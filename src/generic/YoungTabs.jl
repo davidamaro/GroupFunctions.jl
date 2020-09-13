@@ -1,5 +1,11 @@
 #import AbstractAlgebra: YoungTableau
 using AbstractAlgebra
+import Primes: prime
+import LinearAlgebra:  dot, I
+import Combinatorics:  permutations
+
+const Content = Vector{T} where T <: Integer
+const Irrep = Vector{T} where T <: Integer
 
 @doc Markdown.doc"""
     axialdistance(Y::YoungTableau, i, j)
@@ -138,8 +144,45 @@ function StandardYoungTableaux(part::Array{Int64,1})
     lista
 end
 
+@doc Markdown.doc"""
+  generar_matriz(Y::Array{YoungTableau}, p::Perm) -> SparseMatrixCSC
+> Return non-zero entries of the orthogonal irrep given by the permutation 'p'
+> The information of the irrep is introduced via 'Y' which is a list of
+> Standard Young tableaux
+
+# Examples
+```jldoctest; setup = :(using AbstractAlgebra)
+julia> guilty = StandardYoungTableaux([3,2])
+julia> generar_matriz(guilty, Perm([2,1,3,4,5]))
+[1, 1]  =  -1.0
+[2, 2]  =  1.0
+[3, 3]  =  -1.0
+[4, 4]  =  1.0
+[5, 5]  =  1.0
+
+julia> generar_matriz(guilty, Perm([1,3,2,4,5]))
+[1, 1]  =  0.5
+[2, 1]  =  0.866025
+[1, 2]  =  0.866025
+[2, 2]  =  -0.5
+[3, 3]  =  0.5
+[4, 3]  =  0.866025
+[3, 4]  =  0.866025
+[4, 4]  =  -0.5
+[5, 5]  =  1.0
+```
+"""
+function generar_matriz(patrones::Array{AbstractAlgebra.Generic.YoungTableau{Int64},1}, p::Perm, irrep::Array{Int64,1})
+    descom_en_trans = descomp_total(p)
+    len = length(patrones)
+    mat = I#spzeros(len,len)
+    for (a,b) in descom_en_trans # a + 1 = b
+        mat = generar_matriz(patrones, b, irrep)*mat
+    end
+    mat
+end
 function generar_matriz(lista_tablones::Array{AbstractAlgebra.Generic.YoungTableau{Int64},1}, m::Int, irrep::Array{Int64,1})
-    mat = spzeros(Int64,length(lista_tablones), length(lista_tablones))
+    mat = spzeros(Float64,length(lista_tablones), length(lista_tablones))
 
     for i in 1:length(lista_tablones), k in 1:length(lista_tablones)
         if i == k && mat[i,i] == 0
@@ -213,7 +256,7 @@ function encontrar_esquina(lista::Array{Tuple{Int64,Int64},1})
     (i_max, jm)
 end
 
-function bloque_yamanouchi(mat::SparseMatrixCSC{Int64,Int64}, lista_tablones::Array{AbstractAlgebra.Generic.YoungTableau{Int64},1}, i::Int64, k::Int64, m::Int64, irrep::Array{Int64,1})
+function bloque_yamanouchi(mat::SparseMatrixCSC{Float64,Int64}, lista_tablones::Array{AbstractAlgebra.Generic.YoungTableau{Int64},1}, i::Int64, k::Int64, m::Int64, irrep::Array{Int64,1})
     tab_1 = lista_tablones[i]
     tab_2 = lista_tablones[k]
     if i < k && lista_tablones[i] == intercambio(lista_tablones[k], m,irrep)
@@ -250,4 +293,306 @@ function intercambio(Y::AbstractAlgebra.Generic.YoungTableau{Int64}, m::Int64, i
     end
 
     V
+end
+##############################################################################
+#
+#   Codigo para representates double coset
+#
+##############################################################################
+@doc Markdown.doc"""
+    indice_tablon_semistandard(p::YoungTableau)
+> Returns the index of the standard YoungTableau such that the function mapping
+> the filling of the semistandard to the standard Tableau is non decreasing
+
+# Examples:
+```
+julia> patrones_gt_prueba = genera_patrones([2,1,0]);
+julia> young_prueba = map(YoungTableau, patrones_gt_prueba);
+julia> for elemento in young_prueba
+           icons_abstract_thee(elemento)
+       end
+```
+"""
+function indice_tablon_semistandard(tablon_semistandard)
+    particion = (tablon_semistandard.part) |> collect
+    tablon_semistandard_v = YoungTableau(particion)# |> primero_lexi
+    orden = sortperm(tablon_semistandard.fill)
+    diccionario = generate_dictionary(orden)#Dict()
+    nuevo_fill = [diccionario[x] for x in tablon_semistandard_v.fill]
+    tablon_resultado_permutacion = AbstractAlgebra.fill!(tablon_semistandard_v, nuevo_fill)
+    tablones_standard = StandardYoungTableaux(particion)
+    etiquetas_semi = map(gen_etiqueta, map(x->x.fill, tablones_standard))
+    
+    return findfirst(x -> x ≈ gen_etiqueta(tablon_resultado_permutacion.fill), etiquetas_semi)
+end
+
+function generate_dictionary(lista)
+    fvars = Dict()
+    for (n, f) in enumerate(lista)
+        fvars[f] = n
+    end
+    fvars
+end
+
+function gen_etiqueta(lista)
+    len = length(lista)
+    #@show  prime(3), Base.sqrt(prime(3))
+    #@show  prime(3), sqrt(prime(3))
+    dot([Base.sqrt(prime(i)) for i in 1:len], lista)
+end
+
+@doc Markdown.doc"""
+    content(p::Partition, λ::Irrep)
+> Return the size of the vector which represents the partition.
+> ADVERTENCIA content sin λ ignora los 0s de la irrep.
+
+# Examples:
+```jldoctest; setup = :(using AbstractAlgebra)
+julia> ss = YoungTableau(GTPattern([[2,1,0,0],[2,1,0],[2,1],[2]]));
+julia> content(ss, [2,1,0,0])
+[2,2,0,0]
+
+julia> ss = YoungTableau(GTPattern([[2,1,0,0],[2,1,0],[2,1],[2]]));
+julia> content(ss, [2,1,0,0])
+[2,2,0]
+```
+"""
+#function content(y::YoungTableau, λ::Irrep)
+function content(y::AbstractAlgebra.Generic.YoungTableau{Int64}, λ::Irrep)
+    relleno = y.fill
+    if length(relleno) <= length(λ)
+      len = length(λ)
+    else
+      len = length(relleno)
+    end
+    tablon_nuevo = tablon_standar_asociado_a_semiestandar(y).fill
+    nuevo_relleno = deepcopy(relleno)
+    anterior = relleno[1]
+    for i in 1:len
+      if i ∉ tablon_nuevo
+        push!(nuevo_relleno, anterior)
+      end
+      if i > length(relleno)
+        break
+      end
+      relleno[i] > anterior ? anterior = relleno[i] : continue
+    end
+
+    [count(y -> x == y,nuevo_relleno) for x in 1:len]
+end
+
+#function content(p::YoungTableau)
+function content(p::AbstractAlgebra.Generic.YoungTableau{Int64})
+    relleno = p.fill
+    len = length(relleno)
+    [count(y -> x == y,relleno) for x in 1:len]
+end
+
+@doc Markdown.doc"""
+    tablon_standar_asociado_a_semiestandar(tablon_semistandard::YoungTableau)
+> Returns a YoungTableau corresponding to the standard YoungTableau such that
+> f is non decreasing.
+"""
+function tablon_standar_asociado_a_semiestandar(tablon_semistandard)
+    particion = (tablon_semistandard.part) |> collect
+    tablon_standard = YoungTableau(particion)# |> primero_lexi
+
+    orden = sortperm(tablon_semistandard.fill)
+    diccionario = generate_dictionary(orden)#Dict()
+    nuevo_fill = [diccionario[x] for x in tablon_standard.fill]
+
+    tablon_resultado_permutacion = AbstractAlgebra.fill!(tablon_standard, nuevo_fill)
+    tablones_standard = StandardYoungTableaux(particion)
+    etiquetas_semi = map(gen_etiqueta, map(x->x.fill, tablones_standard))
+    
+    pos = findfirst(x -> x ≈ gen_etiqueta(tablon_resultado_permutacion.fill), etiquetas_semi)
+    tablones_standard[pos]
+end
+
+@doc Markdown.doc"""
+    Θ(patron_semi::YoungTableau)
+> Computes coefficient Θ. Returns a Float64
+"""
+function Θ(patron_semi::AbstractAlgebra.Generic.YoungTableau{Int64}, irrep::Array{Int64,1})
+    relleno_semi = patron_semi.fill
+    tablones_standard = StandardYoungTableaux((patron_semi.part) |> collect)
+    tablon_standard = tablon_standar_asociado_a_semiestandar(patron_semi)
+    relleno_standard = tablon_standard.fill
+    n = ((patron_semi.fill) |> collect |> length)
+    n = irrep |> length
+    
+    parejas = zip(relleno_standard, relleno_semi) |> collect
+    prod = 1.0
+    for k in 1:n
+        α = map(first,filter((xx -> (last(xx) == k)), parejas))
+        if length(α) > 1
+            for indx in 1:length(α), indy in indx+1:length(α)
+                x,y = α[indx], α[indy]
+                if x > y
+                  prod *= (1 + (1/axialdistance(tablon_standard, y, x)))
+                else
+                  prod *= (1 + (1/axialdistance(tablon_standard, x, y)))
+                end
+            end
+        end
+    end
+    prod
+end
+
+@doc Markdown.doc"""
+calcula_proto_permutacion(proto::Array{Int64,1})
+Notese que el orden en que se ingresa la matriz es igual a la traspuesta.
+Esto es debido a la forman en la que Julia recorre matrices.
+> calcula_proto_permutacion([2 0 1 1])
+1
+1
+2
+2
+"""
+function calcula_proto_permutacion(proto::Array{Int64,1})
+    len = length(proto) |> sqrt |> Int
+    new_proto = reshape(proto, len, len)'
+
+    mult = 0
+    yard = Array{Int64,1}[]
+    for i in 1:len
+        densidad = vcat(fill.(1:len, new_proto[mult*len + 1:len*(mult + 1)])...)
+        push!(yard, densidad)
+        mult += 1
+    end
+    vcat(yard...)
+end
+
+@doc Markdown.doc"""
+    genera_funcion(patron_semi::YoungTableau, irrep::Vector{T})
+    genera_funcion(patron_semi::YoungTableau)
+> Genera un diccionario con la función entre un tablón standar
+> y uno semistandar.
+# Examples:
+```
+julia> t_u = YoungTableau([2,2, 1]);
+julia> fill!(t_u, [1,2,3,3,4]);
+julia> genera_funcion(t_u)
+Dict(4=>4, 2=>2, 3=>3, 5=>5, 1=>1)
+```
+"""
+function genera_funcion(patron_semi::AbstractAlgebra.Generic.YoungTableau{Int64}, irrep::Array{Int64,1}) 
+    len = length(irrep)
+    relleno_semi = patron_semi.fill
+
+    if length(relleno_semi) >= len
+      return genera_funcion(patron_semi)
+    end
+
+    tablones_standard = StandardYoungTableaux((patron_semi.part) |> collect)
+    tablon_standard = tablon_standar_asociado_a_semiestandar(patron_semi)
+    relleno_standard = tablon_standard.fill
+    
+    parejas = zip(relleno_standard, relleno_semi) |> collect
+    dd = Dict{Int64, Int64}()
+
+    for (va, viene) in parejas
+      dd[va] = viene
+    end
+    nuevos = setdiff!(collect(1:len), relleno_standard)
+    for i in nuevos
+      cercano = sort(relleno_standard, by=(x -> abs(x-i))) |> first
+      dd[i] = dd[cercano]
+    end
+
+    dd
+end
+
+function genera_funcion(patron_semi::AbstractAlgebra.Generic.YoungTableau{Int64})
+    relleno_semi = patron_semi.fill
+    tablones_standard = StandardYoungTableaux((patron_semi.part) |> collect)
+    tablon_standard = tablon_standar_asociado_a_semiestandar(patron_semi)
+    relleno_standard = tablon_standard.fill
+    
+    parejas = zip(relleno_standard, relleno_semi) |> collect
+    dd = Dict{Int64, Int64}()
+
+    for (va, viene) in parejas
+      #dd[viene] = va
+      dd[va] = viene
+    end
+    dd
+end
+
+@doc Markdown.doc"""
+    calcular_sα(c::Content)
+> Return the size of the vector which represents the partition.
+
+# Examples:
+```
+julia> c = [0,1,2]; calcular_sα(c)
+```
+"""
+function calcular_sα(c::Content)
+    inferior = 1
+    superior = length(c) 
+    list_perm_output = Perm{Int64}[]
+    for sub_cjto in c
+        if sub_cjto == 0
+            continue
+        elseif sub_cjto == 1
+            inferior += 1
+        elseif sub_cjto > 1 && length(list_perm_output) == 0
+            conjunto = collect(inferior:(inferior + sub_cjto - 1))
+            permutaciones = permutations(conjunto) |> collect
+
+            for p in permutaciones
+                lista = sortperm(vcat(collect(1:inferior - 1), p, collect((inferior + sub_cjto):superior)))
+                push!(list_perm_output, Perm(lista))
+            end
+            inferior += sub_cjto
+        else
+            conjunto = collect(inferior:(inferior + sub_cjto - 1))
+            permutaciones = permutations(conjunto)
+
+            tmp = Perm{Int64}[]
+            for p in permutaciones
+                lista = sortperm(vcat(collect(1:inferior - 1), p , collect((inferior + sub_cjto):superior)))
+                for elem in list_perm_output
+                  push!(tmp, elem*Perm(lista))
+                end
+            end
+            list_perm_output = tmp
+            inferior += sub_cjto
+        end
+        push!(list_perm_output, Perm(1:superior |> collect))
+        unique!(list_perm_output)
+    end
+    if length(list_perm_output) == 0
+      return [Perm(1:superior |> collect)]
+    end
+    list_perm_output
+end
+
+function calcular_sα(tablon::AbstractAlgebra.Generic.YoungTableau{Int64})
+  contenido = content(tablon)
+  inferior = 1
+  superior = length(contenido)
+  list_perm_output = Perm[]
+  for sub_cjto in contenido
+      if sub_cjto == 0
+          continue
+      elseif sub_cjto == 1
+          inferior += 1
+      elseif sub_cjto > 1
+          conjunto = collect(inferior:(inferior + sub_cjto - 1))
+          permutaciones = permutations(conjunto)
+
+          for p in permutaciones
+              lista = vcat(collect(1:inferior - 1), p, collect((inferior + sub_cjto):superior))
+              push!(list_perm_output, Perm(lista))
+          end
+          inferior += 1
+      end
+      unique!(list_perm_output)
+  end
+  if length(list_perm_output) == 0
+    return [Perm(1:superior |> collect)]
+  end
+  list_perm_output
 end
