@@ -3,6 +3,7 @@ module GroupFunctions
 using Markdown
 #import AbstractAlgebra: YoungTableau
 using AbstractAlgebra
+import AbstractAlgebra: YoungTableau
 using SymEngine
 
 import SparseArrays: spzeros, SparseMatrixCSC
@@ -18,6 +19,7 @@ export YoungTableau, axialdistance, encontrar_posicion
 export GTPattern, basis_states, siguientepatron
 export primero_lexi, StandardYoungTableaux, generar_matriz
 export indice_tablon_semistandard, content, Θ
-export group_function
+export group_function, @mma_str, mma_to_julia
+export zweight, pweight
 
 end # module

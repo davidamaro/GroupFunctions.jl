@@ -1,4 +1,4 @@
-using Combinatorics
+import Combinatorics: permutations
 using IntervalArithmetic
 import IntervalConstraintProgramming: SubPaving, Contractor
 import ModelingToolkit: @variables, Variable

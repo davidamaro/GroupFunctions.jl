@@ -596,3 +596,11 @@ function calcular_sα(tablon::AbstractAlgebra.Generic.YoungTableau{Int64})
   end
   list_perm_output
 end
+
+function YoungTableau(tab::GTPattern)
+    filas = tab.filas
+    len = filas[1] |> length
+    conjunto_contenido = [obtener_diferencias_patron(tab, x) for x in 1:len]
+    p = Partition(filter(x -> x>0, filas[1]))
+    Generic.YoungTableau(p, vcat(conjunto_contenido...))
+end
