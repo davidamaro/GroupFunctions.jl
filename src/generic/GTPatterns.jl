@@ -1,0 +1,212 @@
+#export GTPattern
+#export basis_states, obtener_diferencias_patron#, prematuro_pesos#, YoungTableau
+import Base.isvalid
+
+
+using Base.Iterators
+
+##############################################################################
+#
+#   Partition type, AbstractVector interface
+#
+##############################################################################
+
+
+mutable struct GTPattern
+    filas::Array{Array{Int64,1},1}
+    ultima_fila::Array{Int64,1}
+end
+
+function Base.show(io::IO, ::MIME"text/plain", G::GTPattern)
+    list_of_rows = G.filas
+    pattern = ""
+    n = length(list_of_rows)
+    mitad = n ÷ 2
+    between = isodd(n)
+    cont = 1
+    i = 1
+    length_first_row = length(list_of_rows[1])*2
+    for row in list_of_rows
+        pattern *= "│ "
+        for number in row
+            pattern *= string(number)
+            pattern *= " "
+        end
+        pattern *= repeat(" ", length_first_row - 2*length(row))
+        if i <= mitad
+            pattern *= repeat(" ", cont - 1)
+            pattern *= "╲\n"
+            cont += 1
+        elseif between
+            pattern *= repeat(" ", cont - 1)
+            pattern *= "╳\n"
+            between = false
+        else
+            if !between && cont > mitad
+                cont -= 1
+            end
+            pattern *= repeat(" ", cont - 1)
+            pattern *= "╱\n"
+            cont -= 1
+        end
+        i += 1
+    end
+
+    print(io, pattern)
+end
+
+function primera!(fila, a::GTPattern)
+    if length(a.ultima_fila) == 0
+        a.ultima_fila = fila
+    end
+    push!(a.filas, fila)
+    a
+end
+
+function determinar_siguientes(fila)
+    siguientes = UnitRange{Int64}[]
+    for i in 1:length(fila)-1
+        push!(siguientes, fila[i+1]:fila[i] )
+    end
+    product(siguientes...)
+end
+
+function generar_siguiente_fila(tab::GTPattern)
+    siguientes = determinar_siguientes(tab.ultima_fila)
+
+    lista_patrones = GTPattern[]
+    for sig in siguientes
+        tmp = deepcopy(tab)
+        tmp.ultima_fila = collect(sig)
+        push!(tmp.filas, collect(sig))
+
+        push!(lista_patrones, tmp)
+    end
+    lista_patrones
+end
+
+function generar_siguiente_fila(tabs::Array{GTPattern,1})
+    lista_patrones = GTPattern[]
+    for tab in tabs
+        siguientes = determinar_siguientes(tab.ultima_fila)
+
+
+        for sig in siguientes
+            tmp = deepcopy(tab)
+            tmp.ultima_fila = collect(sig)
+            push!(tmp.filas, collect(sig))
+
+            push!(lista_patrones, tmp)
+        end
+    end
+    lista_patrones
+end
+
+function basis_states(irrep::Array{Int64,1})
+    ejemplo = GTPattern([], [])
+    primera!(irrep, ejemplo)
+    multitud_prueba = generar_siguiente_fila(ejemplo);
+    for i in 3:length(irrep)
+        multitud_prueba = generar_siguiente_fila(multitud_prueba)
+    end
+    multitud_prueba
+end
+
+##############################################################################
+#
+#   Codigo para la traduccion
+#
+##############################################################################
+
+function obtener_diferencias_patron(tab::GTPattern,fila::Int64)
+    filas = tab.filas
+    if fila > length(filas)
+        throw(BoundsError("te pasas"))
+    end
+    longitud = length(filas) + 1
+
+    diferencias = Int64[0]
+    max = 0
+    for fil in reverse(filas[1:longitud - fila])
+        diferencia = fil[fila] - max
+        if diferencia > 0
+            push!(diferencias, diferencia)
+            max = fil[fila]
+        else
+            push!(diferencias, 0)
+        end
+    end
+    contenido = Int64[]
+    i = fila
+    for punto in diferencias[2:end]
+        for j in 1:punto
+            push!(contenido, i)
+        end
+        i += 1
+    end
+    contenido
+end
+
+function prematuro_pesos(tab::GTPattern)
+    totales = [sum(x) for x in tab.filas]
+    append!(totales,0)
+    final = Int[]
+    for i in (1:length(tab.filas)-1)
+        push!(final, totales[i]-totales[i+1])
+    end
+    all(x -> x == 1, final)
+end
+
+function isvalid(x::GTPattern)
+    rows = x.filas
+    for mayor in 1:length(rows)-1
+        arriba = rows[mayor]
+        abajo = rows[mayor+1]
+        
+        for (i,px) in enumerate(abajo)
+            if !(px <= arriba[i] && px >= arriba[i+1])
+                
+                return false
+            end
+        end
+    end
+    true
+end
+
+function siguientepatron(x::GTPattern)
+    fila, col = disminuible(x)
+    rows = deepcopy(x.filas)
+
+    rows[fila][col] -= 1
+
+    for j in col+1:length(rows[fila])
+        rows[fila][j] = rows[fila-1][j]
+    end
+
+
+    for fil in fila+1:length(rows)
+        for co in 1:length(rows[fil])
+
+            rows[fil][co] = rows[fil-1][co]
+        end
+    end
+    GTPattern(rows,rows[end])
+end
+
+function disminuible(x::GTPattern)
+    rows = deepcopy(x.filas)
+    for j in length(rows):-1:2
+        for (i,val) in enumerate(rows[j])
+            if rows[j][i] == 0
+                continue
+            end
+            rows[j][i] -= 1
+            if isvalid(GTPattern(rows, rows[end]))
+                return j,i
+            else
+                rows[j][i] += 1
+            end
+        end
+    end
+    return nothing
+end
