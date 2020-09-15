@@ -313,7 +313,7 @@ julia> for elemento in young_prueba
        end
 ```
 """
-function indice_tablon_semistandard(tablon_semistandard)
+function indice_tablon_semistandard(tablon_semistandard::AbstractAlgebra.Generic.YoungTableau{Int64})
     particion = (tablon_semistandard.part) |> collect
     tablon_semistandard_v = YoungTableau(particion)# |> primero_lexi
     orden = sortperm(tablon_semistandard.fill)
@@ -326,7 +326,7 @@ function indice_tablon_semistandard(tablon_semistandard)
     return findfirst(x -> x ≈ gen_etiqueta(tablon_resultado_permutacion.fill), etiquetas_semi)
 end
 
-function generate_dictionary(lista)
+function generate_dictionary(lista::Array{Int64,1})
     fvars = Dict()
     for (n, f) in enumerate(lista)
         fvars[f] = n
@@ -334,10 +334,8 @@ function generate_dictionary(lista)
     fvars
 end
 
-function gen_etiqueta(lista)
+function gen_etiqueta(lista::Array{Int64,1})
     len = length(lista)
-    #@show  prime(3), Base.sqrt(prime(3))
-    #@show  prime(3), sqrt(prime(3))
     dot([Base.sqrt(prime(i)) for i in 1:len], lista)
 end
 
@@ -393,7 +391,7 @@ end
 > Returns a YoungTableau corresponding to the standard YoungTableau such that
 > f is non decreasing.
 """
-function tablon_standar_asociado_a_semiestandar(tablon_semistandard)
+function tablon_standar_asociado_a_semiestandar(tablon_semistandard::AbstractAlgebra.Generic.YoungTableau{Int64})
     particion = (tablon_semistandard.part) |> collect
     tablon_standard = YoungTableau(particion)# |> primero_lexi
 
