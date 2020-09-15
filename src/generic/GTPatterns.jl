@@ -174,6 +174,27 @@ function isvalid(x::GTPattern)
     true
 end
 
+function siguientepatron!(x::GTPattern)
+    if disminuible(x) != nothing
+        fila, col = disminuible(x)
+    else
+        return nothing
+    end
+
+    x.filas[fila][col] -= 1
+
+    for j in 1:col-1
+        x.filas[fila][j] = x.filas[fila-1][j]
+    end
+
+
+    for fil in fila+1:length(x.filas)
+        for co in 1:length(x.filas[fil])
+            x.filas[fil][co] = x.filas[fil-1][co]
+        end
+    end
+    x
+end
 function siguientepatron(x::GTPattern)
     fila, col = disminuible(x)
     rows = deepcopy(x.filas)
@@ -210,4 +231,12 @@ function disminuible(x::GTPattern)
         end
     end
     return nothing
+end
+
+function gtinicial(irrep::Fila)
+    filas = Array{Int64,1}[irrep]
+    while length(filas[end]) > 1
+        push!(filas, filas[end][1:end-1])
+    end
+    GTPattern(filas, filas[end])
 end

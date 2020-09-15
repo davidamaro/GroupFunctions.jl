@@ -16,10 +16,11 @@ include("generic/PermGroups.jl")
 
 #import GTPattern, basis_states
 export YoungTableau, axialdistance, encontrar_posicion
-export GTPattern, basis_states, siguientepatron
+export GTPattern, basis_states, siguientepatron, siguientepatron!
 export primero_lexi, StandardYoungTableaux, generar_matriz
 export indice_tablon_semistandard, content, Θ
 export group_function, @mma_str, mma_to_julia
 export zweight, pweight
+export gtinicial
 
 end # module
