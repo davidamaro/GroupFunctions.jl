@@ -16,6 +16,7 @@ mutable struct GTPattern
     filas::Array{Array{Int64,1},1}
     ultima_fila::Array{Int64,1}
 end
+const Fila = Array{Int64,1}
 
 function Base.show(io::IO, ::MIME"text/plain", G::GTPattern)
     list_of_rows = G.filas
@@ -55,18 +56,18 @@ function Base.show(io::IO, ::MIME"text/plain", G::GTPattern)
     print(io, pattern)
 end
 
-function primera!(fila, a::GTPattern)
+function primera!(f::Fila, a::GTPattern)
     if length(a.ultima_fila) == 0
-        a.ultima_fila = fila
+        a.ultima_fila = f
     end
-    push!(a.filas, fila)
+    push!(a.filas, f)
     a
 end
 
-function determinar_siguientes(fila)
+function determinar_siguientes(f::Fila)
     siguientes = UnitRange{Int64}[]
-    for i in 1:length(fila)-1
-        push!(siguientes, fila[i+1]:fila[i] )
+    for i in 1:length(f)-1
+        push!(siguientes, f[i+1]:f[i] )
     end
     product(siguientes...)
 end
@@ -102,11 +103,11 @@ function generar_siguiente_fila(tabs::Array{GTPattern,1})
     lista_patrones
 end
 
-function basis_states(irrep::Array{Int64,1})
+function basis_states(λ::Fila)
     ejemplo = GTPattern([], [])
-    primera!(irrep, ejemplo)
+    primera!(λ, ejemplo)
     multitud_prueba = generar_siguiente_fila(ejemplo);
-    for i in 3:length(irrep)
+    for i in 3:length(λ)
         multitud_prueba = generar_siguiente_fila(multitud_prueba)
     end
     multitud_prueba
@@ -118,26 +119,26 @@ end
 #
 ##############################################################################
 
-function obtener_diferencias_patron(tab::GTPattern,fila::Int64)
+function obtener_diferencias_patron(tab::GTPattern,numerofila::Int64)
     filas = tab.filas
-    if fila > length(filas)
+    if numerofila > length(filas)
         throw(BoundsError("te pasas"))
     end
     longitud = length(filas) + 1
 
     diferencias = Int64[0]
     max = 0
-    for fil in reverse(filas[1:longitud - fila])
-        diferencia = fil[fila] - max
+    for fil in reverse(filas[1:longitud - numerofila])
+        diferencia = fil[numerofila] - max
         if diferencia > 0
             push!(diferencias, diferencia)
-            max = fil[fila]
+            max = fil[numerofila]
         else
             push!(diferencias, 0)
         end
     end
     contenido = Int64[]
-    i = fila
+    i = numerofila
     for punto in diferencias[2:end]
         for j in 1:punto
             push!(contenido, i)
