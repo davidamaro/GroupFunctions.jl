@@ -109,7 +109,7 @@ julia> primero_lexi(pat)
 ```
 """
 function primero_lexi(pat::AbstractAlgebra.Generic.YoungTableau{Int64})
-    mat = Matrix(matrix_repr(pat))
+    mat = Array(matrix_repr(pat))
 
     orco = zeros(Int, size(mat))
     inx = 1
@@ -233,7 +233,7 @@ function encontrar_malo_imp!(tab::AbstractAlgebra.Generic.YoungTableau{Int64})
         end
     end
 
-    yup = *(size(mat|>Matrix)...)
+    yup = *(size(mat|>Array)...)
     fill!(tab, filter(x -> x > 0, reshape(mat', yup)))
 
     tab
