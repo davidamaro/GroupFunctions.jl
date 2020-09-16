@@ -22,6 +22,25 @@ function es_cero(pol::Basic; ϵ = 10^(-5))
     pol < ϵ
 end
 
+function bloquesun(tamano::Int64, pos::Int64, angulos::Tuple{Float64,Float64,Float64})
+    @assert pos < tamano && pos > 0
+
+    base = zeros(Complex{Float64}, tamano, tamano)
+    α,β,γ = angulos
+    base[pos,pos] = exp(-im*(α+γ))*cos(β/2)
+    base[pos,pos+1] = -exp(-im*(α-γ))*sin(β/2)
+    base[pos+1,pos] = exp(im*(α-γ))*sin(β/2)
+    base[pos+1,pos+1] = exp(im*(α+γ))*cos(β/2)
+    for i in 1:tamano
+        if i == pos || i == pos + 1
+            continue
+        end
+        base[i,i] = 1.0
+    end
+
+    return base
+end
+
 @testset "irrep 221 de SU(4)" begin
     t_u = YoungTableau([2,2, 1])
     fill!(t_u, [1,2,3,3,4])
@@ -31,6 +50,23 @@ end
     edo_julia = group_function([2,2,1,0],t_u, t_v) |> expand
     edo_final = expand(edo_mma - edo_julia)
     @test es_cero(edo_final)
+end
+
+@testset "test con polinomios de Legendre" begin
+  α1,β1,γ1 = rand(Float64,3)
+  xx=bloquesun(3,1,(α1,β1,γ1))#*bloquesun(3,2,(2.3,.3,.4))
+  α2,β2 = rand(Float64,2)
+  yy=bloquesun(3,2,(α2,β2,α2))
+  α3,β3,γ3 = rand(Float64,3)
+  zz=bloquesun(3,1,(α3,β3,γ3))
+
+  uu = xx*yy*zz
+
+  edo = GTPattern([[2,1,0],[1,1], [1]], [1])
+  @test group_function([2,1,0],edo, edo, uu) ≈ (1/4)*(1+3*cos(β2))
+
+  edo = GTPattern([[4,2,0],[2,2], [2]], [2])
+  @test group_function([4,2,0],edo, edo, uu) ≈ (1/3^2)*(1+3*cos(β2)+5*(1/2)*(3*cos(β2)^2 - 1))
 end
 
 @testset "irrep 11 de SU(3)" begin
@@ -329,3 +365,4 @@ end
 
     @test isapprox(abs(immanant(Partition(filter(x -> x> 0, part)), mat) -total)^2, 0.0, atol = 10^(-6))
 end
+
