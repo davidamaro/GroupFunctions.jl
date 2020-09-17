@@ -3,9 +3,9 @@ using IntervalArithmetic
 import IntervalConstraintProgramming: SubPaving, Contractor
 import ModelingToolkit: @variables, Variable
 
-const Irrep = Vector{T} where T <: Integer
+const Irrep = Array{T,1} where T <: Integer
 const YTableau = AbstractAlgebra.Generic.YoungTableau{T} where T <: Integer
-const Content = Vector{T} where T <: Integer
+const Content = Array{T,1} where T <: Integer
 const MapST2SST = Dict{T,T} where T <: Integer
 
 function pave(Cs, working::Vector{IntervalBox{N,T}}, ϵ, bisection_point=nothing) where {N,T}
@@ -77,10 +77,10 @@ julia > encontrar_prototablones([1,1,1], [1,2,0])
 """
 function encontrar_prototablones(μ::Array{Int64,1}, ν::Array{Int64,1})
 
-    n = length(μ)
+    n::Int64 = length(μ)
 
-    vars = @variables y[1:n, 1:n]
-    vars = vars[1]
+    vars = (@variables y[1:n, 1:n])[1]
+    #vars = vars[1]
 
     contractors = []
 
@@ -224,7 +224,7 @@ function monomio_n(f::MapST2SST, g::MapST2SST, per::Perm, n::Int64, mat::Array{C
     colleccion = zip(fff,ggg) |> collect
     
     for (a,b) in colleccion
-      mon *= mat[a,b]#SymEngine.symbols("u_$(a)_$(b)")
+      mon *= mat[a,b]
     end
     
     mon
