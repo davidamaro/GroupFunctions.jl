@@ -289,8 +289,8 @@ function group_function(λ::Irrep, tab_u::YTableau, tab_v::YTableau; verbose = f
       @show length(vcat(lista_cosets...) |> unique), length(lista_gamas)
     end
     
-    pol = 0.0
-    total = 0.0
+    pol = zero(SymEngine.symbols("x"))#0.0
+    total = zero(Complex{Float64})
     
     for ind in 1:length(lista_gamas)
         γ = lista_gamas[ind]
@@ -328,8 +328,8 @@ function group_function(λ::Irrep, pat_u::GTPattern, pat_v::GTPattern; verbose =
       @show length(vcat(lista_cosets...) |> unique), length(lista_gamas)
     end
     
-    pol = 0.0
-    total = 0.0
+    pol = zero(SymEngine.symbols("x"))#0.0
+    total = zero(Float64)
     
     for ind in 1:length(lista_gamas)
         γ = lista_gamas[ind]
@@ -368,8 +368,8 @@ function group_function(λ::Irrep, pat_u::GTPattern, pat_v::GTPattern, mat::Arra
       @show length(vcat(lista_cosets...) |> unique), length(lista_gamas)
     end
     
-    pol = 0.0
-    total = 0.0
+    pol = zero(Complex{Float64})
+    total = zero(Float64)
     
     for ind in 1:length(lista_gamas)
         γ = lista_gamas[ind]
@@ -384,6 +384,7 @@ function group_function(λ::Irrep, pat_u::GTPattern, pat_v::GTPattern, mat::Arra
     
     pol*inversos
 end
+
 function group_function(λ::Irrep, tab_u::YTableau, tab_v::YTableau, mat::Array{Complex{Float64}, 2}; verbose = false) 
     tablones = StandardYoungTableaux(filter(x -> x > 0, λ))
     i = indice_tablon_semistandard(tab_u)
@@ -405,8 +406,8 @@ function group_function(λ::Irrep, tab_u::YTableau, tab_v::YTableau, mat::Array{
       @show length(vcat(lista_cosets...) |> unique), length(lista_gamas)
     end
     
-    pol = 0.0
-    total = 0.0
+    pol = zero(Complex{Float64})
+    total = zero(Float64)
     
     for ind in 1:length(lista_gamas)
         γ = lista_gamas[ind]
