@@ -19,7 +19,7 @@ function es_cero(pol::Basic; ϵ = 10^(-5))
       pol = SymEngine.subs(pol, mono, randn())
     end
 
-    pol < ϵ
+    abs(pol)^2 < ϵ
 end
 
 function bloquesun(tamano::Int64, pos::Int64, angulos::Tuple{Float64,Float64,Float64})

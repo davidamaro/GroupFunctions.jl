@@ -289,8 +289,8 @@ function group_function(λ::Irrep, tab_u::YTableau, tab_v::YTableau; verbose = f
       @show length(vcat(lista_cosets...) |> unique), length(lista_gamas)
     end
     
-    pol = zero(SymEngine.symbols("x"))#0.0
-    total = zero(Complex{Float64})
+    pol::Basic = zero(SymEngine.symbols("x"))#0.0
+    total::Complex{Float64} = zero(Complex{Float64})
     
     for ind in 1:length(lista_gamas)
         γ = lista_gamas[ind]
@@ -328,8 +328,8 @@ function group_function(λ::Irrep, pat_u::GTPattern, pat_v::GTPattern; verbose =
       @show length(vcat(lista_cosets...) |> unique), length(lista_gamas)
     end
     
-    pol = zero(SymEngine.symbols("x"))#0.0
-    total = zero(Float64)
+    pol::Basic = zero(SymEngine.symbols("x"))#0.0
+    total::Float64 = zero(Float64)
     
     for ind in 1:length(lista_gamas)
         γ = lista_gamas[ind]
@@ -368,8 +368,8 @@ function group_function(λ::Irrep, pat_u::GTPattern, pat_v::GTPattern, mat::Arra
       @show length(vcat(lista_cosets...) |> unique), length(lista_gamas)
     end
     
-    pol = zero(Complex{Float64})
-    total = zero(Float64)
+    pol::Complex{Float64} = zero(Complex{Float64})
+    total::Float64 = zero(Float64)
     
     for ind in 1:length(lista_gamas)
         γ = lista_gamas[ind]
@@ -406,8 +406,8 @@ function group_function(λ::Irrep, tab_u::YTableau, tab_v::YTableau, mat::Array{
       @show length(vcat(lista_cosets...) |> unique), length(lista_gamas)
     end
     
-    pol = zero(Complex{Float64})
-    total = zero(Float64)
+    pol::Complex{Float64} = zero(Complex{Float64})
+    total::Float64 = zero(Float64)
     
     for ind in 1:length(lista_gamas)
         γ = lista_gamas[ind]
