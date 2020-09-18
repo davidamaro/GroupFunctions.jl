@@ -2,6 +2,8 @@ import Combinatorics: permutations
 using IntervalArithmetic
 import IntervalConstraintProgramming: SubPaving, Contractor
 import ModelingToolkit: @variables, Variable
+#import SArray
+import StaticArrays: SArray
 
 const Irrep = Array{T,1} where T <: Integer
 const YTableau = AbstractAlgebra.Generic.YoungTableau{T} where T <: Integer
