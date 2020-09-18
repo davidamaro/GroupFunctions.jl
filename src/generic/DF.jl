@@ -79,12 +79,32 @@ julia > encontrar_prototablones([1,1,1], [1,2,0])
 """
 function encontrar_prototablones(μ::Array{Int64,1}, ν::Array{Int64,1})
 
+    # intervalo y contractors
+    n::Int64 = length(μ)
+    x::IntervalBox,c::Array{Contractor,1} = generarcontractors(μ,ν)
+
+    contractors::Array{Function,1} = [X -> C(0..0, X) for C in c]
+
+    helper = pop!(contractors)
+    X::IntervalBox = Base.invokelatest(helper, x)
+
+    for C in contractors
+        X = Base.invokelatest(C, X)
+    end
+
+    contractors = [contractors; integerize]
+    solutions::Array{IntervalBox{n^2,Float64},1} = Base.invokelatest(pave, contractors,[X], 1.0)
+
+
+    SArray{Tuple{n^2},Int64,1,n^2}[Int.(x) for x in mid.(solutions)]
+end
+
+function generarcontractors(μ::Array{Int64,1}, ν::Array{Int64,1})
     n::Int64 = length(μ)
 
     vars = (@variables y[1:n, 1:n])[1]
-    #vars = vars[1]
 
-    contractors = []
+    contractors::Array{Contractor,1} = Contractor[]
 
     for i in 1:n
         push!(contractors, Contractor(vars, sum(vars[i, 1:n]) - μ[i]))
@@ -94,20 +114,8 @@ function encontrar_prototablones(μ::Array{Int64,1}, ν::Array{Int64,1})
         push!(contractors, Contractor(vars, sum(vars[1:n, i]) - ν[i]))
     end
 
-    X = IntervalBox(0..n^2, n^2)
-
-    contractors = [X -> C(0..0, X) for C in contractors]
-
-    for C in contractors
-        X = Base.invokelatest(C, X)
-    end
-
-    contractors = [contractors; integerize]
-    solutions = Base.invokelatest(pave, contractors,[X], 1.0)
-
-    all(diam.(solutions) .== 0)
-
-    output = [Int.(x) for x in mid.(solutions)]
+    X::IntervalBox = IntervalBox(0..n^2, n^2)
+    X, contractors
 end
 
 @doc Markdown.doc"""
