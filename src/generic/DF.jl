@@ -81,12 +81,12 @@ function encontrar_prototablones(μ::Array{Int64,1}, ν::Array{Int64,1})
 
     # intervalo y contractors
     n::Int64 = length(μ)
-    x::IntervalBox,c::Array{Contractor,1} = generarcontractors(μ,ν)
+    x::IntervalBox{n^2, Float64}, c::Array{Contractor,1} = generarcontractors(μ,ν)
 
     contractors::Array{Function,1} = [X -> C(0..0, X) for C in c]
 
     helper = pop!(contractors)
-    X::IntervalBox = Base.invokelatest(helper, x)
+    X::IntervalBox{n^2, Float64} = Base.invokelatest(helper, x)
 
     for C in contractors
         X = Base.invokelatest(C, X)
