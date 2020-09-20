@@ -4,6 +4,8 @@ import IntervalConstraintProgramming: SubPaving, Contractor
 import ModelingToolkit: @variables, Variable
 #import SArray
 import StaticArrays: SArray
+export group_function, mma_to_julia, @mma
+export zweight, pweight
 
 const Irrep = Array{T,1} where T <: Integer
 const YTableau = AbstractAlgebra.Generic.YoungTableau{T} where T <: Integer
@@ -462,6 +464,21 @@ function mma_to_julia(edo::String)
     eval(Meta.parse(edo))
 end
 
+@doc Markdown.doc"""
+> Computes _zweight_ of a GTPattern.
+> This array, if applied to each state of the irrep, is commonly known as the _weight diagram_ of an SU(n) irrep.
+
+  zweight(x::GTPattern)
+
+# Examples:
+
+```julia
+julia> t = GTPattern([[2,1,0],[2,1],[2]],[2])
+julia> zweight(t)
+>[0.5,0.5]
+
+```
+"""
 function zweight(gt::GTPattern)
     l = zeros(Int, length(gt.filas) + 1)
     l[1] = 0
@@ -473,12 +490,30 @@ function zweight(gt::GTPattern)
     total
 end
 
+@doc Markdown.doc"""
+> Computes _pweight_ of a GTPattern.
+> This array is related to the occupation number.
+
+  pweight(x::GTPattern)
+
+# Examples:
+
+```julia
+julia> t = GTPattern([[2,1,0],[2,1],[2]],[2])
+julia> pweight(t)
+>[0,1,2]
+
+```
+"""
 function pweight(gt::GTPattern)
-    l = zeros(Int, length(gt.filas))
-    l = reverse!(sum.((gt.filas)))
-    total = Int[]
-    for k in length(gt.filas):-1:2
-        push!(total, l[k] - l[k-1])
+    l::Array{Int64,1} = zeros(Int, length(gt.filas) + 1)
+    #l = reverse!(sum.((gt.filas)))
+    for i in 1:length(gt.filas)
+      l[i] = sum(gt.filas[i])
+    end
+    total::Array{Int64,1} = zeros(Int, length(l) - 1)
+    for k in 1:length(total)
+      total[k] = l[k]  - l[k+1]
     end
     total
 end

@@ -12,6 +12,16 @@ using Base.Iterators
 ##############################################################################
 
 
+@doc Markdown.doc"""
+
+  GTPattern(Array of arrays, Array)
+
+# Examples:
+
+```julia
+julia> GTPattern([[2,1,0],[2,1],[2]],[2])
+```
+"""
 mutable struct GTPattern
     filas::Array{Array{Int64,1},1}
     ultima_fila::Array{Int64,1}
@@ -158,6 +168,25 @@ function prematuro_pesos(tab::GTPattern)
     all(x -> x == 1, final)
 end
 
+
+@doc Markdown.doc"""
+> Custom `isvalid` for GTPattern
+
+  isvalid(x::GTPattern)
+
+# Examples:
+
+```julia
+julia> t = GTPattern([[2,1,0],[2,1],[2]],[2])
+julia> isvalid(t)
+>true
+
+
+julia> t = GTPattern([[2,1,0],[2,2],[2]],[2])
+julia> isvalid(t)
+>false
+```
+"""
 function isvalid(x::GTPattern)
     rows = x.filas
     for mayor in 1:length(rows)-1
@@ -195,6 +224,7 @@ function siguientepatron!(x::GTPattern)
     end
     x
 end
+
 function siguientepatron(x::GTPattern)
     fila, col = disminuible(x)
     rows = deepcopy(x.filas)
