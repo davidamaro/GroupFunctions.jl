@@ -274,8 +274,13 @@ end
   group_function[lista tablones standard, tab semi U, tab semi V]
 > Return the size of the vector which represents the partition.
 
+<<<<<<< HEAD
 # Examples:
 ```jldoctest; setup = :(using AbstractAlgebra)
+=======
+# Example:
+```julia
+>>>>>>> e0f07f5... mejora documentacion group_function.
 julia> t = YoungTableau([2,1]); fill!(t, [1,2,3]);
 julia> group_function([2,1,0], t, t)
 ```
@@ -317,6 +322,18 @@ function group_function(λ::Irrep, tab_u::YTableau, tab_v::YTableau; verbose = f
     
     pol*inversos
 end
+
+@doc Markdown.doc"""
+    group_function(λ::Irrep, tu::GTPattern, tv::GTPattern)
+> Return the _symbolic_ group function corresponding to irrep `λ` and GT patterns
+> `tu` and `tv`.
+
+# Example:
+```julia
+julia> t = GTPattern([[2,1,0],[2,1],[2]],[2]);
+julia> group_function([2,1,0], t, t)
+```
+"""
 function group_function(λ::Irrep, pat_u::GTPattern, pat_v::GTPattern; verbose = false) 
   tab_u = pat_u |> YoungTableau
   tab_v = pat_v |> YoungTableau
@@ -357,6 +374,18 @@ function group_function(λ::Irrep, pat_u::GTPattern, pat_v::GTPattern; verbose =
     pol*inversos
 end
 
+@doc Markdown.doc"""
+    group_function(λ::Irrep, tu::GTPattern, tv::GTPattern, mat::Array{Complex{Float64},2})
+> Return the _numeric_ group function, for an SU(n) member `mat`, corresponding to irrep `λ` and a pair of GT patterns
+> `tu` and `tv`.
+
+```julia
+julia> using RandomMatrices
+julia> mat = rand(Haar(2),3)
+julia> t = GTPattern([[2,1,0],[2,1],[2]],[2]);
+julia> group_function([2,1,0], t, t, mat)
+```
+"""
 function group_function(λ::Irrep, pat_u::GTPattern, pat_v::GTPattern, mat::Array{Complex{Float64}, 2}; verbose = false) 
     tab_u = pat_u |> YoungTableau
     tab_v = pat_v |> YoungTableau
@@ -397,6 +426,19 @@ function group_function(λ::Irrep, pat_u::GTPattern, pat_v::GTPattern, mat::Arra
     pol*inversos
 end
 
+@doc Markdown.doc"""
+    group_function(λ::Irrep, tu::GTPattern, tv::GTPattern, mat::Array{Complex{Float64},2})
+> Return the _numeric_ group function, for an SU(n) member `mat`, corresponding to irrep `λ` and STYT
+> `tu` and `tv`.
+
+# Example:
+```julia
+julia> using RandomMatrices
+julia> mat = rand(Haar(2),3)
+julia> t = YoungTableau([2,1]); fill!(t, [1,2,3]);
+julia> group_function([2,1,0], t, t, mat)
+```
+"""
 function group_function(λ::Irrep, tab_u::YTableau, tab_v::YTableau, mat::Array{Complex{Float64}, 2}; verbose = false) 
     tablones = StandardYoungTableaux(filter(x -> x > 0, λ))
     i = indice_tablon_semistandard(tab_u)
@@ -443,7 +485,7 @@ end
     mma_to_julia(s::String)
 > Calcula el polinomio de MMA a uno de Julia usando SymEngine
 
-# Examples:
+# Example:
 
 ```
 julia > mma_to_julia("x[1, 1])
