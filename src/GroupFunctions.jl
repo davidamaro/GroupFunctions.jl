@@ -22,5 +22,6 @@ export indice_tablon_semistandard, content, Θ
 export group_function, @mma_str, mma_to_julia
 export zweight, pweight
 export gtinicial
+export generar_matriz
 
 end # module
