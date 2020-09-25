@@ -448,6 +448,32 @@ function Θ(patron_semi::AbstractAlgebra.Generic.YoungTableau{Int64}, irrep::Arr
     prod
 end
 
+function Θn(patron_semi::AbstractAlgebra.Generic.YoungTableau{Int64}, irrep::Array{Int64,1})
+    relleno_semi = patron_semi.fill
+    tablones_standard = StandardYoungTableaux((patron_semi.part) |> collect)
+    tablon_standard = tablon_standar_asociado_a_semiestandar(patron_semi)
+    relleno_standard = tablon_standard.fill
+    n = ((patron_semi.fill) |> collect |> length)
+    n = irrep |> length
+    
+    parejas = zip(relleno_standard, relleno_semi) |> collect
+    prod = one(Float64)#1.0
+    for k in 1:n
+        α = map(first,filter((xx -> (last(xx) == k)), parejas))
+        if length(α) > 1
+            for indx in 1:length(α), indy in indx+1:length(α)
+                x,y = α[indx], α[indy]
+                if x > y
+                  prod *= (1 + (1/axialdistance(tablon_standard, y, x) ))
+                else
+                  prod *= (1 + (1/axialdistance(tablon_standard, x, y) ))
+                end
+            end
+        end
+    end
+    prod
+end
+
 @doc Markdown.doc"""
 calcula_proto_permutacion(proto::Array{Int64,1})
 Notese que el orden en que se ingresa la matriz es igual a la traspuesta.

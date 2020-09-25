@@ -295,7 +295,7 @@ function group_function(λ::Irrep, tab_u::YTableau, tab_v::YTableau; verbose = f
     # probablemente se pueda sustituir con sum(λ)
     n = tab_u |> content |> length
     
-    inversos = sqrt((1/Θ(tab_u,λ))*(1/Θ(tab_v,λ)))
+    inversos = sqrt((1/ Θ(tab_u,λ) )*(1/ Θ(tab_v,λ) ))
     if verbose 
       @show inversos
     end
@@ -348,7 +348,7 @@ function group_function(λ::Irrep, pat_u::GTPattern, pat_v::GTPattern; verbose =
     n = tab_u |> content |> length
     
     #inversos = sqrt((1/Θ(tab_u,λ))*(1/Θ(tab_v,λ)))
-    inversos = sqrt((1/Basic( Θ(tab_u,λ) ))*(1/Basic( Θ(tab_v,λ) )))
+    inversos = sqrt((1/ Θ(tab_u,λ))*(1/ Θ(tab_v,λ) ))
     if verbose 
       @show inversos
     end
@@ -401,7 +401,7 @@ function group_function(λ::Irrep, pat_u::GTPattern, pat_v::GTPattern, mat::Arra
     # probablemente se pueda sustituir con sum(λ)
     n = tab_u |> content |> length
     
-    inversos = sqrt((1/Θ(tab_u,λ))*(1/Θ(tab_v,λ)))
+    inversos = sqrt((1/Θn(tab_u,λ))*(1/Θn(tab_v,λ)))
     if verbose 
       @show inversos
     end
@@ -452,7 +452,7 @@ function group_function(λ::Irrep, tab_u::YTableau, tab_v::YTableau, mat::Array{
     # probablemente se pueda sustituir con sum(λ)
     n = tab_u |> content |> length
     
-    inversos = sqrt((1/Θ(tab_u,λ))*(1/Θ(tab_v,λ)))
+    inversos = sqrt((1/Θn(tab_u,λ))*(1/Θn(tab_v,λ)))
     if verbose 
       @show inversos
     end
