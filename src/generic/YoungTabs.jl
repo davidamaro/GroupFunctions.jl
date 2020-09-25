@@ -431,16 +431,16 @@ function Θ(patron_semi::AbstractAlgebra.Generic.YoungTableau{Int64}, irrep::Arr
     n = irrep |> length
     
     parejas = zip(relleno_standard, relleno_semi) |> collect
-    prod = 1.0
+    prod = one(Basic)#1.0
     for k in 1:n
         α = map(first,filter((xx -> (last(xx) == k)), parejas))
         if length(α) > 1
             for indx in 1:length(α), indy in indx+1:length(α)
                 x,y = α[indx], α[indy]
                 if x > y
-                  prod *= (1 + (1/axialdistance(tablon_standard, y, x)))
+                  prod *= (1 + (1/Basic( axialdistance(tablon_standard, y, x) )))
                 else
-                  prod *= (1 + (1/axialdistance(tablon_standard, x, y)))
+                  prod *= (1 + (1/Basic( axialdistance(tablon_standard, x, y) )))
                 end
             end
         end

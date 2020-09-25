@@ -307,13 +307,14 @@ function group_function(λ::Irrep, tab_u::YTableau, tab_v::YTableau; verbose = f
     end
     
     pol::Basic = zero(SymEngine.symbols("x"))#0.0
-    total::Complex{Float64} = zero(Complex{Float64})
+    #total::Complex{Float64} = zero(Complex{Float64})
+    total::Basic = zero(Basic)
     
     for ind in 1:length(lista_gamas)
         γ = lista_gamas[ind]
         cjto_σ = lista_cosets[ind]
         mon = monomio(f, g, inv(γ), n)
-        total = 0.0
+        total = zero(Basic)
         for σ in cjto_σ
             total += generar_matriz(tablones, σ,λ)[i,j]
         end
@@ -346,7 +347,8 @@ function group_function(λ::Irrep, pat_u::GTPattern, pat_v::GTPattern; verbose =
     # probablemente se pueda sustituir con sum(λ)
     n = tab_u |> content |> length
     
-    inversos = sqrt((1/Θ(tab_u,λ))*(1/Θ(tab_v,λ)))
+    #inversos = sqrt((1/Θ(tab_u,λ))*(1/Θ(tab_v,λ)))
+    inversos = sqrt((1/Basic( Θ(tab_u,λ) ))*(1/Basic( Θ(tab_v,λ) )))
     if verbose 
       @show inversos
     end
@@ -358,13 +360,14 @@ function group_function(λ::Irrep, pat_u::GTPattern, pat_v::GTPattern; verbose =
     end
     
     pol::Basic = zero(SymEngine.symbols("x"))#0.0
-    total::Float64 = zero(Float64)
+    #total::Float64 = zero(Float64)
+    total::Basic = zero(Basic)
     
     for ind in 1:length(lista_gamas)
         γ = lista_gamas[ind]
         cjto_σ = lista_cosets[ind]
         mon = monomio(f, g, inv(γ), n)
-        total = 0.0
+        total = zero(Basic)
         for σ in cjto_σ
             total += generar_matriz(tablones, σ,λ)[i,j]
         end
