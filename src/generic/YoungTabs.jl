@@ -146,22 +146,22 @@ function StandardYoungTableaux(part::Array{Int64,1})
 end
 
 @doc Markdown.doc"""
-  generar_matriz(Y::Array{YoungTableau}, p::Perm) -> SparseMatrixCSC
+    generar_matriz(Y::Array{YoungTableau}, p::Perm, λ::Array{Int64,1}) -> SparseMatrixCSC
 > Return non-zero entries of the orthogonal irrep given by the permutation 'p'
 > The information of the irrep is introduced via 'Y' which is a list of
 > Standard Young tableaux
 
 # Examples
-```jldoctest; setup = :(using AbstractAlgebra)
+```
 julia> guilty = StandardYoungTableaux([3,2])
-julia> generar_matriz(guilty, Perm([2,1,3,4,5]))
+julia> generar_matriz(guilty, Perm([2,1,3,4,5]), [3,2])
 [1, 1]  =  -1.0
 [2, 2]  =  1.0
 [3, 3]  =  -1.0
 [4, 4]  =  1.0
 [5, 5]  =  1.0
 
-julia> generar_matriz(guilty, Perm([1,3,2,4,5]))
+julia> generar_matriz(guilty, Perm([1,3,2,4,5]), [3,2])
 [1, 1]  =  0.5
 [2, 1]  =  0.866025
 [1, 2]  =  0.866025
