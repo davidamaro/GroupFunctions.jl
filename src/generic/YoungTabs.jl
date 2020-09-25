@@ -3,6 +3,7 @@ using AbstractAlgebra
 import Primes: prime
 import LinearAlgebra:  dot, I
 import Combinatorics:  permutations
+import SymEngine: Basic
 
 const Content = Vector{T} where T <: Integer
 const Irrep = Vector{T} where T <: Integer
@@ -85,11 +86,11 @@ function determinar_coeficiente_irrep_yamanouchi(Y::AbstractAlgebra.Generic.Youn
   k,l = encontrar_posicion(Y, v)
   
   if i == k
-    return 1
+    return Basic(1)
   elseif j == l
-    return -1 
+    return Basic(-1)
   else
-    return 0
+    return Basic(0)
   end
 end
 
@@ -174,15 +175,21 @@ julia> generar_matriz(guilty, Perm([1,3,2,4,5]))
 """
 function generar_matriz(patrones::Array{AbstractAlgebra.Generic.YoungTableau{Int64},1}, p::Perm, irrep::Array{Int64,1})
     descom_en_trans = descomp_total(p)
-    len = length(patrones)
-    mat = I#spzeros(len,len)
+    len::Int64 = length(patrones)
+    #mat = I#spzeros(len,len)
+    mat::SparseMatrixCSC{Basic,Int64} = spzeros(Basic, len, len)
+    @simd for i in 1:len
+      @inbounds mat[i,i] = Basic(1)
+    end
+    #[mat[i,i] for i in 1:len]
+    #mat::SparseMatrixCSC{Basic}
     for (a,b) in descom_en_trans # a + 1 = b
         mat = generar_matriz(patrones, b, irrep)*mat
     end
     mat
 end
 function generar_matriz(lista_tablones::Array{AbstractAlgebra.Generic.YoungTableau{Int64},1}, m::Int, irrep::Array{Int64,1})
-    mat = spzeros(Float64,length(lista_tablones), length(lista_tablones))
+    mat = spzeros(Basic,length(lista_tablones), length(lista_tablones))
 
     for i in 1:length(lista_tablones), k in 1:length(lista_tablones)
         if i == k && mat[i,i] == 0
@@ -256,14 +263,18 @@ function encontrar_esquina(lista::Array{Tuple{Int64,Int64},1})
     (i_max, jm)
 end
 
-function bloque_yamanouchi(mat::SparseMatrixCSC{Float64,Int64}, lista_tablones::Array{AbstractAlgebra.Generic.YoungTableau{Int64},1}, i::Int64, k::Int64, m::Int64, irrep::Array{Int64,1})
+function bloque_yamanouchi(mat::SparseMatrixCSC{Basic,Int64}, lista_tablones::Array{AbstractAlgebra.Generic.YoungTableau{Int64},1}, i::Int64, k::Int64, m::Int64, irrep::Array{Int64,1})
     tab_1 = lista_tablones[i]
     tab_2 = lista_tablones[k]
     if i < k && lista_tablones[i] == intercambio(lista_tablones[k], m,irrep)
-        mat[i,i] = -((axialdistance(tab_1,m, m-1))^(-1))
-        mat[i,k] = sqrt(1-((axialdistance(tab_1,m, m-1))^(-2)))
-        mat[k,i] = sqrt(1-((axialdistance(tab_1,m, m-1))^(-2)))
-        mat[k,k] = ((axialdistance(tab_1,m, m-1))^(-1))
+        mat[i,i] = -((Basic( axialdistance(tab_1,m, m-1) ))^(-1))
+        mat[i,k] = sqrt(1-((Basic( axialdistance(tab_1,m, m-1) ))^(-2)))
+        mat[k,i] = sqrt(1-((Basic( axialdistance(tab_1,m, m-1) ))^(-2)))
+        mat[k,k] = ((Basic( axialdistance(tab_1,m, m-1) ))^(-1))
+#        mat[i,i] = -((axialdistance(tab_1,m, m-1))^(-1))
+#        mat[i,k] = sqrt(1-((axialdistance(tab_1,m, m-1))^(-2)))
+#        mat[k,i] = sqrt(1-((axialdistance(tab_1,m, m-1))^(-2)))
+#        mat[k,k] = ((axialdistance(tab_1,m, m-1))^(-1))
     end
     mat
 end
