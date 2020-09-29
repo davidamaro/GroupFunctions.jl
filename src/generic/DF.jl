@@ -528,9 +528,10 @@ function zweight(gt::GTPattern)
     l = zeros(Int, length(gt.filas) + 1)
     l[1] = 0
     l[2:end] = reverse!(sum.((gt.filas)))
-    total = Float64[]
-    for k in 2:length(gt.filas)
-        push!(total, (l[k] - (1/2)*(l[k+1] + l[k-1])))
+    total::Array{Float64,1} = zeros(Float64, length(gt.filas) - 1)#Float64[]
+    @simd for k in 2:length(gt.filas)
+      @inbounds total[k - 1] = (l[k] - (1/2)*(l[k+1] + l[k-1]))
+        #push!(total, (l[k] - (1/2)*(l[k+1] + l[k-1])))
     end
     total
 end
@@ -553,12 +554,12 @@ julia> pweight(t)
 function pweight(gt::GTPattern)
     l::Array{Int64,1} = zeros(Int, length(gt.filas) + 1)
     #l = reverse!(sum.((gt.filas)))
-    for i in 1:length(gt.filas)
-      l[i] = sum(gt.filas[i])
+    @simd for i in 1:length(gt.filas)
+      @inbounds l[i] = sum(gt.filas[i])
     end
     total::Array{Int64,1} = zeros(Int, length(l) - 1)
-    for k in 1:length(total)
-      total[k] = l[k]  - l[k+1]
+    @simd for k in 1:length(total)
+      @inbounds total[k] = l[k]  - l[k+1]
     end
     total
 end
