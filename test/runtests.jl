@@ -22,24 +22,24 @@ function es_cero(pol::Basic; ϵ = 10^(-5))
     abs(pol)^2 < ϵ
 end
 
-function bloquesun(tamano::Int64, pos::Int64, angulos::Tuple{Float64,Float64,Float64})
-    @assert pos < tamano && pos > 0
-
-    base = zeros(Complex{Float64}, tamano, tamano)
-    α,β,γ = angulos
-    base[pos,pos] = exp(-im*(α+γ))*cos(β/2)
-    base[pos,pos+1] = -exp(-im*(α-γ))*sin(β/2)
-    base[pos+1,pos] = exp(im*(α-γ))*sin(β/2)
-    base[pos+1,pos+1] = exp(im*(α+γ))*cos(β/2)
-    for i in 1:tamano
-        if i == pos || i == pos + 1
-            continue
-        end
-        base[i,i] = 1.0
-    end
-
-    return base
-end
+#function bloquesun(tamano::Int64, pos::Int64, angulos::Tuple{Float64,Float64,Float64})
+#    @assert pos < tamano && pos > 0
+#
+#    base = zeros(Complex{Float64}, tamano, tamano)
+#    α,β,γ = angulos
+#    base[pos,pos] = exp(-im*(α+γ))*cos(β/2)
+#    base[pos,pos+1] = -exp(-im*(α-γ))*sin(β/2)
+#    base[pos+1,pos] = exp(im*(α-γ))*sin(β/2)
+#    base[pos+1,pos+1] = exp(im*(α+γ))*cos(β/2)
+#    for i in 1:tamano
+#        if i == pos || i == pos + 1
+#            continue
+#        end
+#        base[i,i] = 1.0
+#    end
+#
+#    return base
+#end
 
 @testset "irrep 221 de SU(4)" begin
     t_u = YoungTableau([2,2, 1])
@@ -407,7 +407,7 @@ end
     @test rate1 ≈ rate2
 end
 
-@testset "comparativa permanente submatriz y funcion D: num. de oc. repetido" begin
+@testset "permanente submatriz" begin
     α1,β1,γ1 = rand(Float64,3)
     xx=bloquesun(4,1,(α1,β1,γ1))
     α2,β2 = rand(Float64,2)
