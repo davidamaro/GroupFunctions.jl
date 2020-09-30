@@ -13,6 +13,7 @@ include("generic/GTPatterns.jl")
 include("generic/YoungTabs.jl")
 include("generic/DF.jl")
 include("generic/PermGroups.jl")
+include("generic/Aux.jl")
 
 #import GTPattern, basis_states
 export YoungTableau, axialdistance, encontrar_posicion
@@ -23,5 +24,6 @@ export group_function, @mma_str, mma_to_julia
 export zweight, pweight
 export gtinicial
 export generar_matriz
+export bloquesun, simplefactorization, simple
 
 end # module
