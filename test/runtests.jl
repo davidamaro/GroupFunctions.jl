@@ -2,10 +2,6 @@ using GroupFunctions, Test, SymEngine, Immanants
 import RandomMatrices: Haar
 import LinearAlgebra: norm
 
-#println(@which GTPattern([[2,1,0], [2,0],[1]]))
-#using AbstractAlgebra
-#import AbstractAlgebra: basis_states, GTPattern
-
 function findzero(part::Array{Int,1})
     base = basis_states(part)
     filter(x -> norm(zweight(x)) ≈ 0.0, base)
@@ -21,25 +17,6 @@ function es_cero(pol::Basic; ϵ = 10^(-5))
 
     abs(pol)^2 < ϵ
 end
-
-#function bloquesun(tamano::Int64, pos::Int64, angulos::Tuple{Float64,Float64,Float64})
-#    @assert pos < tamano && pos > 0
-#
-#    base = zeros(Complex{Float64}, tamano, tamano)
-#    α,β,γ = angulos
-#    base[pos,pos] = exp(-im*(α+γ))*cos(β/2)
-#    base[pos,pos+1] = -exp(-im*(α-γ))*sin(β/2)
-#    base[pos+1,pos] = exp(im*(α-γ))*sin(β/2)
-#    base[pos+1,pos+1] = exp(im*(α+γ))*cos(β/2)
-#    for i in 1:tamano
-#        if i == pos || i == pos + 1
-#            continue
-#        end
-#        base[i,i] = 1.0
-#    end
-#
-#    return base
-#end
 
 @testset "irrep 221 de SU(4)" begin
     t_u = YoungTableau([2,2, 1])
@@ -428,4 +405,24 @@ end
     edoy = filter(x -> pweight(x) == [1,0,2,0], welcome)[1]
 
     @test group_function([3,0,0,0], edox, edoy, mat4) ≈ immanant(Partition([3]), mat4[[1,2,3], [2,2,4]])/sqrt(2)
+end
+
+@testset "simplefactorization explicita" begin
+  α1,β1,γ1 = rand(Float64,3)
+  xx=bloquesun(4,1,(α1,β1,γ1))
+  α2,β2 = rand(Float64,2)
+  yy=bloquesun(4,2,(α2,β2,α2))
+  α3,β3,γ3 = rand(Float64,3)
+  zz=bloquesun(4,1,(α3,β3,γ3))
+  α4,β4 = rand(Float64,3)
+  xx2=bloquesun(4,3,(α4,β4,α4))
+  α5,β5 = rand(Float64,2)
+  yy2=bloquesun(4,2,(α5,β5,α5))
+  α6,β6,γ6 = rand(Float64,3)
+  zz2=bloquesun(4,1,(α6,β6,γ6))
+
+  matsimple = simple([α1,β1,γ1,α2,β2,α3,β3,γ3,α4,β4,α5,β5,α6,β6,γ6], 4)
+  mat =  xx*yy*zz*xx2*yy2*zz2
+
+  @test norm(matsimple - mat) < 10^(-11)
 end
