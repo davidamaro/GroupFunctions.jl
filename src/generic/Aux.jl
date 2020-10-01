@@ -66,23 +66,27 @@ function simple(valores::Array{Float64,1}, n::Int64; quotient::Bool = false)
     @assert len ≈ n^2-1
 
     if quotient
-        angulos[end-(2*(n-2) +3)+1:end] .= 0
+        angulos[1:(3*(n-2) + (n-3)*(n-2))] .= 0
+        #angulos[end-(2*(n-2) +3)+1:end] .= 0
     end
 
     mat::Array{Complex{Float64},2} = zeros(Complex{Float64}, n, n)
-    for i in 1:n
-        mat[i,i] = 1.0
+    @simd for i in 1:n
+        @inbounds mat[i,i] = 1.0
     end
 
-    for tope in 1:n-1
-        for max in tope:-1:1
+    #angulos
+    @simd for tope in 1:n-1
+        @simd for max in tope:-1:1
             if max == 1
-                ang = angulos[1:3]
-                mat *= bloquesun(n, max, (ang[1], ang[2], ang[3]))
+                ang = angulos[1:3]#rand(Float64,3)*π
+                #mat *= bloquesun(n, max, (ang[1], ang[2], ang[3]))
+                mat = bloquesun(n, max, (ang[1], ang[2], ang[3])) * mat
                 angulos = angulos[4:end]
             else
                 ang = angulos[1:2]
-                mat *= bloquesun(n, max, (ang[1], ang[2], ang[1]))
+                #mat *= bloquesun(n, max, (ang[1], ang[2], ang[1]))
+                mat = bloquesun(n, max, (ang[1], ang[2], ang[1])) * mat
                 angulos = angulos[3:end]
             end
         end

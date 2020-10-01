@@ -422,9 +422,13 @@ end
   zz2=bloquesun(4,1,(α6,β6,γ6))
 
   matsimple = simple([α1,β1,γ1,α2,β2,α3,β3,γ3,α4,β4,α5,β5,α6,β6,γ6], 4)
-  mat =  xx*yy*zz*xx2*yy2*zz2
+  matsimple_quotient = simple([α1,β1,γ1,α2,β2,α3,β3,γ3,α4,β4,α5,β5,α6,β6,γ6], 4; quotient = true)
+  #mat =  xx*yy*zz*xx2*yy2*zz2
+  mat =  zz2*yy2*xx2*zz*yy*xx 
+  mat_quotient =  zz2*yy2*xx2#*zz*yy*xx 
 
   @test norm(matsimple - mat) < 10^(-11)
+  @test norm(matsimple_quotient - mat_quotient) < 10^(-11)
 end
 
 @testset "simplefactorization explicita 3x3" begin
@@ -435,7 +439,8 @@ end
     α3,β3,γ3 = rand(Float64,3)
     zz=bloquesun(3,1,(α3,β3,γ3))
     mat = simple([α1,β1,γ1, α2,β2, α3,β3,γ3 ], 3)
-    mat2 = xx*yy*zz;
+    #mat2 = xx*yy*zz;
+    mat2 = zz*yy*xx;
     @test norm(mat-mat2) < 10^(-5)
 
 #    matc1 = yy*zz;
