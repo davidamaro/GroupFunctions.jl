@@ -426,3 +426,19 @@ end
 
   @test norm(matsimple - mat) < 10^(-11)
 end
+
+@testset "simplefactorization explicita 3x3" begin
+    α1,β1,γ1 = rand(Float64,3)
+    xx=bloquesun(3,1,(α1,β1,γ1))
+    α2,β2 = rand(Float64,2)
+    yy=bloquesun(3,2,(α2,β2,α2))
+    α3,β3,γ3 = rand(Float64,3)
+    zz=bloquesun(3,1,(α3,β3,γ3))
+    mat = simple([α1,β1,γ1, α2,β2, α3,β3,γ3 ], 3)
+    mat2 = xx*yy*zz;
+    @test norm(mat-mat2) < 10^(-5)
+
+#    matc1 = yy*zz;
+#    matc2 = simple([α1,β1,γ1, α2,β2, α3,β3,γ3 ], 3; quotient = true)
+#    @test norm(matc1-matc2) < 10^(-5)
+end
