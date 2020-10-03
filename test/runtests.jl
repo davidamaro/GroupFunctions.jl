@@ -18,6 +18,8 @@ function es_cero(pol::Basic; ϵ = 10^(-5))
     abs(pol)^2 < ϵ
 end
 
+include("internals.jl")
+
 @testset "irrep 221 de SU(4)" begin
     t_u = YoungTableau([2,2, 1])
     fill!(t_u, [1,2,3,3,4])
@@ -447,3 +449,4 @@ end
 #    matc2 = simple([α1,β1,γ1, α2,β2, α3,β3,γ3 ], 3; quotient = true)
 #    @test norm(matc1-matc2) < 10^(-5)
 end
+
