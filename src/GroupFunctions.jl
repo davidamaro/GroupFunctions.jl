@@ -13,7 +13,7 @@ include("generic/GTPatterns.jl")
 include("generic/YoungTabs.jl")
 include("generic/DF.jl")
 include("generic/PermGroups.jl")
-include("generic/Aux.jl")
+include("generic/Misc.jl")
 
 #import GTPattern, basis_states
 export YoungTableau, axialdistance, encontrar_posicion
