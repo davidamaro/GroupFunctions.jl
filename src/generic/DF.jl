@@ -37,7 +37,7 @@ function pave(Cs, working::Vector{IntervalBox{N,T}}, ϵ, bisection_point=nothing
             push!(boundary, X)
 
         else
-            if bisection_point == nothing
+            if isnothing(bisection_point)
                 push!(working, bisect(X)...)
             else
                 push!(working, bisect(X, bisection_point)...)

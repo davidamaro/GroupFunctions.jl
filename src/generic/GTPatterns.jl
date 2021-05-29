@@ -204,7 +204,7 @@ function isvalid(x::GTPattern)
 end
 
 function siguientepatron!(x::GTPattern)
-    if disminuible(x) != nothing
+    if !isnothing(disminuible(x))
         fila, col = disminuible(x)
     else
         return nothing
