@@ -139,7 +139,7 @@ function StandardYoungTableaux(part::Array{Int64,1})
     flat[1:len] = part
     primero = primero_lexi(YoungTableau(part))
     lista = [deepcopy(primero)]
-    for i in 2:dim(YoungTableau(part))
+    for _ in 2:dim(YoungTableau(part))
         push!(lista, deepcopy(encontrar_malo_imp!(primero)))
     end
     lista
@@ -183,7 +183,7 @@ function generar_matriz(patrones::Array{AbstractAlgebra.Generic.YoungTableau{Int
     end
     #[mat[i,i] for i in 1:len]
     #mat::SparseMatrixCSC{Basic}
-    for (a,b) in descom_en_trans # a + 1 = b
+    for (_,b) in descom_en_trans # a + 1 = b
         mat = generar_matriz(patrones, b, irrep)*mat
     end
     mat

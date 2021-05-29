@@ -117,7 +117,7 @@ function basis_states(λ::Fila)
     ejemplo = GTPattern([], [])
     primera!(λ, ejemplo)
     multitud_prueba = generar_siguiente_fila(ejemplo);
-    for i in 3:length(λ)
+    for _ in 3:length(λ)
         multitud_prueba = generar_siguiente_fila(multitud_prueba)
     end
     multitud_prueba
@@ -150,7 +150,7 @@ function obtener_diferencias_patron(tab::GTPattern,numerofila::Int64)
     contenido = Int64[]
     i = numerofila
     for punto in diferencias[2:end]
-        for j in 1:punto
+        for _ in 1:punto
             push!(contenido, i)
         end
         i += 1
@@ -248,7 +248,7 @@ end
 function disminuible(x::GTPattern)
     rows = deepcopy(x.filas)
     for j in length(rows):-1:2
-        for (i,val) in enumerate(rows[j])
+        for i in eachindex(rows[j])
             if rows[j][i] == 0
                 continue
             end
