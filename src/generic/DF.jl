@@ -1,8 +1,11 @@
 import Combinatorics: permutations
-using IntervalArithmetic
-import IntervalConstraintProgramming: SubPaving, Contractor
-import ModelingToolkit: @variables, Variable
+# using IntervalArithmetic
+# import IntervalConstraintProgramming: SubPaving, Contractor
+# import ModelingToolkit: @variables, Variable
+using JuMP
+using Gurobi
 #import SArray
+import LinearAlgebra: transpose
 import StaticArrays: SArray
 export group_function, mma_to_julia, @mma
 export zweight, pweight
@@ -12,112 +15,164 @@ const YTableau = AbstractAlgebra.Generic.YoungTableau{T} where T <: Integer
 const Content = Array{T,1} where T <: Integer
 const MapST2SST = Dict{T,T} where T <: Integer
 
-function pave(Cs, working::Vector{IntervalBox{N,T}}, ϵ, bisection_point=nothing) where {N,T}
+# function pave(Cs, working::Vector{IntervalBox{N,T}}, ϵ, bisection_point=nothing) where {N,T}
 
-    boundary = SubPaving{N,T}()
+#     boundary = SubPaving{N,T}()
 
-    while !isempty(working)
+#     while !isempty(working)
 
-        X = pop!(working)
+#         X = pop!(working)
 
-        # apply each contractor in a round-robin fashion:
-        for C in Cs
-            X = C(X)
+#         # apply each contractor in a round-robin fashion:
+#         for C in Cs
+#             X = C(X)
             
-            if isempty(X)
-                break
-            end
-        end
+#             if isempty(X)
+#                 break
+#             end
+#         end
         
-        if isempty(X)
-            continue
-        end
+#         if isempty(X)
+#             continue
+#         end
 
-        if diam(X) < ϵ
-            push!(boundary, X)
+#         if diam(X) < ϵ
+#             push!(boundary, X)
 
-        else
-            if isnothing(bisection_point)
-                push!(working, bisect(X)...)
-            else
-                push!(working, bisect(X, bisection_point)...)
-            end
+#         else
+#             if isnothing(bisection_point)
+#                 push!(working, bisect(X)...)
+#             else
+#                 push!(working, bisect(X, bisection_point)...)
+#             end
 
-        end
+#         end
 
-    end
+#     end
 
-    return boundary
+#     return boundary
 
-end
+# end
 
 
-function integerize(X::Interval)
-    a = ceil(X.lo)
-    b = floor(X.hi)
+# function integerize(X::Interval)
+#     a = ceil(X.lo)
+#     b = floor(X.hi)
     
-    if a > b
-        return emptyinterval(X)
-    end
+#     if a > b
+#         return emptyinterval(X)
+#     end
 
-    return Interval(a, b)
-end 
+#     return Interval(a, b)
+# end 
 
-integerize(X::IntervalBox) = integerize.(X)
+# integerize(X::IntervalBox) = integerize.(X)
 
-@doc Markdown.doc"""
-> Return the size of the vector which represents the partition.
+# @doc Markdown.doc"""
+# > Return the size of the vector which represents the partition.
 
-encontrar_prototablones(Array, Array)
+# encontrar_prototablones(Array, Array)
 
-# Examples:
+# # Examples:
 
-```
-julia > encontrar_prototablones([1,1,1], [1,2,0])
- [1, 0, 0, 0, 1, 1, 0, 0, 0]
- [0, 1, 0, 1, 0, 1, 0, 0, 0]
- [0, 0, 1, 1, 1, 0, 0, 0, 0]
-```
-"""
-function encontrar_prototablones(μ::Array{Int64,1}, ν::Array{Int64,1})
+# ```
+# julia > encontrar_prototablones([1,1,1], [1,2,0])
+#  [1, 0, 0, 0, 1, 1, 0, 0, 0]
+#  [0, 1, 0, 1, 0, 1, 0, 0, 0]
+#  [0, 0, 1, 1, 1, 0, 0, 0, 0]
+# ```
+# """
+# function encontrar_prototablones(μ::Array{Int64,1}, ν::Array{Int64,1})
 
-    # intervalo y contractors
-    n::Int64 = length(μ)
-    x::IntervalBox{n^2, Float64}, c::Array{Contractor,1} = generarcontractors(μ,ν)
+#     # intervalo y contractors
+#     n::Int64 = length(μ)
+#     x::IntervalBox{n^2, Float64}, c::Array{Contractor,1} = generarcontractors(μ,ν)
 
-    contractors::Array{Function,1} = [X -> C(0..0, X) for C in c]
+#     contractors::Array{Function,1} = [X -> C(0..0, X) for C in c]
 
-    helper = pop!(contractors)
-    X::IntervalBox{n^2, Float64} = Base.invokelatest(helper, x)
+#     helper = pop!(contractors)
+#     X::IntervalBox{n^2, Float64} = Base.invokelatest(helper, x)
 
-    for C in contractors
-        X = Base.invokelatest(C, X)
-    end
+#     for C in contractors
+#         X = Base.invokelatest(C, X)
+#     end
 
-    contractors = [contractors; integerize]
-    solutions::Array{IntervalBox{n^2,Float64},1} = Base.invokelatest(pave, contractors,[X], 1.0)
+#     contractors = [contractors; integerize]
+#     solutions::Array{IntervalBox{n^2,Float64},1} = Base.invokelatest(pave, contractors,[X], 1.0)
 
 
-    SArray{Tuple{n^2},Int64,1,n^2}[Int.(x) for x in mid.(solutions)]
+#     SArray{Tuple{n^2},Int64,1,n^2}[Int.(x) for x in mid.(solutions)]
+# end
+
+# function generarcontractors(μ::Array{Int64,1}, ν::Array{Int64,1})
+#     n::Int64 = length(μ)
+
+#     vars = (@variables y[1:n, 1:n])[1]
+
+#     contractors::Array{Contractor,1} = Contractor[]
+
+#     for i in 1:n
+#         push!(contractors, Contractor(vars, sum(vars[i, 1:n]) - μ[i]))
+#     end
+
+#     for i in 1:n
+#         push!(contractors, Contractor(vars, sum(vars[1:n, i]) - ν[i]))
+#     end
+
+#     X::IntervalBox = IntervalBox(0..n^2, n^2)
+#     X, contractors
+# end
+function flatten(x)
+    n, _ = x |> size
+    reshape(x, (n^2,1))
+#     reshape(x, (1,n^2))
 end
+function encontrar_prototablones(rowsum::Array{Int64,1}, colsum::Array{Int64,1}; verbose::Bool = false, num_sol::Int = 1000)
+        ## Model:
+    model = Model(Gurobi.Optimizer)
+    @assert length(rowsum) == length(colsum)
 
-function generarcontractors(μ::Array{Int64,1}, ν::Array{Int64,1})
-    n::Int64 = length(μ)
+    N = length(rowsum)
+    INDEX = 1:N
+    @variable(model, y[INDEX,INDEX] >= 0, Int)
 
-    vars = (@variables y[1:n, 1:n])[1]
+    @constraint(model, rowCons[i=INDEX], sum(y[i,j] for j in INDEX) == rowsum[i])
+    @constraint(model, colCons[j=INDEX], sum(y[i,j] for i in INDEX) == colsum[j])
 
-    contractors::Array{Contractor,1} = Contractor[]
+    if verbose; print(model); end
 
-    for i in 1:n
-        push!(contractors, Contractor(vars, sum(vars[i, 1:n]) - μ[i]))
+    ## Gurobi parameters - see https://www.gurobi.com/documentation/9.0/refman/finding_multiple_solutions.html
+    JuMP.set_optimizer_attribute(model, "PoolSearchMode", 2)   # exhaustive search mode
+    JuMP.set_optimizer_attribute(model, "PoolSolutions", num_sol)  # num_sol is an arbitrary (large enough) whole number
+
+    if !verbose; JuMP.set_optimizer_attribute(model, "OutputFlag", 0); end
+
+    ## Optimize:
+    JuMP.optimize!(model)
+
+    ## Results:
+    num_results = result_count(model)
+    if verbose; println("Number of results: ", num_results, "\n"); end
+
+    Results = Array{Array{Int64},1}()  ## Note the conversion to Int64
+    for n in 1:num_results
+        sol = Array{Int64}(undef, N, N)
+        for i in INDEX
+            for j in INDEX
+                sol[i,j] = JuMP.value(y[i,j]; result=n)
+            end
+        end
+
+        push!(Results,sol)
+        if verbose
+            println(Results[n])
+        end
     end
 
-    for i in 1:n
-        push!(contractors, Contractor(vars, sum(vars[1:n, i]) - ν[i]))
-    end
+    length(Results) == num_sol && println("Warning! Maybe I did not obtain all the solutions. Try increasing num_sol.")
 
-    X::IntervalBox = IntervalBox(0..n^2, n^2)
-    X, contractors
+    return (x->vcat(x...)).(transpose(Results))
+    # return Results
 end
 
 @doc Markdown.doc"""
