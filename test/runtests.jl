@@ -203,6 +203,7 @@ end
       ];
 
     bolsa_estados = [ t_1, t_2, t_3, t_4, t_5, t_6, t_7, t_8 ]
+    output_test= []
     for (idx,edox) in enumerate(bolsa_estados), (idy,edoy) in enumerate(bolsa_estados)
       edo_mma = basura_ejemplo[idx][idy] |> mma_to_julia
       edo_julia = group_function([2,1,0],edox, edoy) |> expand
@@ -210,8 +211,10 @@ end
       if !es_cero(edo_final)
         @show edo_mma, edo_julia
       end
-      @test es_cero(edo_final)
+      # @test es_cero(edo_final)
+      push!(output_test, es_cero(edo_final))
     end
+    @test all(output_test)
 end
 @testset "irrep 21 de SU(4)" begin
     # placeholder
@@ -315,6 +318,7 @@ end
     ]
     ];
     bolsa_estados = [ t_1, t_2, t_3, t_4, t_5, t_6, t_7, t_8 ]
+    output_test = []
     for (idx,edox) in enumerate(bolsa_estados), (idy,edoy) in enumerate(bolsa_estados)
       edo_mma = basura_ejemplo[idx][idy] |> mma_to_julia
       edo_julia = group_function([2,1,0,0],edox, edoy) |> expand
@@ -322,8 +326,9 @@ end
       if !es_cero(edo_final)
         @show edo_mma, edo_julia
       end
-      @test es_cero(edo_final)
+      push!(output_test, es_cero(edo_final) )
     end
+    @test all(output_test)
 end
 
 @testset "comparativa immanante" begin
