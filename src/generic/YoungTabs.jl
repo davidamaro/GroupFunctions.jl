@@ -484,9 +484,29 @@ Esto es debido a la forman en la que Julia recorre matrices.
 2
 2
 """
-function calcula_proto_permutacion(proto::Array{Int64,1})
-    len = length(proto) |> sqrt |> Int
-    new_proto = reshape(proto, len, len)'
+# function calcula_proto_permutacion(proto::Array{Int64,1})
+    # len = length(proto) |> sqrt |> Int
+    # new_proto = reshape(proto, len, len)'
+
+    # mult = 0
+    # yard = Array{Int64,1}[]
+    # for i in 1:len
+        # densidad = vcat(fill.(1:len, new_proto[mult*len + 1:len*(mult + 1)])...)
+        # push!(yard, densidad)
+        # mult += 1
+    # end
+    # vcat(yard...)
+# end
+function calcula_proto_permutacion(proto::AbstractArray{Int64})
+    if ndims(proto) == 1
+        len = length(proto) |> sqrt |> Int
+        new_proto = reshape(proto, len, len)'
+    elseif ndims(proto) == 2
+        len = size(proto, 1)
+        new_proto = proto'
+    else
+        error("Unsupported input dimension: ", ndims(proto))
+    end
 
     mult = 0
     yard = Array{Int64,1}[]

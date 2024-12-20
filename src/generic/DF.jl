@@ -3,12 +3,14 @@ import Combinatorics: permutations
 # import IntervalConstraintProgramming: SubPaving, Contractor
 # import ModelingToolkit: @variables, Variable
 using JuMP
-using Gurobi
+# using Gurobi
+using HiGHS
 #import SArray
 import LinearAlgebra: transpose
 import StaticArrays: SArray
 export group_function, mma_to_julia, @mma
 export zweight, pweight
+export encontrar_prototablones
 
 const Irrep = Array{T,1} where T <: Integer
 const YTableau = AbstractAlgebra.Generic.YoungTableau{T} where T <: Integer
@@ -127,9 +129,207 @@ function flatten(x)
     reshape(x, (n^2,1))
 #     reshape(x, (1,n^2))
 end
+
+
+#
+# using JuMP
+# using HiGHS
+
+# function find_all_matrices(rowsum::Array{Int64,1}, colsum::Array{Int64,1}; verbose::Bool = false, num_sol::Int = 1000)
+    # # Input validation
+    # @assert length(rowsum) == length(colsum) "Row and column sums must have equal length"
+    # @assert sum(rowsum) == sum(colsum) "Sum of row sums must equal sum of column sums"
+    
+    # N = length(rowsum)
+    # INDEX = 1:N
+    # Results = Array{Array{Int64,2},1}()
+    
+    # # Create initial model
+    # function create_base_model()
+        # model = Model(HiGHS.Optimizer)
+        # if !verbose
+            # set_silent(model)
+        # end
+        
+        # # Variables and basic constraints
+        # @variable(model, y[INDEX,INDEX] >= 0, Int)
+        # @constraint(model, rowCons[i=INDEX], sum(y[i,j] for j in INDEX) == rowsum[i])
+        # @constraint(model, colCons[j=INDEX], sum(y[i,j] for i in INDEX) == colsum[j])
+        
+        # return model, y
+    # end
+    
+    # # Function to add constraint excluding previous solution
+    # function add_exclusion_constraint(model, y, prev_sol)
+        # # Sum of absolute differences must be at least 1
+        # @constraint(model, sum(y[i,j] for i in INDEX, j in INDEX where prev_sol[i,j] == 1) + 
+                          # sum(1 - y[i,j] for i in INDEX, j in INDEX where prev_sol[i,j] == 0) <= 
+                          # N*N - 1)
+    # end
+    
+    # # Main solution loop
+    # solutions_found = 0
+    # while solutions_found < num_sol
+        # model, y = create_base_model()
+        
+        # # Add exclusion constraints for all previously found solutions
+        # for prev_sol in Results
+            # add_exclusion_constraint(model, y, prev_sol)
+        # end
+        
+        # # Optimize
+        # optimize!(model)
+        
+        # # Check if we found a solution
+        # if termination_status(model) != MOI.OPTIMAL
+            # if verbose && solutions_found == 0
+                # println("No (more) solutions exist")
+            # end
+            # break
+        # end
+        
+        # # Extract solution
+        # sol = zeros(Int64, N, N)
+        # for i in INDEX, j in INDEX
+            # sol[i,j] = round(Int64, value(y[i,j]))
+        # end
+        
+        # # Add to results
+        # push!(Results, sol)
+        # solutions_found += 1
+        
+        # if verbose
+            # println("Found solution $solutions_found:")
+            # display(sol)
+            # println()
+        # end
+    # end
+    
+    # if solutions_found == num_sol
+        # println("Warning! Maybe not all solutions were found. Try increasing num_sol.")
+    # end
+    
+    # if verbose
+        # println("Total solutions found: ", length(Results))
+    # end
+    
+    # @show Results
+    # return Results
+# end
+
+#david
+# function encontrar_prototablones(rowsum::Vector{Int}, colsum::Vector{Int}; verbose::Bool = false, num_sol::Int = 1000)
+    # ## Model:
+    # model = Model(HiGHS.Optimizer)
+    # @assert length(rowsum) == length(colsum)
+
+    # N = length(rowsum)
+    # INDEX = 1:N
+    # @variable(model, y[INDEX, INDEX], Bin)  # Binary decision variables for faster computation
+
+    # @constraint(model, rowCons[i in INDEX], sum(y[i, j] for j in INDEX) == rowsum[i])
+    # @constraint(model, colCons[j in INDEX], sum(y[i, j] for i in INDEX) == colsum[j])
+
+    # if verbose; println(model); end
+
+    # ## Set verbosity for HiGHS solver
+    # if !verbose
+        # set_silent(model)
+    # end
+
+    # Results = Array{Matrix{Int64}, 1}()
+
+    # ## Add an array to track excluded solutions
+    # excluded_solutions = []
+
+    # ## Optimization loop
+    # for _ in 1:num_sol
+        # optimize!(model)
+
+        # if termination_status(model) != MOI.OPTIMAL
+            # break
+        # end
+
+        # # Extract the solution
+        # sol = Int.(JuMP.value.(y))
+
+        # # Add to results
+        # push!(Results, sol)
+
+        # if verbose
+            # println("Found solution:")
+            # println(sol)
+        # end
+
+        # # Add exclusion constraint for the current solution
+        # push!(excluded_solutions, sol)
+        # @constraint(model, sum(y[i, j] != sol[i, j] for i in INDEX, j in INDEX) >= 1)
+    # end
+
+    # @show unique(Results)
+    # return unique(Results)
+# end
+
+# function encontrar_prototablones(rowsum::Array{Int64,1}, colsum::Array{Int64,1}; verbose::Bool = false, num_sol::Int = 1000)
+    # ## Model:
+    # @show rowsum, colsum
+    # model = Model(HiGHS.Optimizer)
+    # @assert length(rowsum) == length(colsum)
+
+    # N = length(rowsum)
+    # INDEX = 1:N
+    # @variable(model, y[INDEX,INDEX] >= 0, Int)
+
+    # @constraint(model, rowCons[i=INDEX], sum(y[i,j] for j in INDEX) == rowsum[i])
+    # @constraint(model, colCons[j=INDEX], sum(y[i,j] for i in INDEX) == colsum[j])
+
+    # if verbose; println(model); end
+
+    # ## Set verbosity for HiGHS solver
+    # if !verbose
+        # set_silent(model)
+    # end
+
+    # Results = Array{Array{Int64},1}()
+
+    # ## Function to add a constraint to exclude a solution
+    # function exclude_solution!(model, sol)
+        # @constraint(model, sum((y[i,j] != sol[i,j]) for i in INDEX, j in INDEX) >= 1)
+    # end
+
+    # ## Find all solutions
+    # while true
+        # optimize!(model)
+
+        # if termination_status(model) != MOI.OPTIMAL
+            # break
+        # end
+
+        # sol = Array{Int64}(undef, N, N)
+        # for i in INDEX
+            # for j in INDEX
+                # sol[i,j] = Int(value(y[i,j]))
+            # end
+        # end
+
+        # push!(Results, sol)
+
+        # if verbose
+            # println("Found solution:")
+            # println(sol)
+        # end
+
+        # exclude_solution!(model, sol)
+    # end
+
+    # @show Results
+    # return Results
+# end
+
 function encontrar_prototablones(rowsum::Array{Int64,1}, colsum::Array{Int64,1}; verbose::Bool = false, num_sol::Int = 1000)
-        ## Model:
-    model = Model(Gurobi.Optimizer)
+    ## Model:
+    @show rowsum, colsum
+    model = Model(HiGHS.Optimizer)
     @assert length(rowsum) == length(colsum)
 
     N = length(rowsum)
@@ -139,41 +339,141 @@ function encontrar_prototablones(rowsum::Array{Int64,1}, colsum::Array{Int64,1};
     @constraint(model, rowCons[i=INDEX], sum(y[i,j] for j in INDEX) == rowsum[i])
     @constraint(model, colCons[j=INDEX], sum(y[i,j] for i in INDEX) == colsum[j])
 
-    if verbose; print(model); end
+    if verbose; println(model); end
 
-    ## Gurobi parameters - see https://www.gurobi.com/documentation/9.0/refman/finding_multiple_solutions.html
-    JuMP.set_optimizer_attribute(model, "PoolSearchMode", 2)   # exhaustive search mode
-    JuMP.set_optimizer_attribute(model, "PoolSolutions", num_sol)  # num_sol is an arbitrary (large enough) whole number
+    ## Set verbosity for HiGHS solver
+    if !verbose
+        set_silent(model)
+    end
 
-    if !verbose; JuMP.set_optimizer_attribute(model, "OutputFlag", 0); end
+    Results = Array{Array{Int64},1}()
 
-    ## Optimize:
-    JuMP.optimize!(model)
+    ## Function to add a constraint to exclude a solution
+    function exclude_solution!(model, sol)
+        @constraint(model, sum(y[i,j] * sol[i,j] for i in INDEX, j in INDEX) <= sum(sol) - 1)
+    end
 
-    ## Results:
-    num_results = result_count(model)
-    if verbose; println("Number of results: ", num_results, "\n"); end
+    ## Find all solutions
+    while true
+        optimize!(model)
 
-    Results = Array{Array{Int64},1}()  ## Note the conversion to Int64
-    for n in 1:num_results
+        if termination_status(model) != MOI.OPTIMAL
+            break
+        end
+
         sol = Array{Int64}(undef, N, N)
         for i in INDEX
             for j in INDEX
-                sol[i,j] = JuMP.value(y[i,j]; result=n)
+                sol[i,j] = Int(value(y[i,j]))
             end
         end
 
-        push!(Results,sol)
+        push!(Results, sol)
+
         if verbose
-            println(Results[n])
+            println("Found solution:")
+            println(sol)
         end
+
+        exclude_solution!(model, sol)
     end
 
-    length(Results) == num_sol && println("Warning! Maybe I did not obtain all the solutions. Try increasing num_sol.")
-
-    return (x->vcat(x...)).(transpose(Results))
-    # return Results
+    @show Results
+    return Results
 end
+#
+# function encontrar_prototablones(rowsum::Array{Int64,1}, colsum::Array{Int64,1}; verbose::Bool = false, num_sol::Int = 1000)
+    # ## Model:
+    # model = Model(HiGHS.Optimizer)
+    # @assert length(rowsum) == length(colsum)
+
+    # N = length(rowsum)
+    # INDEX = 1:N
+    # @variable(model, y[INDEX,INDEX] >= 0, Int)
+
+    # @constraint(model, rowCons[i=INDEX], sum(y[i,j] for j in INDEX) == rowsum[i])
+    # @constraint(model, colCons[j=INDEX], sum(y[i,j] for i in INDEX) == colsum[j])
+
+    # if verbose; println(model); end
+
+    # ## Set verbosity for HiGHS solver
+    # if !verbose
+        # set_silent(model)
+    # end
+
+    # ## Optimize:
+    # optimize!(model)
+
+    # ## Results:
+    # if termination_status(model) != MOI.OPTIMAL
+        # error("Optimization was not successful.")
+    # end
+
+    # Results = Array{Array{Int64},1}()
+    # sol = Array{Int64}(undef, N, N)
+    # for i in INDEX
+        # for j in INDEX
+            # sol[i,j] = Int(value(y[i,j]))
+        # end
+    # end
+    # push!(Results, sol)
+
+    # if verbose
+        # println("Solution:")
+        # println(sol)
+    # end
+    # @show Results
+
+    # return (x -> vcat(x...)).(transpose(Results))
+# end
+
+# function encontrar_prototablones(rowsum::Array{Int64,1}, colsum::Array{Int64,1}; verbose::Bool = false, num_sol::Int = 1000)
+        # ## Model:
+    # model = Model(Gurobi.Optimizer)
+    # @assert length(rowsum) == length(colsum)
+
+    # N = length(rowsum)
+    # INDEX = 1:N
+    # @variable(model, y[INDEX,INDEX] >= 0, Int)
+
+    # @constraint(model, rowCons[i=INDEX], sum(y[i,j] for j in INDEX) == rowsum[i])
+    # @constraint(model, colCons[j=INDEX], sum(y[i,j] for i in INDEX) == colsum[j])
+
+    # if verbose; print(model); end
+
+    # ## Gurobi parameters - see https://www.gurobi.com/documentation/9.0/refman/finding_multiple_solutions.html
+    # JuMP.set_optimizer_attribute(model, "PoolSearchMode", 2)   # exhaustive search mode
+    # JuMP.set_optimizer_attribute(model, "PoolSolutions", num_sol)  # num_sol is an arbitrary (large enough) whole number
+
+    # if !verbose; JuMP.set_optimizer_attribute(model, "OutputFlag", 0); end
+
+    # ## Optimize:
+    # JuMP.optimize!(model)
+
+    # ## Results:
+    # num_results = result_count(model)
+    # if verbose; println("Number of results: ", num_results, "\n"); end
+
+    # Results = Array{Array{Int64},1}()  ## Note the conversion to Int64
+    # for n in 1:num_results
+        # sol = Array{Int64}(undef, N, N)
+        # for i in INDEX
+            # for j in INDEX
+                # sol[i,j] = JuMP.value(y[i,j]; result=n)
+            # end
+        # end
+
+        # push!(Results,sol)
+        # if verbose
+            # println(Results[n])
+        # end
+    # end
+
+    # length(Results) == num_sol && println("Warning! Maybe I did not obtain all the solutions. Try increasing num_sol.")
+
+    # return (x->vcat(x...)).(transpose(Results))
+    # # return Results
+# end
 
 @doc Markdown.doc"""
   encajar(lista::Vector{T}, n::T) where T <: Integer
