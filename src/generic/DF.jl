@@ -325,62 +325,175 @@ end
     # @show Results
     # return Results
 # end
-
-function encontrar_prototablones(rowsum::Array{Int64,1}, colsum::Array{Int64,1}; verbose::Bool = false, num_sol::Int = 1000)
-    ## Model:
-    @show rowsum, colsum
+#
+# 
+# function encontrar_prototablones(rowsum::Vector{Int}, colsum::Vector{Int}; verbose::Bool = false, num_sol::Int = 1000)
+# function find_all_solutions(A::Vector{Int}, B::Vector{Int})
+function encontrar_prototablones(A::Vector{Int}, B::Vector{Int})
+    solutions = []
+    n = length(A)
+    
+    # Create base model
     model = Model(HiGHS.Optimizer)
-    @assert length(rowsum) == length(colsum)
-
-    N = length(rowsum)
-    INDEX = 1:N
-    @variable(model, y[INDEX,INDEX] >= 0, Int)
-
-    @constraint(model, rowCons[i=INDEX], sum(y[i,j] for j in INDEX) == rowsum[i])
-    @constraint(model, colCons[j=INDEX], sum(y[i,j] for i in INDEX) == colsum[j])
-
-    if verbose; println(model); end
-
-    ## Set verbosity for HiGHS solver
-    if !verbose
-        set_silent(model)
+    set_silent(model)
+    
+    # Variables
+    @variable(model, M[1:n, 1:n] >= 0, Int)
+    
+    # Base constraints
+    for i in 1:n
+        @constraint(model, sum(M[i,:]) == A[i])
     end
-
-    Results = Array{Array{Int64},1}()
-
-    ## Function to add a constraint to exclude a solution
-    function exclude_solution!(model, sol)
-        @constraint(model, sum(y[i,j] * sol[i,j] for i in INDEX, j in INDEX) <= sum(sol) - 1)
+    for j in 1:n
+        @constraint(model, sum(M[:,j]) == B[j])
     end
-
-    ## Find all solutions
-    while true
+    
+    # Keep finding solutions until no more exist
+    prev_size = -1
+    current_size = 0
+    
+    while current_size > prev_size
         optimize!(model)
-
+        
         if termination_status(model) != MOI.OPTIMAL
             break
         end
-
-        sol = Array{Int64}(undef, N, N)
-        for i in INDEX
-            for j in INDEX
-                sol[i,j] = Int(value(y[i,j]))
+        
+        # Get current solution
+        current_sol = round.(Int, value.(M))
+        push!(solutions, copy(current_sol))
+        
+        # Update sizes for termination check
+        prev_size = current_size
+        current_size = length(solutions)
+        
+        # Add constraint to exclude current solution
+        constraint_expr = AffExpr(0.0)
+        for i in 1:n, j in 1:n
+            if current_sol[i,j] == 0
+                # For zero elements, count how many become non-zero
+                constraint_expr += M[i,j]
+            else
+                # For non-zero elements, count elements that decrease
+                constraint_expr += (current_sol[i,j] - M[i,j])/(2*current_sol[i,j])
+                # Count elements that increase
+                constraint_expr += (M[i,j] - current_sol[i,j])/(2*current_sol[i,j])
             end
         end
-
-        push!(Results, sol)
-
-        if verbose
-            println("Found solution:")
-            println(sol)
-        end
-
-        exclude_solution!(model, sol)
+        @constraint(model, constraint_expr >= 1)
     end
-
-    @show Results
-    return Results
+    
+    println("Found $(length(solutions)) total solutions")
+    return solutions
 end
+
+
+# function encontrar_prototablones(rowsum::Vector{Int}, colsum::Vector{Int}; verbose::Bool = false, num_sol::Int = 1000)
+    # ## Model:
+    # @show rowsum, colsum
+    # model = Model(HiGHS.Optimizer)
+    # @assert length(rowsum) == length(colsum)
+
+    # N = length(rowsum)
+    # INDEX = 1:N
+    # @variable(model, y[INDEX, INDEX] >= 0, Int)
+
+    # @constraint(model, rowCons[i=INDEX], sum(y[i, j] for j in INDEX) == rowsum[i])
+    # @constraint(model, colCons[j=INDEX], sum(y[i, j] for i in INDEX) == colsum[j])
+
+    # if verbose; println(model); end
+
+    # ## Set verbosity for HiGHS solver
+    # if !verbose
+        # set_silent(model)
+    # end
+
+    # Results = []
+
+    # ## Function to add a constraint to exclude a solution
+    # function exclude_solution!(model, sol)
+        # @constraint(model, sum(abs(y[i, j] - sol[i, j]) for i in INDEX, j in INDEX) >= 1)
+    # end
+
+    # ## Find all solutions
+    # while length(Results) < num_sol
+        # optimize!(model)
+
+        # if termination_status(model) != MOI.OPTIMAL
+            # break
+        # end
+
+        # sol = [Int(value(y[i, j])) for i in INDEX, j in INDEX]
+
+        # push!(Results, sol)
+
+        # if verbose
+            # println("Found solution:")
+            # println(sol)
+        # end
+
+        # exclude_solution!(model, sol)
+    # end
+
+    # @show length(Results), Results
+    # return Results
+# end
+
+# function encontrar_prototablones(rowsum::Array{Int64,1}, colsum::Array{Int64,1}; verbose::Bool = false, num_sol::Int = 1000)
+    # ## Model:
+    # @show rowsum, colsum
+    # model = Model(HiGHS.Optimizer)
+    # @assert length(rowsum) == length(colsum)
+
+    # N = length(rowsum)
+    # INDEX = 1:N
+    # @variable(model, y[INDEX,INDEX] >= 0, Int)
+
+    # @constraint(model, rowCons[i=INDEX], sum(y[i,j] for j in INDEX) == rowsum[i])
+    # @constraint(model, colCons[j=INDEX], sum(y[i,j] for i in INDEX) == colsum[j])
+
+    # if verbose; println(model); end
+
+    # ## Set verbosity for HiGHS solver
+    # if !verbose
+        # set_silent(model)
+    # end
+
+    # Results = Array{Array{Int64},1}()
+
+    # ## Function to add a constraint to exclude a solution
+    # function exclude_solution!(model, sol)
+        # @constraint(model, sum(y[i,j] * sol[i,j] for i in INDEX, j in INDEX) <= sum(sol) - 1)
+    # end
+
+    # ## Find all solutions
+    # while true
+        # optimize!(model)
+
+        # if termination_status(model) != MOI.OPTIMAL
+            # break
+        # end
+
+        # sol = Array{Int64}(undef, N, N)
+        # for i in INDEX
+            # for j in INDEX
+                # sol[i,j] = Int(value(y[i,j]))
+            # end
+        # end
+
+        # push!(Results, sol)
+
+        # if verbose
+            # println("Found solution:")
+            # println(sol)
+        # end
+
+        # exclude_solution!(model, sol)
+    # end
+
+    # @show Results
+    # return Results
+# end
 #
 # function encontrar_prototablones(rowsum::Array{Int64,1}, colsum::Array{Int64,1}; verbose::Bool = false, num_sol::Int = 1000)
     # ## Model:
