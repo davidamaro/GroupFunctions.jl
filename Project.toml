@@ -1,7 +1,7 @@
 name = "GroupFunctions"
 uuid = "187e6719-d2a6-4c17-9b39-0c99811c6bd2"
 authors = ["David Amaro Alcalá <dav1494@ciencias.unam.mx>"]
-version = "0.1.1"
+version = "0.1.2"
 
 [deps]
 AbstractAlgebra = "c3fe647b-3220-5bb0-a1ea-a7954cac585d"

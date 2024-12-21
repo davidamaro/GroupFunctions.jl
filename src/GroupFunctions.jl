@@ -31,9 +31,10 @@
 module GroupFunctions
 using Markdown
 using AbstractAlgebra
+using SymEngine
 import AbstractAlgebra: YoungTableau
 import SparseArrays: spzeros, SparseMatrixCSC
-using SymEngine: expand  # Changed this line
+import SymEngine: expand  # Changed this line
 #greet() = print("Hello World!")
 include("generic/GTPatterns.jl")
 include("generic/YoungTabs.jl")
