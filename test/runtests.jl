@@ -19,7 +19,7 @@ function es_cero(pol::Basic; ϵ = 10^(-5))
 end
 
 include("internals.jl")
-@testset "van derecho hacia la fisura" begin
+@testset "Number of zero weight states." begin
   solutions = encontrar_prototablones([1, 1, 2, 1, 0], [1, 1, 2, 1, 0])
   @test length(solutions) == 33
   solutions = encontrar_prototablones([2,2,2,0,0,0], [2,2,2,0,0,0])
@@ -37,9 +37,9 @@ end
     @test es_cero(edo_final)
 end
 
-@testset "test con polinomios de Legendre" begin
+@testset "Comparison between Legendre polynomails and D-function" begin
   α1,β1,γ1 = rand(Float64,3)
-  xx=bloquesun(3,1,(α1,β1,γ1))#*bloquesun(3,2,(2.3,.3,.4))
+  xx=bloquesun(3,1,(α1,β1,γ1))
   α2,β2 = rand(Float64,2)
   yy=bloquesun(3,2,(α2,β2,α2))
   α3,β3,γ3 = rand(Float64,3)
@@ -125,7 +125,7 @@ end
     t_8 = YoungTableau([2,1])# edo 69
     fill!(t_8, [1,1,2])
 
-      basura_ejemplo = [
+      mma_states = [
       [
       "-1.0 x[2, 3] x[3, 2] x[3, 3] + x[2, 2] x[3, 3]^2",
       "-1.0 x[2, 3] x[3, 1] x[3, 3] + x[2, 1] x[3, 3]^2",
@@ -211,13 +211,12 @@ end
     bolsa_estados = [ t_1, t_2, t_3, t_4, t_5, t_6, t_7, t_8 ]
     output_test= []
     for (idx,edox) in enumerate(bolsa_estados), (idy,edoy) in enumerate(bolsa_estados)
-      edo_mma = basura_ejemplo[idx][idy] |> mma_to_julia
+      edo_mma = mma_states[idx][idy] |> mma_to_julia
       edo_julia = group_function([2,1,0],edox, edoy) |> expand
       edo_final = expand(edo_mma - edo_julia)
       if !es_cero(edo_final)
         @show edo_mma, edo_julia
       end
-      # @test es_cero(edo_final)
       push!(output_test, es_cero(edo_final))
     end
     @test all(output_test)
@@ -337,7 +336,7 @@ end
     @test all(output_test)
 end
 
-@testset "comparativa immanante" begin
+@testset "Comparisong with immanant" begin
     mat = rand(Haar(2), 3)
     pt_1 = GTPattern([[2,1,0], [2,0],[1]],[1])
     pt_2 = GTPattern([[2,1,0], [1,1],[1]],[1])
@@ -345,7 +344,7 @@ end
     @test suma ≈ immanant(Partition([2,1]), mat)
 end
 
-@testset "comparativa immanante" begin
+@testset "Comparisong with immanant" begin
     part = [2,1,1,0]
     zeroweightstates = findzero(part)
 
@@ -356,7 +355,7 @@ end
     @test isapprox(abs(immanant(Partition(filter(x -> x> 0, part)), mat) -total)^2, 0.0, atol = 10^(-6))
 end
 
-@testset "sum rules 3x3" begin
+@testset "Sum rules 3x3" begin
     welcome = basis_states([2,0,0]);
 
     α1,β1,γ1 = rand(Float64,3)
@@ -373,7 +372,7 @@ end
     @test rate1 ≈ rate2
 end
 
-@testset "sum rules 4x4" begin
+@testset "Sum rules 4x4" begin
     α1,β1,γ1 = rand(Float64,3)
     xx=bloquesun(4,1,(α1,β1,γ1))
     α2,β2 = rand(Float64,2)
@@ -397,7 +396,7 @@ end
     @test rate1 ≈ rate2
 end
 
-@testset "permanente submatriz" begin
+@testset "Comparison with permanent of a submatrix" begin
     α1,β1,γ1 = rand(Float64,3)
     xx=bloquesun(4,1,(α1,β1,γ1))
     α2,β2 = rand(Float64,2)
@@ -420,7 +419,7 @@ end
     @test group_function([3,0,0,0], edox, edoy, mat4) ≈ immanant(Partition([3]), mat4[[1,2,3], [2,2,4]])/sqrt(2)
 end
 
-@testset "simplefactorization explicita" begin
+@testset "Testing labelling for construction of unitary matrices" begin
   α1,β1,γ1 = rand(Float64,3)
   xx=bloquesun(4,1,(α1,β1,γ1))
   α2,β2 = rand(Float64,2)
@@ -436,7 +435,6 @@ end
 
   matsimple = simple([α1,β1,γ1,α2,β2,α3,β3,γ3,α4,β4,α5,β5,α6,β6,γ6], 4)
   matsimple_quotient = simple([α1,β1,γ1,α2,β2,α3,β3,γ3,α4,β4,α5,β5,α6,β6,γ6], 4; quotient = true)
-  #mat =  xx*yy*zz*xx2*yy2*zz2
   mat =  zz2*yy2*xx2*zz*yy*xx 
   mat_quotient =  zz2*yy2*xx2#*zz*yy*xx 
 
@@ -444,7 +442,7 @@ end
   @test norm(matsimple_quotient - mat_quotient) < 10^(-11)
 end
 
-@testset "simplefactorization explicita 3x3" begin
+@testset "Testing labelling for construction of unitary matrices" begin
     α1,β1,γ1 = rand(Float64,3)
     xx=bloquesun(3,1,(α1,β1,γ1))
     α2,β2 = rand(Float64,2)
@@ -452,12 +450,8 @@ end
     α3,β3,γ3 = rand(Float64,3)
     zz=bloquesun(3,1,(α3,β3,γ3))
     mat = simple([α1,β1,γ1, α2,β2, α3,β3,γ3 ], 3)
-    #mat2 = xx*yy*zz;
     mat2 = zz*yy*xx;
     @test norm(mat-mat2) < 10^(-5)
 
-#    matc1 = yy*zz;
-#    matc2 = simple([α1,β1,γ1, α2,β2, α3,β3,γ3 ], 3; quotient = true)
-#    @test norm(matc1-matc2) < 10^(-5)
 end
 
