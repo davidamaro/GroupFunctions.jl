@@ -329,63 +329,212 @@ end
 # 
 # function encontrar_prototablones(rowsum::Vector{Int}, colsum::Vector{Int}; verbose::Bool = false, num_sol::Int = 1000)
 # function find_all_solutions(A::Vector{Int}, B::Vector{Int})
+"""
+Function to check if two matrices are equal
+"""
+function matrices_equal(M1::Matrix{Int}, M2::Matrix{Int})
+    return all(M1 .== M2)
+end
+
+"""
+Function to check if a matrix is already in our solutions
+"""
+function is_new_solution(M::Matrix{Int}, solutions::Vector{Matrix{Int}})
+    for sol in solutions
+        if matrices_equal(M, sol)
+            return false
+        end
+    end
+    return true
+end
+
+"""
+Generate systematic objective coefficients
+"""
+function generate_objective_coefficients(n::Int, phase::Int)
+    coeffs = zeros(Int, n, n)
+    if phase == 1
+        # Maximize values in upper triangle
+        for i in 1:n, j in i:n
+            coeffs[i,j] = 1
+        end
+    elseif phase == 2
+        # Maximize values in lower triangle
+        for i in 1:n, j in 1:i
+            coeffs[i,j] = 1
+        end
+    elseif phase == 3
+        # Maximize diagonal
+        for i in 1:n
+            coeffs[i,i] = 1
+        end
+    elseif phase == 4
+        # Maximize anti-diagonal
+        for i in 1:n
+            coeffs[i,n-i+1] = 1
+        end
+    else
+        # Use different patterns for subsequent phases
+        shift = (phase - 4) % n
+        for i in 1:n
+            j = mod1(i + shift, n)
+            coeffs[i,j] = 1
+        end
+    end
+    return coeffs
+end
+
+"""
+Find all possible solutions to the matrix balancing problem
+"""
+# function encontrar_prototablones(A::Vector{Int}, B::Vector{Int})
+# function encontrar_prototablones(A::Vector{Int}, B::Vector{Int})
 function encontrar_prototablones(A::Vector{Int}, B::Vector{Int})
-    solutions = []
+    if length(A) != length(B) || sum(A) != sum(B)
+        println("No solution exists: row sums must equal column sums")
+        return []
+    end
+    
     n = length(A)
+    solutions = []
     
-    # Create base model
-    model = Model(HiGHS.Optimizer)
-    set_silent(model)
-    
-    # Variables
-    @variable(model, M[1:n, 1:n] >= 0, Int)
-    
-    # Base constraints
-    for i in 1:n
-        @constraint(model, sum(M[i,:]) == A[i])
-    end
-    for j in 1:n
-        @constraint(model, sum(M[:,j]) == B[j])
-    end
-    
-    # Keep finding solutions until no more exist
-    prev_size = -1
-    current_size = 0
-    
-    while current_size > prev_size
+    function solve_with_fixed_values(fixed_values)
+        model = Model(HiGHS.Optimizer)
+        set_silent(model)
+        
+        # Variables
+        @variable(model, M[1:n, 1:n] >= 0, Int)
+        
+        # Apply fixed values
+        for ((i,j), val) in fixed_values
+            @constraint(model, M[i,j] == val)
+        end
+        
+        # Basic constraints
+        for i in 1:n
+            @constraint(model, sum(M[i,:]) == A[i])
+        end
+        for j in 1:n
+            @constraint(model, sum(M[:,j]) == B[j])
+        end
+        
         optimize!(model)
         
-        if termination_status(model) != MOI.OPTIMAL
-            break
+        if termination_status(model) == OPTIMAL
+            return round.(Int, value.(M))
+        else
+            return nothing
         end
-        
-        # Get current solution
-        current_sol = round.(Int, value.(M))
-        push!(solutions, copy(current_sol))
-        
-        # Update sizes for termination check
-        prev_size = current_size
-        current_size = length(solutions)
-        
-        # Add constraint to exclude current solution
-        constraint_expr = AffExpr(0.0)
-        for i in 1:n, j in 1:n
-            if current_sol[i,j] == 0
-                # For zero elements, count how many become non-zero
-                constraint_expr += M[i,j]
-            else
-                # For non-zero elements, count elements that decrease
-                constraint_expr += (current_sol[i,j] - M[i,j])/(2*current_sol[i,j])
-                # Count elements that increase
-                constraint_expr += (M[i,j] - current_sol[i,j])/(2*current_sol[i,j])
-            end
-        end
-        @constraint(model, constraint_expr >= 1)
     end
     
-    println("Found $(length(solutions)) total solutions")
+    function explore_solutions(fixed_values=Dict())
+        sol = solve_with_fixed_values(fixed_values)
+        if sol === nothing
+            return
+        end
+        
+        # If we have a complete solution, add it
+        if length(fixed_values) == n*n-1
+            if !any(all(s .== sol) for s in solutions)
+                push!(solutions, copy(sol))
+            end
+            return
+        end
+        
+        # Find next unfixed position
+        next_i, next_j = 1, 1
+        for i in 1:n, j in 1:n
+            if !haskey(fixed_values, (i,j))
+                next_i, next_j = i, j
+                break
+            end
+        end
+        
+        # Try different values for the next position
+        max_val = min(A[next_i], B[next_j])
+        for val in 0:max_val
+            new_fixed = copy(fixed_values)
+            new_fixed[(next_i, next_j)] = val
+            explore_solutions(new_fixed)
+        end
+    end
+    
+    explore_solutions()
     return solutions
 end
+
+    # solutions = Matrix{Int}[]
+    # n = length(A)
+    
+    # # First check if problem is feasible
+    # if sum(A) != sum(B)
+        # println("No solution exists: sum of A ≠ sum of B")
+        # return solutions
+    # end
+    
+    # # Try multiple systematic objective functions
+    # for phase in 1:2n  # Use enough phases to catch all patterns
+        # for direction in [MOI.MIN_SENSE, MOI.MAX_SENSE]  # Try both maximizing and minimizing
+            # # Create new model for each attempt
+            # model = Model(HiGHS.Optimizer)
+            # set_silent(model)
+            
+            # # Variables
+            # @variable(model, M[1:n, 1:n] >= 0, Int)
+            
+            # # Base constraints
+            # for i in 1:n
+                # @constraint(model, sum(M[i,:]) == A[i])
+            # end
+            # for j in 1:n
+                # @constraint(model, sum(M[:,j]) == B[j])
+            # end
+            
+            # # Add constraints to avoid all previous solutions
+            # for sol in solutions
+                # @constraint(model, sum(M[i,j] for i in 1:n, j in 1:n 
+                          # if sol[i,j] == 0) + 
+                          # sum((sol[i,j] - M[i,j]) for i in 1:n, j in 1:n 
+                          # if sol[i,j] > 0) >= 1)
+            # end
+            
+            # # Systematic objective
+            # coeffs = generate_objective_coefficients(n, phase)
+            # @objective(model, direction, 
+                      # sum(coeffs[i,j]*M[i,j] for i in 1:n, j in 1:n))
+            
+            # optimize!(model)
+            
+            # if termination_status(model) == MOI.OPTIMAL
+                # current_sol = round.(Int, value.(M))
+                # if is_new_solution(current_sol, solutions)
+                    # push!(solutions, copy(current_sol))
+                # end
+            # end
+            
+            # # Try also with a perturbed version of the same objective
+            # if !isempty(coeffs)
+                # for k in 1:3  # Try a few perturbations
+                    # perturbed_coeffs = coeffs + rand(-1:1, n, n)
+                    # @objective(model, direction, 
+                              # sum(perturbed_coeffs[i,j]*M[i,j] for i in 1:n, j in 1:n))
+                    
+                    # optimize!(model)
+                    
+                    # if termination_status(model) == MOI.OPTIMAL
+                        # current_sol = round.(Int, value.(M))
+                        # if is_new_solution(current_sol, solutions)
+                            # push!(solutions, copy(current_sol))
+                        # end
+                    # end
+                # end
+            # end
+        # end
+    # end
+    
+    # println("Found $(length(solutions)) total solutions")
+    # return solutions
+# end
 
 
 # function encontrar_prototablones(rowsum::Vector{Int}, colsum::Vector{Int}; verbose::Bool = false, num_sol::Int = 1000)
