@@ -34,14 +34,12 @@ using AbstractAlgebra
 using SymEngine
 import AbstractAlgebra: YoungTableau
 import SparseArrays: spzeros, SparseMatrixCSC
-import SymEngine: expand  # Changed this line
-#greet() = print("Hello World!")
+import SymEngine: expand 
 include("generic/GTPatterns.jl")
 include("generic/YoungTabs.jl")
 include("generic/DF.jl")
 include("generic/PermGroups.jl")
 include("generic/Misc.jl")
-#import GTPattern, basis_states
 export YoungTableau, axialdistance, encontrar_posicion
 export GTPattern, basis_states, siguientepatron, siguientepatron!
 export primero_lexi, StandardYoungTableaux, generar_matriz
@@ -52,4 +50,5 @@ export gtinicial
 export generar_matriz
 export bloquesun, simplefactorization, simple
 export expand
+export julia_to_mma
 end # module

@@ -1,4 +1,29 @@
 export bloquesun, simplefactorization, simple
+export julia_to_mma
+
+function julia_to_mma(symbolic_expression::SymEngine.Basic)
+  expression = string(symbolic_expression)
+      expr = replace(expression, r"u_(\d+)_(\d+)" => s"u[\1,\2]")
+    
+    # Clean up spaces
+    expr = replace(expr, " " => "")
+    
+    # Add spaces around operators
+    expr = replace(expr, "*" => " * ")
+    
+    # Add space after each ) that's followed by a +/-
+    expr = replace(expr, r"\)([+-])" => s") \1")
+    
+    # Add space before + if it's missing
+    expr = replace(expr, r"([^\s])\+" => s"\1 +")
+    
+    # Clean up double spaces
+    expr = replace(expr, r"\s+" => " ")
+    
+    return strip(expr)
+    
+end
+
 
 function bloquesun(tamano::Int64, pos::Int64, angulos::Tuple{Float64,Float64,Float64})
     @assert pos < tamano && pos > 0
