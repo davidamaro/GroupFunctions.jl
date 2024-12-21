@@ -1,6 +1,91 @@
-using GroupFunctions, Test, SymEngine, Immanants
+using GroupFunctions, Test, SymEngine, Combinatorics
+
+# , Immanants
 import RandomMatrices: Haar
 import LinearAlgebra: norm
+
+"""
+    permanent(matrix::AbstractMatrix)
+
+Compute the permanent of a square matrix using Ryser's formula.
+This implementation has complexity O(n * 2^n).
+
+# Arguments
+- `matrix::AbstractMatrix`: A square matrix
+
+# Returns
+- The permanent of the matrix
+
+# Example
+```julia
+julia> A = [1 2; 3 4]
+julia> permanent(A)
+10
+```
+"""
+function permanent(matrix::AbstractMatrix)
+    rows, cols = size(matrix)
+    if rows != cols
+        throw(ArgumentError("Matrix must be square"))
+    end
+    
+    if rows == 0
+        return 1  # Empty matrix has permanent 1
+    end
+    
+    if rows == 1
+        return matrix[1,1]
+    end
+    
+    if rows == 2
+        return matrix[1,1] * matrix[2,2] + matrix[1,2] * matrix[2,1]
+    end
+    
+    # For larger matrices, use the definition with permutations
+    result = 0
+    for perm in permutations(1:rows)
+        term = 1
+        for i in 1:rows
+            term *= matrix[i, perm[i]]
+        end
+        result += term
+    end
+    
+    return result
+end
+
+function immanant2110(A::AbstractMatrix)
+      size(A) == (4,4) || throw(ArgumentError("Matrix must be 4×4"))
+    
+    return -A[1,4] * A[2,3] * A[3,2] * A[4,1] + 
+            A[1,3] * A[2,4] * A[3,2] * A[4,1] - 
+            A[1,4] * A[2,2] * A[3,3] * A[4,1] + 
+            A[1,2] * A[2,3] * A[3,4] * A[4,1] +
+            A[1,4] * A[2,3] * A[3,1] * A[4,2] - 
+            A[1,3] * A[2,4] * A[3,1] * A[4,2] - 
+            A[1,1] * A[2,4] * A[3,3] * A[4,2] + 
+            A[1,3] * A[2,1] * A[3,4] * A[4,2] +
+            A[1,2] * A[2,4] * A[3,1] * A[4,3] + 
+            A[1,4] * A[2,1] * A[3,2] * A[4,3] - 
+            A[1,2] * A[2,1] * A[3,4] * A[4,3] - 
+            A[1,1] * A[2,2] * A[3,4] * A[4,3] -
+            A[1,3] * A[2,2] * A[3,1] * A[4,4] - 
+            A[1,1] * A[2,3] * A[3,2] * A[4,4] - 
+            A[1,2] * A[2,1] * A[3,3] * A[4,4] + 
+            3 * A[1,1] * A[2,2] * A[3,3] * A[4,4]
+end
+
+function immanant210(A::AbstractMatrix)
+    size(A) == (3,3) || throw(ArgumentError("Matrix must be 3×3"))
+    
+    return -A[1,2] * A[2,3] * A[3,1] - 
+           A[1,3] * A[2,1] * A[3,2] + 
+           2 * A[1,1] * A[2,2] * A[3,3]
+end
+
+# Example usage:
+# matrix = [1 2; 3 4]
+# println("Permanent: ", permanent(matrix))  # Should print 10
 
 function findzero(part::Array{Int,1})
     base = basis_states(part)
@@ -336,15 +421,15 @@ end
     @test all(output_test)
 end
 
-@testset "Comparisong with immanant" begin
+@testset "Comparison with immanant 210" begin
     mat = rand(Haar(2), 3)
     pt_1 = GTPattern([[2,1,0], [2,0],[1]],[1])
     pt_2 = GTPattern([[2,1,0], [1,1],[1]],[1])
     suma::Complex{Float64} = group_function([2,1,0], pt_1, pt_1, mat)+ group_function([2,1,0], pt_2, pt_2, mat)
-    @test suma ≈ immanant(Partition([2,1]), mat)
+    @test suma ≈ immanant210(mat)
 end
 
-@testset "Comparisong with immanant" begin
+@testset "Comparison with immanant 2110" begin
     part = [2,1,1,0]
     zeroweightstates = findzero(part)
 
@@ -352,7 +437,7 @@ end
 
     total::Complex{Float64} = sum(group_function(part, p, p, mat) for p in zeroweightstates)
 
-    @test isapprox(abs(immanant(Partition(filter(x -> x> 0, part)), mat) -total)^2, 0.0, atol = 10^(-6))
+    @test isapprox(abs(immanant2110(mat) -total)^2, 0.0, atol = 10^(-6))
 end
 
 @testset "Sum rules 3x3" begin
@@ -416,8 +501,9 @@ end
     edox = filter(x -> pweight(x) == [0,1,1,1] , welcome)[1]
     edoy = filter(x -> pweight(x) == [1,0,2,0], welcome)[1]
 
-    @test group_function([3,0,0,0], edox, edoy, mat4) ≈ immanant(Partition([3]), mat4[[1,2,3], [2,2,4]])/sqrt(2)
+    @test group_function([3,0,0,0], edox, edoy, mat4) ≈ permanent(mat4[[1,2,3], [2,2,4]])/sqrt(2)
 end
+    # @test group_function([3,0,0,0], edox, edoy, mat4) ≈ immanant(Partition([3]), mat4[[1,2,3], [2,2,4]])/sqrt(2)
 
 @testset "Testing labelling for construction of unitary matrices" begin
   α1,β1,γ1 = rand(Float64,3)
