@@ -30,6 +30,7 @@ Pkg.add("GroupFunctions")
 
 ```julia
 julia> using RandomMatrices
+julia> using GroupFunctions
 julia> my_fav_irrep = [2, 1, 0]
 julia> my_fav_matrix = rand(Haar(2), 3)
 julia> my_fav_basis = basis_states(my_fav_irrep)
