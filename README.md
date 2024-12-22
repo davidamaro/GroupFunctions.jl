@@ -47,6 +47,13 @@ Contributions are welcome! Please feel free to submit a Pull Request. A to-do li
 
 Until the code from AbstractAlgebra.jl is removed from this package, the license will align with AbstractAlgebra.jl's.
 
+## References
+
+1. [J Grabmeier and A Kerber, "The evaluation of irreducible polynomial representations of the general linear groups and of the unitary groups over fields of characteristic 0" Acta Appl. Math, 1987](http://dx.doi.org/10.1007/BF00046717)
+2. [A Alex et al, "A numerical algorithm for the explicit calculation of SU(N) and SL(N, C) Clebsch–Gordan coefficients" J. Math. Phys. 2011 ](http://dx.doi.org/10.1063/1.3521562)
+3. [D Amaro-Alcala et al "Sum rules in multiphoton coincidence rates" Phys. Lett. A 2020](http://dx.doi.org/10.1016/j.physleta.2020.126459)
+4. [AbstractAlgebra.jl](https://nemocas.github.io/AbstractAlgebra.jl/stable/)
+
 ## Citation
 
 Pending.
