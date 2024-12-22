@@ -45,7 +45,8 @@ Contributions are welcome! Please feel free to submit a Pull Request. A to-do li
 
 ## License
 
-Until the code from AbstractAlgebra.jl is removed from this package, the license will align with AbstractAlgebra.jl's.
+Until the code from AbstractAlgebra.jl (to deal with Young tableaux) is removed from this package,
+the license will align with AbstractAlgebra.jl's.
 
 ## References
 

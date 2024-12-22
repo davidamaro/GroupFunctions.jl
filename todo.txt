@@ -1,0 +1,8 @@
+Tests
+
+* SU(2) tests
+
+Major changes
+
+* Drop AbstractAlgebra.jl and their YoungTableau support. It is overkill.
+* Remove code remaining from sum rules tests.
