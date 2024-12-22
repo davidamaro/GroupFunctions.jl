@@ -553,3 +553,19 @@ end
   kak = basis_states(irrep)
   @test all(isapprox.(0, [group_function(irrep, x, y, mat) - mat[end-i+1, end-j+1] for (i,x) in enumerate(kak), (j,y) in enumerate(kak)], atol=1e-10))
 end
+
+@testset "Symmetry with respect to hermitian conjugate 210" begin
+  mat = rand(Haar(2),3)
+  invmat = inv(mat)
+  irrep = [2,1,0]
+  kak = basis_states(irrep)
+  @test all(isapprox.(0, [group_function(irrep, x, y, mat) - conj(group_function(irrep, y, x, invmat)) for (i,x) in enumerate(kak), (j,y) in enumerate(kak)], atol=1e-10))
+end
+
+@testset "Symmetry with respect to hermitian conjugate 221" begin
+  mat = rand(Haar(2),3)
+  invmat = inv(mat)
+  irrep = [2,2,1]
+  kak = basis_states(irrep)
+  @test all(isapprox.(0, [group_function(irrep, x, y, mat) - conj(group_function(irrep, y, x, invmat)) for (i,x) in enumerate(kak), (j,y) in enumerate(kak)], atol=1e-10))
+end
