@@ -17,7 +17,7 @@ julia> ] add https://github.com/davidamaro/GroupFunctions.jl
 
 - **Mac**: Use `juliaup`. Installing Julia via `brew` is not recommended.
 - **Linux**: Use the appropriate package manager (e.g., `sudo pacman -S julia`).
-- **Windows**: Use the recommended installer (specific details not provided).
+- **Windows**: Run `winget install julia -s msstore` in your terminal and follow the steps.
 
 ## Usage
 
