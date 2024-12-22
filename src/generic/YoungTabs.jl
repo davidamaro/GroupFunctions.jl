@@ -1,4 +1,3 @@
-#import AbstractAlgebra: YoungTableau
 using AbstractAlgebra
 import Primes: prime
 import LinearAlgebra:  dot, I
@@ -38,7 +37,6 @@ julia> axialdistance(y, 2,4)
 ```
 """
 function axialdistance(Y::AbstractAlgebra.Generic.YoungTableau{Int64}, u::Int64, v::Int64)
-  #fila, columna
   i,j = encontrar_posicion(Y, u)
   k,l = encontrar_posicion(Y, v)
 
@@ -80,7 +78,6 @@ function encontrar_posicion(Y::AbstractAlgebra.Generic.YoungTableau{Int64}, entr
 end
 
 function determinar_coeficiente_irrep_yamanouchi(Y::AbstractAlgebra.Generic.YoungTableau{Int64}, u::Integer)
-  #fila, columna
   v = u - 1
   i,j = encontrar_posicion(Y, u)
   k,l = encontrar_posicion(Y, v)
@@ -176,13 +173,10 @@ julia> generar_matriz(guilty, Perm([1,3,2,4,5]), [3,2])
 function generar_matriz(patrones::Array{AbstractAlgebra.Generic.YoungTableau{Int64},1}, p::Perm, irrep::Array{Int64,1})
     descom_en_trans = descomp_total(p)
     len::Int64 = length(patrones)
-    #mat = I#spzeros(len,len)
     mat::SparseMatrixCSC{Basic,Int64} = spzeros(Basic, len, len)
     @simd for i in 1:len
       @inbounds mat[i,i] = Basic(1)
     end
-    #[mat[i,i] for i in 1:len]
-    #mat::SparseMatrixCSC{Basic}
     for (_,b) in descom_en_trans # a + 1 = b
         mat = generar_matriz(patrones, b, irrep)*mat
     end
@@ -271,10 +265,6 @@ function bloque_yamanouchi(mat::SparseMatrixCSC{Basic,Int64}, lista_tablones::Ar
         mat[i,k] = sqrt(1-((Basic( axialdistance(tab_1,m, m-1) ))^(-2)))
         mat[k,i] = sqrt(1-((Basic( axialdistance(tab_1,m, m-1) ))^(-2)))
         mat[k,k] = ((Basic( axialdistance(tab_1,m, m-1) ))^(-1))
-#        mat[i,i] = -((axialdistance(tab_1,m, m-1))^(-1))
-#        mat[i,k] = sqrt(1-((axialdistance(tab_1,m, m-1))^(-2)))
-#        mat[k,i] = sqrt(1-((axialdistance(tab_1,m, m-1))^(-2)))
-#        mat[k,k] = ((axialdistance(tab_1,m, m-1))^(-1))
     end
     mat
 end
@@ -390,7 +380,6 @@ function content(y::AbstractAlgebra.Generic.YoungTableau{Int64}, λ::Irrep)
     [count(y -> x == y,nuevo_relleno) for x in 1:len]
 end
 
-#function content(p::YoungTableau)
 function content(p::AbstractAlgebra.Generic.YoungTableau{Int64})
     relleno = p.fill
     len = length(relleno)
@@ -484,19 +473,6 @@ Esto es debido a la forman en la que Julia recorre matrices.
 2
 2
 """
-# function calcula_proto_permutacion(proto::Array{Int64,1})
-    # len = length(proto) |> sqrt |> Int
-    # new_proto = reshape(proto, len, len)'
-
-    # mult = 0
-    # yard = Array{Int64,1}[]
-    # for i in 1:len
-        # densidad = vcat(fill.(1:len, new_proto[mult*len + 1:len*(mult + 1)])...)
-        # push!(yard, densidad)
-        # mult += 1
-    # end
-    # vcat(yard...)
-# end
 function calcula_proto_permutacion(proto::AbstractArray{Int64})
     if ndims(proto) == 1
         len = length(proto) |> sqrt |> Int
@@ -568,7 +544,6 @@ function genera_funcion(patron_semi::AbstractAlgebra.Generic.YoungTableau{Int64}
     dd = Dict{Int64, Int64}()
 
     for (va, viene) in parejas
-      #dd[viene] = va
       dd[va] = viene
     end
     dd

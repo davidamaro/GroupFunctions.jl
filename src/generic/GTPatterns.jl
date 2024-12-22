@@ -50,7 +50,7 @@ function Base.show(io::IO, ::MIME"text/plain", G::GTPattern)
             cont += 1
         elseif between
             pattern *= repeat(" ", cont - 1)
-            pattern *= "╳\n"
+            pattern *= "〉\n"
             between = false
         else
             if !between && cont > mitad
@@ -66,61 +66,89 @@ function Base.show(io::IO, ::MIME"text/plain", G::GTPattern)
     print(io, pattern)
 end
 
-function primera!(f::Fila, a::GTPattern)
-    if length(a.ultima_fila) == 0
-        a.ultima_fila = f
-    end
-    push!(a.filas, f)
-    a
+function primera!(row::Fila, pattern::GTPattern)
+    isempty(pattern.ultima_fila) && (pattern.ultima_fila = row)
+    push!(pattern.filas, row)
+    return pattern
 end
 
-function determinar_siguientes(f::Fila)
-    siguientes = UnitRange{Int64}[]
-    for i in 1:length(f)-1
-        push!(siguientes, f[i+1]:f[i] )
+function determinar_siguientes(row::Fila)
+    # Pre-allocate the array with known size
+    n_ranges = length(row) - 1
+    ranges = Vector{UnitRange{Int64}}(undef, n_ranges)
+    
+    # Fill ranges directly without push!
+    @inbounds for i in 1:n_ranges
+        ranges[i] = row[i+1]:row[i]
     end
-    product(siguientes...)
+    
+    return product(ranges...)
 end
 
-function generar_siguiente_fila(tab::GTPattern)
-    siguientes = determinar_siguientes(tab.ultima_fila)
-
-    lista_patrones = GTPattern[]
-    for sig in siguientes
-        tmp = deepcopy(tab)
-        tmp.ultima_fila = collect(sig)
-        push!(tmp.filas, collect(sig))
-
-        push!(lista_patrones, tmp)
+function generar_siguiente_fila(pattern::GTPattern)
+    # Pre-calculate size for allocation
+    next_possibilities = determinar_siguientes(pattern.ultima_fila)
+    patterns = Vector{GTPattern}(undef, length(collect(next_possibilities)))
+    
+    # Fill patterns array directly
+    for (idx, next_row) in enumerate(next_possibilities)
+        next_row_vec = collect(next_row)
+        new_pattern = GTPattern(
+            [pattern.filas..., next_row_vec],
+            next_row_vec
+        )
+        patterns[idx] = new_pattern
     end
-    lista_patrones
+    
+    return patterns
 end
 
-function generar_siguiente_fila(tabs::Array{GTPattern,1})
-    lista_patrones = GTPattern[]
-    for tab in tabs
-        siguientes = determinar_siguientes(tab.ultima_fila)
-
-
-        for sig in siguientes
-            tmp = deepcopy(tab)
-            tmp.ultima_fila = collect(sig)
-            push!(tmp.filas, collect(sig))
-
-            push!(lista_patrones, tmp)
+function generar_siguiente_fila(patterns::Vector{GTPattern})
+    # Calculate total size for pre-allocation
+    total_patterns = sum(pattern -> 
+        length(collect(determinar_siguientes(pattern.ultima_fila))), 
+        patterns
+    )
+    
+    result_patterns = Vector{GTPattern}(undef, total_patterns)
+    current_idx = 1
+    
+    # Process each pattern
+    for pattern in patterns
+        next_possibilities = determinar_siguientes(pattern.ultima_fila)
+        
+        # Add new patterns directly to pre-allocated array
+        for next_row in next_possibilities
+            next_row_vec = collect(next_row)
+            new_pattern = GTPattern(
+                [pattern.filas..., next_row_vec],
+                next_row_vec
+            )
+            result_patterns[current_idx] = new_pattern
+            current_idx += 1
         end
     end
-    lista_patrones
+    
+    return result_patterns
 end
 
-function basis_states(λ::Fila)
-    ejemplo = GTPattern([], [])
-    primera!(λ, ejemplo)
-    multitud_prueba = generar_siguiente_fila(ejemplo);
-    for _ in 3:length(λ)
-        multitud_prueba = generar_siguiente_fila(multitud_prueba)
+function basis_states(weight::Fila)
+    # Initialize with first pattern
+    initial_pattern = GTPattern([], [])
+    primera!(weight, initial_pattern)
+    
+    # Generate patterns iteratively
+    current_patterns = generar_siguiente_fila(initial_pattern)
+    
+    # Pre-calculate iterations needed
+    iterations = length(weight) - 2
+    
+    # Generate subsequent patterns
+    @inbounds for _ in 1:iterations
+        current_patterns = generar_siguiente_fila(current_patterns)
     end
-    multitud_prueba
+    
+    return current_patterns
 end
 
 ##############################################################################
@@ -129,45 +157,76 @@ end
 #
 ##############################################################################
 
-function obtener_diferencias_patron(tab::GTPattern,numerofila::Int64)
+function obtener_diferencias_patron(tab::GTPattern, numerofila::Int64)
     filas = tab.filas
-    if numerofila > length(filas)
-        throw(BoundsError("te pasas"))
-    end
-    longitud = length(filas) + 1
-
-    diferencias = Int64[0]
-    max = 0
-    for fil in reverse(filas[1:longitud - numerofila])
-        diferencia = fil[numerofila] - max
+    n_filas = length(filas)
+    
+    # Input validation with descriptive error
+    numerofila > n_filas && throw(BoundsError("Row number $numerofila exceeds pattern size $n_filas"))
+    
+    # Calculate the relevant rows we need to process
+    relevant_rows = n_filas - numerofila + 1
+    
+    # Pre-allocate the differences array with known size
+    diferencias = zeros(Int64, relevant_rows + 1)
+    
+    # Process rows in reverse order more efficiently
+    max_value = 0
+    for (idx, fila) in enumerate(view(filas[1:relevant_rows], reverse(1:relevant_rows)))
+        current_value = fila[numerofila]
+        diferencia = current_value - max_value
+        
         if diferencia > 0
-            push!(diferencias, diferencia)
-            max = fil[numerofila]
-        else
-            push!(diferencias, 0)
+            diferencias[idx + 1] = diferencia
+            max_value = current_value
         end
     end
-    contenido = Int64[]
-    i = numerofila
-    for punto in diferencias[2:end]
-        for _ in 1:punto
-            push!(contenido, i)
+    
+    # Pre-calculate final array size to avoid resizing
+    total_elements = sum(diferencias)
+    contenido = Vector{Int64}(undef, total_elements)
+    
+    # Fill the content array more efficiently
+    pos = 1
+    current_value = numerofila
+    
+    # Process all differences except the first (which is always 0)
+    for diff_count in view(diferencias, 2:length(diferencias))
+        if diff_count > 0
+            # Use range assignment instead of repeated push!
+            range_end = pos + diff_count - 1
+            contenido[pos:range_end] .= current_value
+            pos = range_end + 1
         end
-        i += 1
+        current_value += 1
     end
-    contenido
+    
+    return contenido
 end
 
 function prematuro_pesos(tab::GTPattern)
-    totales = [sum(x) for x in tab.filas]
-    append!(totales,0)
-    final = Int[]
-    for i in (1:length(tab.filas)-1)
-        push!(final, totales[i]-totales[i+1])
+    n_filas = length(tab.filas)
+    
+    # Early return for single-row patterns
+    n_filas == 1 && return true
+    
+    # Calculate row sums efficiently
+    totales = Vector{Int}(undef, n_filas + 1)
+    
+    # Fill totals array with row sums
+    @inbounds for i in 1:n_filas
+        totales[i] = sum(tab.filas[i])
     end
-    all(x -> x == 1, final)
+    totales[end] = 0  # Last element is always 0
+    
+    # Check if differences between consecutive elements are all 1
+    # Using direct array indexing instead of creating a new array
+    @inbounds for i in 1:n_filas-1
+        totales[i] - totales[i+1] != 1 && return false
+    end
+    
+    return true
 end
-
 
 @doc Markdown.doc"""
 > Custom `isvalid` for GTPattern
@@ -189,84 +248,104 @@ julia> isvalid(t)
 """
 function isvalid(x::GTPattern)
     rows = x.filas
-    for mayor in 1:length(rows)-1
-        arriba = rows[mayor]
-        abajo = rows[mayor+1]
+    n_rows = length(rows)
+    
+    # Early return for single-row patterns
+    n_rows == 1 && return true
+    
+    # Vectorized comparison instead of nested loops
+    for i in 1:n_rows-1
+        upper = rows[i]
+        lower = rows[i+1]
         
-        for (i,px) in enumerate(abajo)
-            if !(px <= arriba[i] && px >= arriba[i+1])
-                
-                return false
-            end
+        # Check if any element violates the GT pattern conditions
+        # Using broadcasting for element-wise comparison
+        if any(!(lower[j] <= upper[j] && lower[j] >= upper[j+1]) 
+               for j in eachindex(lower))
+            return false
         end
     end
-    true
+    return true
 end
 
 function siguientepatron!(x::GTPattern)
-    if !isnothing(disminuible(x))
-        fila, col = disminuible(x)
-    else
-        return nothing
+    dim_result = disminuible(x)
+    isnothing(dim_result) && return nothing
+    
+    row, col = dim_result
+    rows = x.filas
+    
+    # Decrease the value at the found position
+    rows[row][col] -= 1
+    
+    # Update subsequent elements in the current row
+    copyto!(rows[row], 1, rows[row-1], 1, col-1)
+    
+    # Update subsequent rows
+    for next_row in row+1:length(rows)
+        copyto!(rows[next_row], rows[next_row-1])
     end
-
-    x.filas[fila][col] -= 1
-
-    for j in 1:col-1
-        x.filas[fila][j] = x.filas[fila-1][j]
-    end
-
-
-    for fil in fila+1:length(x.filas)
-        for co in 1:length(x.filas[fil])
-            x.filas[fil][co] = x.filas[fil-1][co]
-        end
-    end
-    x
+    
+    return x
 end
 
 function siguientepatron(x::GTPattern)
-    fila, col = disminuible(x)
+    dim_result = disminuible(x)
+    isnothing(dim_result) && return nothing
+    
+    row, col = dim_result
     rows = deepcopy(x.filas)
-
-    rows[fila][col] -= 1
-
-    for j in col+1:length(rows[fila])
-        rows[fila][j] = rows[fila-1][j]
+    
+    rows[row][col] -= 1
+    
+    # Use copyto! for better performance
+    copyto!(rows[row], col+1, rows[row-1], col+1, length(rows[row])-col)
+    
+    # Update subsequent rows efficiently
+    for next_row in row+1:length(rows)
+        copyto!(rows[next_row], rows[next_row-1])
     end
-
-
-    for fil in fila+1:length(rows)
-        for co in 1:length(rows[fil])
-
-            rows[fil][co] = rows[fil-1][co]
-        end
-    end
-    GTPattern(rows,rows[end])
+    
+    return GTPattern(rows, rows[end])
 end
 
 function disminuible(x::GTPattern)
     rows = deepcopy(x.filas)
-    for j in length(rows):-1:2
-        for i in eachindex(rows[j])
-            if rows[j][i] == 0
-                continue
-            end
-            rows[j][i] -= 1
+    
+    # Iterate from bottom to top
+    for row in length(rows):-1:2
+        row_vals = rows[row]
+        
+        # Check each position in the current row
+        for col in eachindex(row_vals)
+            row_vals[col] == 0 && continue
+            
+            # Try decreasing the current value
+            row_vals[col] -= 1
+            
+            # Check if the resulting pattern is valid
             if isvalid(GTPattern(rows, rows[end]))
-                return j,i
-            else
-                rows[j][i] += 1
+                return row, col
             end
+            
+            # Restore the value if invalid
+            row_vals[col] += 1
         end
     end
+    
     return nothing
 end
 
 function gtinicial(irrep::Fila)
-    filas = Array{Int64,1}[irrep]
-    while length(filas[end]) > 1
-        push!(filas, filas[end][1:end-1])
+    n = length(irrep)
+    # Pre-allocate array with known size
+    rows = Vector{Vector{Int64}}(undef, n)
+    rows[1] = irrep
+    
+    # Build subsequent rows more efficiently
+    for i in 2:n
+        rows[i] = rows[i-1][1:end-1]
     end
-    GTPattern(filas, filas[end])
+    
+    return GTPattern(rows, rows[end])
 end

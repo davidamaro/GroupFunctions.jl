@@ -12,7 +12,6 @@ true
 """
 function descomp_total(original::Perm)
     lista_ciclos = cycles(original)
-    #@show lista_ciclos
     completa = Tuple{Int64,Int64}[]
     for elem in lista_ciclos
         descomponer_ciclo!(elem, completa)
@@ -31,15 +30,38 @@ function descomponer_ciclo!(ciclo::SubArray{Int64,1,Array{Int64,1},Tuple{UnitRan
     end
 end
 
-function individual!(tranposicion::Tuple{Int64,Int64},lista::Array{Tuple{Int64,Int64},1})
-    j,k = tranposicion
+# function individual!(tranposicion::Tuple{Int64,Int64},lista::Array{Tuple{Int64,Int64},1})
+    # j,k = tranposicion
+    # if k < j
+      # j,k = k,j
+    # end
+    # for i in k:-1:j+1
+        # push!(lista, (i-1,i))
+    # end
+    # for i in j+1:k-1
+        # push!(lista, (i, i+1))
+    # end
+# end
+function individual!(tranposicion::Tuple{Int64,Int64}, lista::Array{Tuple{Int64,Int64},1})
+    j, k = tranposicion
     if k < j
-      j,k = k,j
+        j, k = k, j
     end
-    for i in k:-1:j+1
-        push!(lista, (i-1,i))
-    end
-    for i in j+1:k-1
-        push!(lista, (i, i+1))
+    
+    # Pre-allocate space for all upcoming pushes
+    needed_capacity = 2(k - j)
+    sizehint!(lista, length(lista) + needed_capacity)
+    
+    # Combine both loops into a single pass with @inbounds for performance
+    @inbounds begin
+        # First pass (k down to j+1)
+        for i in k:-1:j+1
+            push!(lista, (i-1, i))
+        end
+        
+        # Second pass (j+1 up to k-1)
+        for i in j+1:k-1
+            push!(lista, (i, i+1))
+        end
     end
 end
