@@ -1,7 +1,7 @@
 import Combinatorics: permutations
 import LinearAlgebra: transpose
 import StaticArrays: SArray
-export group_function, mma_to_julia, @mma
+export group_function, mma_to_julia
 export zweight, pweight
 export encontrar_prototablones
 
@@ -544,9 +544,9 @@ function group_function(λ::Irrep, tab_u::YTableau, tab_v::YTableau, mat::Array{
     pol*inversos
 end
 
-macro mma_str(s)
-  mma_to_julia(s)
-end
+# macro mma_str(s)
+  # mma_to_julia(s)
+# end
 
 @doc Markdown.doc"""
     mma_to_julia(s::String)
