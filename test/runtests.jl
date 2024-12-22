@@ -541,3 +541,15 @@ end
 
 end
 
+@testset "Identity irrep 100 for U(3)" begin
+  mat = rand(Haar(2),3)
+  kak = basis_states([1,0,0])
+  @test all(isapprox.(0, [group_function([1,0,0], x, y, mat) - mat[end-i+1, end-j+1] for (i,x) in enumerate(kak), (j,y) in enumerate(kak)], atol=1e-10))
+end
+
+@testset "Identity irrep 1000 for U(4)" begin
+  mat = rand(Haar(2),4)
+  irrep = [1,0,0,0]
+  kak = basis_states(irrep)
+  @test all(isapprox.(0, [group_function(irrep, x, y, mat) - mat[end-i+1, end-j+1] for (i,x) in enumerate(kak), (j,y) in enumerate(kak)], atol=1e-10))
+end
