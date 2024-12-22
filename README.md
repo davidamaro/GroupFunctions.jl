@@ -11,13 +11,6 @@ Alternatively, you can install the package directly from the repository:
 user@machine:~$ mkdir new_code && cd new_code
 user@machine:~$ julia --project=.
 julia> ] add https://github.com/davidamaro/GroupFunctions.jl
-julia> ] test
-```
-
-```julia
-using Pkg
-Pkg.add("GroupFunctions")
-# Add other required packages similarly
 ```
 
 ### If Julia is not installed
@@ -29,7 +22,7 @@ Pkg.add("GroupFunctions")
 ## Usage
 
 ```julia
-julia> using RandomMatrices
+julia> using RandomMatrices # You may be asked to install it. Just answer yes.
 julia> using GroupFunctions
 julia> my_fav_irrep = [2, 1, 0]
 julia> my_fav_matrix = rand(Haar(2), 3)
