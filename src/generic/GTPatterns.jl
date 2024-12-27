@@ -14,18 +14,26 @@ using Base.Iterators
 
 @doc Markdown.doc"""
 
-  GTPattern(Array of arrays, Array)
+  GTPattern(array_of_arrays)
 
-# Examples:
+# Example:
 
 ```julia
-julia> GTPattern([[2,1,0],[2,1],[2]],[2])
+julia> GTPattern([[2,1,0],[2,1],[2]])
+│ 2 1 0 ╲
+│ 2 1    〉
+│ 2     ╱
 ```
 """
 mutable struct GTPattern
     filas::Array{Array{Int64,1},1}
     ultima_fila::Array{Int64,1}
 end
+
+function GTPattern(filas::Array{Array{Int64,1},1})
+  return GTPattern(filas, filas[end])
+end
+
 const Fila = Array{Int64,1}
 
 function Base.show(io::IO, ::MIME"text/plain", G::GTPattern)

@@ -1,6 +1,15 @@
 push!(LOAD_PATH, "../src/")
 using Documenter, GroupFunctions
-makedocs(sitename="GroupFunctions documentation")
+makedocs(sitename="GroupFunctions documentation",
+    pages = [
+        "Getting started" => "index.md",
+        "Tutorials" => ["Sum rules"=>"sum_rules.md"],
+        "Documentation" => "documentation.md",
+        "Index" => "docstrings.md"],
+    format = Documenter.HTML(
+                             assets = ["assets/favicon.ico"]
+    ),
+        )
 deploydocs(
-    repo = "github.com/davidamaro/GroupFunctions.jl.git",
+    repo = "github.com/davidamaro/GroupFunctions.jl.git"
 )
