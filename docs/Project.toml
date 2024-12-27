@@ -1,0 +1,9 @@
+[deps]
+AbstractAlgebra = "c3fe647b-3220-5bb0-a1ea-a7954cac585d"
+Combinatorics = "861a8166-3701-5b0c-9a16-15d98fcdc6aa"
+Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
+HiGHS = "87dc4568-4c63-4d18-b0c0-bb2238e4078b"
+JuMP = "4076af6c-e467-56ae-b986-b466b2749572"
+Primes = "27ebfcd6-29c5-5fa9-bf4b-fb8fc14df3ae"
+StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
+SymEngine = "123dc426-2d89-5057-bbad-38513e3affd8"
