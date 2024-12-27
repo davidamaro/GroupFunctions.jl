@@ -1,3 +1,4 @@
+[![](https://img.shields.io/badge/docs-dev-blue.svg)](https://davidamaro.github.io/GroupFunctions.jl/dev)
 # Getting started
 
 Julia package to compute entries of the irreducible representations of the
