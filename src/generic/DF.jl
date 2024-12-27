@@ -286,11 +286,10 @@ end
 
 
 @doc Markdown.doc"""
-  group_function[lista tablones standard, tab semi U, tab semi V]
-> Return the size of the vector which represents the partition.
+    group_function(λ::Irrep, tu::YoungTableau, tv::YoungTableau)
+> Returns the _symbolic_ group function corresponding to irrep `λ` and Young tableaux
+> `tu` and `tv`.
 
-# Examples:
-```jldoctest; setup = :(using AbstractAlgebra)
 # Example:
 ```julia
 julia> t = YoungTableau([2,1]); fill!(t, [1,2,3]);
@@ -308,7 +307,7 @@ Arguments:
 - `verbose::Bool`: Flag for detailed output (default: false)
 
 Returns:
-- `Basic`: Computed polynomial expression
+- `Complex`: Group function evaluated
 
 Notes:
 - Uses SymEngine for symbolic computation
@@ -359,7 +358,7 @@ end
 
 @doc Markdown.doc"""
     group_function(λ::Irrep, tu::GTPattern, tv::GTPattern)
-> Return the _symbolic_ group function corresponding to irrep `λ` and GT patterns
+> Returns the _symbolic_ group function corresponding to irrep `λ` and GT patterns
 > `tu` and `tv`.
 
 # Example:
@@ -443,7 +442,7 @@ end
 
 @doc Markdown.doc"""
     group_function(λ::Irrep, tu::GTPattern, tv::GTPattern, mat::Array{Complex{Float64},2})
-> Return the _numeric_ group function, for an SU(n) member `mat`, corresponding to irrep `λ` and a pair of GT patterns
+> Returns the _numeric_ group function, for an SU(n) member `mat`, corresponding to irrep `λ` and a pair of GT patterns
 > `tu` and `tv`.
 
 ```julia
@@ -495,7 +494,7 @@ end
 
 @doc Markdown.doc"""
     group_function(λ::Irrep, tu::GTPattern, tv::GTPattern, mat::Array{Complex{Float64},2})
-> Return the _numeric_ group function, for an SU(n) member `mat`, corresponding to irrep `λ` and STYT
+> Returns the _numeric_ group function, for an SU(n) member `mat`, corresponding to irrep `λ` and STYT
 > `tu` and `tv`.
 
 # Example:
