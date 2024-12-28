@@ -3,7 +3,8 @@ using Documenter, GroupFunctions
 makedocs(sitename="GroupFunctions documentation",
     pages = [
         "Getting started" => "index.md",
-        "Tutorials" => ["Sum rules"=>"sum_rules.md"],
+        "Tutorials" => ["Basis states" => "states.md",
+                        "Sum rules"=>"sum_rules.md"],
         "Documentation" => "documentation.md",
         "Index" => "docstrings.md"],
     format = Documenter.HTML(

@@ -5,13 +5,10 @@ Julia package to compute entries of the irreducible representations of the
 unitary group (D-functions or group functions).
 It supports both numerical and symbolical group functions.
 
-```@contents
-```
-
 ## [Documentation](https://davidamaro.github.io/GroupFunctions.jl/dev/)
 ## Installation
 
-### If Julia is already installed
+### Julia is already installed
 Alternatively, you can install the package directly from the repository:
 
 ```console
@@ -20,7 +17,7 @@ user@machine:~$ julia --project=.
 julia> ] add https://github.com/davidamaro/GroupFunctions.jl
 ```
 
-### If Julia is not installed
+### Getting Julia
 
 - **Mac**: Use `juliaup`. Installing Julia via `brew` is not recommended.
 - **Linux**: Use the appropriate package manager (e.g., `sudo pacman -S julia`).

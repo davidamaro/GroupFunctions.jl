@@ -5,7 +5,7 @@ A Julia library to compute D-functions, which are entries of the irreducible rep
 
 ## Installation
 
-### If Julia is already installed
+### Julia is already installed
 Alternatively, you can install the package directly from the repository:
 
 ```console
@@ -14,7 +14,7 @@ user@machine:~$ julia --project=.
 julia> ] add https://github.com/davidamaro/GroupFunctions.jl
 ```
 
-### If Julia is not installed
+### Installing Julia
 
 - **Mac**: Use `juliaup`. Installing Julia via `brew` is not recommended.
 - **Linux**: Use the appropriate package manager (e.g., `sudo pacman -S julia`).
@@ -38,7 +38,7 @@ julia> # Translate the symbolic D-function for use in Mathematica
 julia> julia_to_mma(output)
 ```
 
-For more examples, see the file `test/runtests.jl`.
+For more examples, see the "Tutorials" section in the [documentation](https://davidamaro.github.io/GroupFunctions.jl/dev/).
 
 ## Contributing
 
