@@ -25,6 +25,17 @@ function julia_to_mma(symbolic_expression::SymEngine.Basic)
 end
 
 
+@doc Markdown.doc"""
+    bloquesun(size::Int64, position::Int64, angles::Tuple{Float64,Float64,Float64})
+> Computes the SU(2) matrix using `angles` an embeds it into a `size` times `size` matrix.
+
+# Example:
+
+```julia
+α5,β5 = rand(Float64,2)
+yy2=bloquesun(4,2,(α5,β5,α5))
+```
+"""
 function bloquesun(tamano::Int64, pos::Int64, angulos::Tuple{Float64,Float64,Float64})
     @assert pos < tamano && pos > 0
 

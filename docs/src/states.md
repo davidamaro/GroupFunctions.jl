@@ -17,7 +17,7 @@ c_{2,0} & &
 
 The betweenness condition imposes the requirement: 
 ```math
-c_{i-1,j} \leq c_{i,j} \leq c_{i-1,j+1}.
+c_{i-1,j} \geq c_{i,j} \geq c_{i-1,j+1}.
 ```
 
 

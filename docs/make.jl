@@ -4,7 +4,9 @@ makedocs(sitename="GroupFunctions documentation",
     pages = [
         "Getting started" => "index.md",
         "Tutorials" => ["Basis states" => "states.md",
-                        "Sum rules"=>"sum_rules.md"],
+                        "Sum rules"=>"sum_rules.md",
+                        "Immanants"=>"immanants.md",
+                       ],
         "Documentation" => "documentation.md",
         "Index" => "docstrings.md"],
     format = Documenter.HTML(
