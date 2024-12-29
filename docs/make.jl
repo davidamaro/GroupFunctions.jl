@@ -10,7 +10,8 @@ makedocs(sitename="GroupFunctions documentation",
         "Documentation" => "documentation.md",
         "Index" => "docstrings.md"],
     format = Documenter.HTML(
-                             assets = ["assets/favicon.ico"]
+                             assets = ["assets/favicon.ico"],
+                             sidebar_sitename=false
     ),
         )
 deploydocs(

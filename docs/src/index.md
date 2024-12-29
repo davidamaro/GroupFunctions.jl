@@ -1,3 +1,4 @@
+[![Build Status](https://github.com/davidamaro/GroupFunctions.jl/actions/workflows/CI.yml/badge.svg?branch=master)](https://github.com/davidamaro/GroupFunctions.jl/actions/workflows/CI.yml?query=branch%3Amaster)
 [![](https://img.shields.io/badge/docs-dev-blue.svg)](https://davidamaro.github.io/GroupFunctions.jl/dev)
 # Getting started
 
@@ -12,9 +13,11 @@ It supports both numerical and symbolical group functions.
 Alternatively, you can install the package directly from the repository:
 
 ```console
-user@machine:~$ mkdir new_code && cd new_code
+user@machine:~$ mkdir new_code 
+user@machine:~$ cd new_code
 user@machine:~$ julia --project=.
-julia> ] add https://github.com/davidamaro/GroupFunctions.jl
+julia> # here you need to press the character `]`; the prompt turns blue
+pkg > add https://github.com/davidamaro/GroupFunctions.jl
 ```
 
 ### Getting Julia
