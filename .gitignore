@@ -1,2 +1,8 @@
-docs/build
-Manifest.toml
+*.jl.cov
+*.jl.*.cov
+*.jl.mem
+/Manifest.toml
+/deps/deps.jl
+/docs/build
+/docs/Manifest.toml
+/test/coverage/Manifest.toml

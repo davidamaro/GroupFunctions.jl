@@ -61,3 +61,6 @@ the license will align with AbstractAlgebra.jl's.
 
 Pending.
 
+[![build](https://github.com/davidamaro/GroupFunctions.jl/workflows/CI/badge.svg)](https://github.com/davidamaro/GroupFunctions.jl/actions?query=workflow%3ACI)
+[![Documentation](https://img.shields.io/badge/docs-stable-blue.svg)](https://davidamaro.github.io/GroupFunctions.jl/stable)
+[![Documentation](https://img.shields.io/badge/docs-master-blue.svg)](https://davidamaro.github.io/GroupFunctions.jl/dev)
