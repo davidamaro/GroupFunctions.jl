@@ -51,6 +51,13 @@ end
 
 const Row = Array{Int64,1}
 
+"""
+    Base.show(io::IO, ::MIME"text/plain", G::GTPattern)
+
+Pretty-print a `GTPattern` as a triangular diagram with slashes indicating
+the GT interlacing structure.
+#TODO make them centered.
+"""
 function Base.show(io::IO, ::MIME"text/plain", G::GTPattern)
     list_of_rows = G.rows
     pattern = ""
@@ -141,6 +148,12 @@ function determine_next_row(pattern::GTPattern)
     return patterns
 end
 
+"""
+    determine_next_row(patterns::Vector{GTPattern})
+
+Given a collection of GT patterns, extend each by one row in all valid ways.
+Returns a flat vector containing every resulting `GTPattern`.
+"""
 function determine_next_row(patterns::Vector{GTPattern})
     # Calculate total size for pre-allocation
     total_patterns = sum(pattern -> 
