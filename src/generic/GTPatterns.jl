@@ -263,35 +263,6 @@ function calculate_pattern_differences(tab::GTPattern, row_number::Int64)
     return content
 end
 
-"""
-    are_row_sums_decreasing_by_one(tab::GTPattern)
-    was: prematuro_pesos
-    Returns true if the sums of rows decrease exactly by 1 with each row. false otherwise.
-    TODO: for deletion? Not used anywhere, not exported.
-    
-"""
-function are_row_sums_decreasing_by_one(tab::GTPattern)
-    number_of_rows = length(tab.rows)
-    # Early return for single-row patterns
-    number_of_rows == 1 && return true
-    
-    # Calculate row sums efficiently
-    row_sums = Vector{Int}(undef, number_of_rows + 1)
-    
-    # Fill totals array with row sums
-    @inbounds for i in 1:number_of_rows
-        row_sums[i] = sum(tab.rows[i])
-    end
-    row_sums[end] = 0  # Last element is always 0
-    
-    # Check if differences between consecutive elements are all 1
-    # Using direct array indexing instead of creating a new array
-    @inbounds for i in 1:number_of_rows-1
-        row_sums[i] - row_sums[i+1] != 1 && return false
-    end
-    
-    return true
-end
 
 @doc Markdown.doc"""
 > Custom `isvalid` for GTPattern
