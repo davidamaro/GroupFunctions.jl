@@ -89,7 +89,13 @@ function Base.show(io::IO, ::MIME"text/plain", G::GTPattern)
     print(io, pattern)
 end
 
-function primera!(row::Row, pattern::GTPattern)
+"""
+    create_first_pattern!(row::Row, pattern::GTPattern)
+
+Attach the first row to an empty `GTPattern`, recording it as both `rows[1]`
+and `last_row` for subsequent construction.
+"""
+function create_first_pattern!(row::Row, pattern::GTPattern)
     isempty(pattern.last_row) && (pattern.last_row = row)
     push!(pattern.rows, row)
     return pattern
@@ -167,7 +173,7 @@ end
 function basis_states(weight::Row)
     # Initialize with first pattern
     initial_pattern = GTPattern([], [])
-    primera!(weight, initial_pattern)
+    create_first_pattern!(weight, initial_pattern)
     
     # Generate patterns iteratively
     current_patterns = determine_next_row(initial_pattern)
