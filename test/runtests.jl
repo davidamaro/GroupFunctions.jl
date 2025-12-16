@@ -105,9 +105,9 @@ end
 
 include("internals.jl")
 @testset "Number of zero weight states." begin
-  solutions = encontrar_prototablones([1, 1, 2, 1, 0], [1, 1, 2, 1, 0])
+  solutions = find_tablaeux_fillings([1, 1, 2, 1, 0], [1, 1, 2, 1, 0])
   @test length(solutions) == 33
-  solutions = encontrar_prototablones([2,2,2,0,0,0], [2,2,2,0,0,0])
+  solutions = find_tablaeux_fillings([2,2,2,0,0,0], [2,2,2,0,0,0])
   @test length(solutions) == 21
 end
 

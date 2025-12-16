@@ -75,7 +75,7 @@ end
 
 """
     find_double_coset_representatives(c_a::Content, c_b::Content) -> Vector{Perm}
-
+was: encontrar_representativos
 Find representative permutations between two content vectors.
 
 Arguments:
