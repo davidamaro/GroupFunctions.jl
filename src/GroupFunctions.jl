@@ -10,14 +10,14 @@ module GroupFunctions
   include("generic/DF.jl")
   include("generic/PermGroups.jl")
   include("generic/Misc.jl")
-  export YoungTableau, axialdistance, encontrar_posicion
-  export GTPattern, basis_states, siguientepatron, siguientepatron!
-  export primero_lexi, StandardYoungTableaux, generar_matriz
+  export YoungTableau, axialdistance, determine_position
+  export GTPattern, basis_states, determine_next_pattern, determine_next_pattern!
+  export first_young_tableau_lexicographic, StandardYoungTableaux, generate_matrix
   export indice_tablon_semistandard, content, Θ
   export group_function, mma_to_julia
   export zweight, pweight
-  export gtinicial
-  export generar_matriz
+  export initial_gt
+  export generate_matrix
   export bloquesun, simplefactorization, simple
   export expand
   export julia_to_mma

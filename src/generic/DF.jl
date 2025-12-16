@@ -3,7 +3,7 @@ import LinearAlgebra: transpose
 import StaticArrays: SArray
 export group_function, mma_to_julia
 export zweight, pweight
-export encontrar_prototablones
+export find_tablaeux_fillings
 
 const Irrep = Array{T,1} where T <: Integer
 const YTableau = AbstractAlgebra.Generic.YoungTableau{T} where T <: Integer
@@ -21,40 +21,42 @@ using .FindTables
 
 
 @doc Markdown.doc"""
-  encajar(lista::Vector{T}, n::T) where T <: Integer
-> Embebe `lista` en un intervalo de tamaño n
+    adjust_permutation_list(lista::Vector{T}, n::T) where T <: Integer -> Vector{T}
 
-# Examples:
-```
-julia> l = [1,2,3]; encajar(l,5)
-[1,2,3,4,5]
-julia> l = [2,3,4]; encajar(l,5)
-[1,2,3,4,5]
-julia> l = [3,4,5]; encajar(l,5)
-[1,2,3,4,5]
-```
-    encajar(lista::Vector{T}, n::T) where T <: Integer -> Vector{T}
-
-Adjust a vector of integers to fit within range [1,n] by shifting values and filling gaps.
+Extend a permutation, represented by a vector if integers, to fit within range [1,n]
+ by shifting values and filling gaps.
 
 Arguments:
-- `lista::Vector{T}`: Input vector of integers
+- `list::Vector{T}`: Input (possibly incomplete, without 1-cycles) permutation
 - `n::T`: Target maximum value
 
 Returns:
-- `Vector{T}`: Adjusted vector containing all integers from min to n
+- `Vector{T}`: Adjusted permutation – a vector containing all integers from min to n
 
 Notes:
 - Shifts values down if minimum is greater than 1
 - Fills missing values up to n if maximum is less than n
 - Preserves input type T
+
+# Examples:
+```
+julia> l = [1,2,3]; adjust_permutation_list(l,5)
+[1,2,3,4,5]
+julia> l = [2,3,4]; adjust_permutation_list(l,5)
+[1,2,3,4,5]
+julia> l = [3,4,5]; adjust_permutation_list(l,5)
+[1,2,3,4,5]
+julia> l = [3,2,1]; adjust_permutation_list(l,5)
+[3,2,1,4,5]
+```
 """
-function encajar(lista::Vector{T}, n::T) where T <: Integer
+function adjust_permutation_list(list::Vector{T}, n::T) where T <: Integer
+    #TODO: refactor the function – right now it doesn't perform checks if it is indeed a permutation
     # Return early if list is empty
-    isempty(lista) && return collect(T, 1:n)
+    isempty(list) && return collect(T, 1:n)
     
     # Create a copy to avoid modifying input
-    adjusted_list = copy(lista)
+    adjusted_list = copy(list)
     
     # Shift values down if needed
     min_value = minimum(adjusted_list)
@@ -72,7 +74,7 @@ function encajar(lista::Vector{T}, n::T) where T <: Integer
 end
 
 """
-    encontrar_representativos(c_a::Content, c_b::Content) -> Vector{Perm}
+    find_double_coset_representatives(c_a::Content, c_b::Content) -> Vector{Perm}
 
 Find representative permutations between two content vectors.
 
@@ -83,9 +85,9 @@ Arguments:
 Returns:
 - Vector{Perm}: List of representative permutations
 """
-function encontrar_representativos(c_a::Content, c_b::Content)
+function find_double_coset_representatives(c_a::Content, c_b::Content)
     # Get proto-tableaux for the given contents
-    proto_tableaux = encontrar_prototablones(c_a, c_b)
+    proto_tableaux = find_tablaeux_fillings(c_a, c_b) #find tableaux fillings
     
     # Calculate and process permutations
     dimension = length(c_a)
@@ -95,7 +97,7 @@ function encontrar_representativos(c_a::Content, c_b::Content)
         # Convert to permutation and sort
         proto_perm = proto |> collect |> calcula_proto_permutacion |> sortperm
         # Adjust permutation to fit dimension
-        adjusted_perm = encajar(proto_perm, dimension)
+        adjusted_perm = adjust_permutation_list(proto_perm, dimension)
         # Create final permutation
         Perm(sortperm(collect(Int64, adjusted_perm)))
     end
@@ -104,7 +106,7 @@ function encontrar_representativos(c_a::Content, c_b::Content)
 end
 
 """
-    encontrar_representativos(t_a, t_b) -> Vector{Perm}
+    find_double_coset_representatives(t_a, t_b) -> Vector{Perm}
 
 Find representative permutations between two tableaux.
 
@@ -115,13 +117,14 @@ Arguments:
 Returns:
 - Vector{Perm}: List of representative permutations
 """
-function encontrar_representativos(t_a, t_b)
+function find_double_coset_representatives(t_a, t_b)
     # Extract content from tableaux
     content_a = content(t_a)
     content_b = content(t_b)
-    
+    #TODO: make this function just a wrapper using the implementation above (with c_a::Content, c_b::Content)
+
     # Get proto-tableaux for the contents
-    proto_tableaux = encontrar_prototablones(content_a, content_b)
+    proto_tableaux = find_tablaeux_fillings(content_a, content_b)
     
     # Transform proto-tableaux into permutations
     representatives = map(proto_tableaux) do proto
@@ -139,33 +142,36 @@ end
 #
 ###############################################################################
 @doc Markdown.doc"""
-    monomio(f::MapST2SST,g::MapST2SST, per::Perm, n::Int)
-> Calcula el monomio a partir de dos funciones y una permutacion.
+
+    monomial(f::MapST2SST, g::MapST2SST, per::Perm, n::Int64) -> Basic
+
+    (was:monomio)
+
+Compute a symbolic monomial by combining mapped indices into SymEngine variables.
+
+Arguments:
+- `f::MapST2SST`: First dict mapping indices to indices, {i => f(i)}
+- `g::MapST2SST`: Second dict mapping indices to indices, {j => g(j)}
+- `per::Perm`: Permutation vector
+- `n::Int64`: Size of the permutation
+
+Returns:
+- `Basic`: SymEngine monomial, product of u_{f(per[k])}_{g(k)}} for k=1:n 
+
+
+Notes:
+- Uses default identity mapping when key is not found in f or g
+- Creates symbolic variables in the form u_i_j where i,j are indices
 
 # Examples:
 ```
 julia> f = Dict{Int,Int}(1=>1, 2=>2, 3=>3);
 julia> g = Dict{Int,Int}(1=>1, 2=>2, 3=>3);
-julia> monomio(f,g,Perm([1,2,3]), 3)
+julia> monomial(f,g,Perm([1,2,3]), 3)
 ```
-    monomio(f::MapST2SST, g::MapST2SST, per::Perm, n::Int64) -> Basic
-
-Compute a symbolic monomial by combining mapped indices into SymEngine variables.
-
-Arguments:
-- `f::MapST2SST`: First mapping function
-- `g::MapST2SST`: Second mapping function
-- `per::Perm`: Permutation vector
-- `n::Int64`: Size of the permutation
-
-Returns:
-- `Basic`: SymEngine monomial expression of the form u_i_j
-
-Notes:
-- Uses default identity mapping when key is not found in f or g
-- Creates symbolic variables in the form u_i_j where i,j are indices
 """
-function monomio(f::MapST2SST, g::MapST2SST, per::Perm, n::Int64)
+function monomial(f::MapST2SST, g::MapST2SST, per::Perm, n::Int64)
+    
     # Pre-allocate arrays with known size
     mapped_indices1 = Vector{Int}(undef, n)
     mapped_indices2 = Vector{Int}(undef, n)
@@ -210,7 +216,7 @@ Notes:
 - Uses identity mapping (original index) when a key is not found in mapping1 or mapping2
 - Matrix dimensions must be compatible with the mappings and size parameter
 """
-function monomio_n(mapping1::MapST2SST, mapping2::MapST2SST, permutation::Perm, size::Int64, matrix::Matrix{ComplexF64})
+function compute_monomial(mapping1::MapST2SST, mapping2::MapST2SST, permutation::Perm, size::Int64, matrix::Matrix{ComplexF64})
     # Pre-allocate arrays for transformed indices
     transformed_indices1 = Vector{Int}(undef, size)
     transformed_indices2 = Vector{Int}(undef, size)
@@ -259,7 +265,7 @@ Notes:
 """
 function double_coset(μ::Content, ν::Content)
     # Find representatives between contents
-    representatives = encontrar_representativos(μ, ν)
+    representatives = find_double_coset_representatives(μ, ν)
     
     # Calculate stabilizers for both contents
     stabilizer_left, stabilizer_right = calcular_sα.([μ, ν])
@@ -348,8 +354,8 @@ function group_function(λ::Irrep, tab_u::YTableau, tab_v::YTableau; verbose::Bo
     
     # Process each gamma and corresponding coset
     for (gamma, coset) in zip(gamma_list, coset_list)
-        monomial_term = monomio(mapping_u, mapping_v, inv(gamma), dimension)
-        coset_sum = sum(generar_matriz(standard_tableaux, σ, λ)[index_u, index_v] for σ in coset)
+        monomial_term = monomial(mapping_u, mapping_v, inv(gamma), dimension)
+        coset_sum = sum(generate_matrix(standard_tableaux, σ, λ)[index_u, index_v] for σ in coset)
         polynomial += coset_sum * monomial_term
     end
     
@@ -424,14 +430,14 @@ function group_function(λ::Irrep, pat_u::GTPattern, pat_v::GTPattern; verbose::
     # Process each gamma and corresponding coset
     for (index, gamma) in enumerate(gamma_list)
         coset = coset_list[index]
-        monomial_term = monomio(mapping_u, mapping_v, inv(gamma), dimension)
+        monomial_term = monomial(mapping_u, mapping_v, inv(gamma), dimension)
         
         # Reset accumulator for current coset
         coset_sum = zero(Basic)
         
         # Sum over current coset
         for permutation in coset
-            coset_sum += generar_matriz(standard_tableaux, permutation, λ)[index_u, index_v]
+            coset_sum += generate_matrix(standard_tableaux, permutation, λ)[index_u, index_v]
         end
         
         polynomial += coset_sum * monomial_term
@@ -481,10 +487,10 @@ function group_function(λ::Irrep, pat_u::GTPattern, pat_v::GTPattern, mat::Arra
     for ind in 1:length(lista_gamas)
         γ = lista_gamas[ind]
         cjto_σ = lista_cosets[ind]
-        mon = monomio_n(f, g, inv(γ), n,mat)
+        mon = compute_monomial(f, g, inv(γ), n,mat)
         total = 0.0
         for σ in cjto_σ
-            total += generar_matriz(tablones, σ,λ)[i,j]
+            total += generate_matrix(tablones, σ,λ)[i,j]
         end
         pol += (total*mon)
     end
@@ -532,10 +538,10 @@ function group_function(λ::Irrep, tab_u::YTableau, tab_v::YTableau, mat::Array{
     for ind in 1:length(lista_gamas)
         γ = lista_gamas[ind]
         cjto_σ = lista_cosets[ind]
-        mon = monomio_n(f, g, inv(γ), n,mat)
+        mon = compute_monomial(f, g, inv(γ), n,mat)
         total = 0.0
         for σ in cjto_σ
-            total += generar_matriz(tablones, σ,λ)[i,j]
+            total += generate_matrix(tablones, σ,λ)[i,j]
         end
         pol += (total*mon)
     end
@@ -588,11 +594,11 @@ julia> zweight(t)
 ```
 """
 function zweight(gt::GTPattern)
-    l = zeros(Int, length(gt.filas) + 1)
+    l = zeros(Int, length(gt.rows) + 1)
     l[1] = 0
-    l[2:end] = reverse!(sum.((gt.filas)))
-    total::Array{Float64,1} = zeros(Float64, length(gt.filas) - 1)#Float64[]
-    @simd for k in 2:length(gt.filas)
+    l[2:end] = reverse!(sum.((gt.rows)))
+    total::Array{Float64,1} = zeros(Float64, length(gt.rows) - 1)#Float64[]
+    @simd for k in 2:length(gt.rows)
       @inbounds total[k - 1] = (l[k] - (1/2)*(l[k+1] + l[k-1]))
         #push!(total, (l[k] - (1/2)*(l[k+1] + l[k-1])))
     end
@@ -615,10 +621,10 @@ julia> pweight(t)
 ```
 """
 function pweight(gt::GTPattern)
-    l::Array{Int64,1} = zeros(Int, length(gt.filas) + 1)
+    l::Array{Int64,1} = zeros(Int, length(gt.rows) + 1)
     #l = reverse!(sum.((gt.filas)))
-    @simd for i in 1:length(gt.filas)
-      @inbounds l[i] = sum(gt.filas[i])
+    @simd for i in 1:length(gt.rows)
+      @inbounds l[i] = sum(gt.rows[i])
     end
     total::Array{Int64,1} = zeros(Int, length(l) - 1)
     @simd for k in 1:length(total)

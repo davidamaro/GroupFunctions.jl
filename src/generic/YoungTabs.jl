@@ -37,8 +37,8 @@ julia> axialdistance(y, 2,4)
 ```
 """
 function axialdistance(Y::AbstractAlgebra.Generic.YoungTableau{Int64}, u::Int64, v::Int64)
-  i,j = encontrar_posicion(Y, u)
-  k,l = encontrar_posicion(Y, v)
+  i,j = determine_position(Y, u)
+  k,l = determine_position(Y, v)
 
   l - k - (j - i)
 end
@@ -64,7 +64,7 @@ julia> matrix_repr(y)
   [1, 4]  =  4
 ```
 """
-function encontrar_posicion(Y::AbstractAlgebra.Generic.YoungTableau{Int64}, entrada::Int64)
+function determine_position(Y::AbstractAlgebra.Generic.YoungTableau{Int64}, entrada::Int64)
    k=1
    for (idx, p) in enumerate(Y.part)
       for (idy, q) in enumerate(Y.fill[k:k+p-1])
@@ -79,8 +79,8 @@ end
 
 function determinar_coeficiente_irrep_yamanouchi(Y::AbstractAlgebra.Generic.YoungTableau{Int64}, u::Integer)
   v = u - 1
-  i,j = encontrar_posicion(Y, u)
-  k,l = encontrar_posicion(Y, v)
+  i,j = determine_position(Y, u)
+  k,l = determine_position(Y, v)
   
   if i == k
     return Basic(1)
@@ -92,7 +92,7 @@ function determinar_coeficiente_irrep_yamanouchi(Y::AbstractAlgebra.Generic.Youn
 end
 
 @doc Markdown.doc"""
-    primero_lexi(YoungTableau) -> YoungTableau
+    first_young_tableau_lexicographic(YoungTableau) -> YoungTableau
     Computes the first ---in lexicographic order---
     Standard Tableaux.
 # Examples:
@@ -106,7 +106,7 @@ julia> primero_lexi(pat)
 ├───┼
 ```
 """
-function primero_lexi(pat::AbstractAlgebra.Generic.YoungTableau{Int64})
+function first_young_tableau_lexicographic(pat::AbstractAlgebra.Generic.YoungTableau{Int64})
     mat = Array(matrix_repr(pat))
 
     orco = zeros(Int, size(mat))
@@ -134,7 +134,7 @@ function StandardYoungTableaux(part::Array{Int64,1})
     len = length(part)
     flat = zeros(Int, sum(part))
     flat[1:len] = part
-    primero = primero_lexi(YoungTableau(part))
+    primero = first_young_tableau_lexicographic(YoungTableau(part))
     lista = [deepcopy(primero)]
     for _ in 2:dim(YoungTableau(part))
         push!(lista, deepcopy(encontrar_malo_imp!(primero)))
@@ -143,7 +143,7 @@ function StandardYoungTableaux(part::Array{Int64,1})
 end
 
 @doc Markdown.doc"""
-    generar_matriz(Y::Array{YoungTableau}, p::Perm, λ::Array{Int64,1}) -> SparseMatrixCSC
+    generate_matrix(Y::Array{YoungTableau}, p::Perm, λ::Array{Int64,1}) -> SparseMatrixCSC
 > Return non-zero entries of the orthogonal irrep given by the permutation 'p'
 > The information of the irrep is introduced via 'Y' which is a list of
 > Standard Young tableaux
@@ -151,14 +151,14 @@ end
 # Examples
 ```
 julia> guilty = StandardYoungTableaux([3,2])
-julia> generar_matriz(guilty, Perm([2,1,3,4,5]), [3,2])
+julia> generate_matrix(guilty, Perm([2,1,3,4,5]), [3,2])
 [1, 1]  =  -1.0
 [2, 2]  =  1.0
 [3, 3]  =  -1.0
 [4, 4]  =  1.0
 [5, 5]  =  1.0
 
-julia> generar_matriz(guilty, Perm([1,3,2,4,5]), [3,2])
+julia> generate_matrix(guilty, Perm([1,3,2,4,5]), [3,2])
 [1, 1]  =  0.5
 [2, 1]  =  0.866025
 [1, 2]  =  0.866025
@@ -170,7 +170,7 @@ julia> generar_matriz(guilty, Perm([1,3,2,4,5]), [3,2])
 [5, 5]  =  1.0
 ```
 """
-function generar_matriz(patrones::Array{AbstractAlgebra.Generic.YoungTableau{Int64},1}, p::Perm, irrep::Array{Int64,1})
+function generate_matrix(patrones::Array{AbstractAlgebra.Generic.YoungTableau{Int64},1}, p::Perm, irrep::Array{Int64,1})
     descom_en_trans = descomp_total(p)
     len::Int64 = length(patrones)
     mat::SparseMatrixCSC{Basic,Int64} = spzeros(Basic, len, len)
@@ -178,11 +178,11 @@ function generar_matriz(patrones::Array{AbstractAlgebra.Generic.YoungTableau{Int
       @inbounds mat[i,i] = Basic(1)
     end
     for (_,b) in descom_en_trans # a + 1 = b
-        mat = generar_matriz(patrones, b, irrep)*mat
+        mat = generate_matrix(patrones, b, irrep)*mat
     end
     mat
 end
-function generar_matriz(lista_tablones::Array{AbstractAlgebra.Generic.YoungTableau{Int64},1}, m::Int, irrep::Array{Int64,1})
+function generate_matrix(lista_tablones::Array{AbstractAlgebra.Generic.YoungTableau{Int64},1}, m::Int, irrep::Array{Int64,1})
     mat = spzeros(Basic,length(lista_tablones), length(lista_tablones))
 
     for i in 1:length(lista_tablones), k in 1:length(lista_tablones)
@@ -197,7 +197,9 @@ function generar_matriz(lista_tablones::Array{AbstractAlgebra.Generic.YoungTable
     mat
 end
 
+
 function encontrar_malo_imp!(tab::AbstractAlgebra.Generic.YoungTableau{Int64})
+    # TODO: beware. not used in the code, confusing usage in documentation. not sure what it actually does
     i_max = 0
     jm = 0
     malo = 0
@@ -205,7 +207,7 @@ function encontrar_malo_imp!(tab::AbstractAlgebra.Generic.YoungTableau{Int64})
     lista_recorridos = typeof((1,2))[]
 
     for l in 1:sum(tab.part)
-        i,j = encontrar_posicion(tab, l)
+        i,j = determine_position(tab, l)
         push!(lista_recorridos,(i,j))
         if i >= i_max
             i_max = i
@@ -218,10 +220,10 @@ function encontrar_malo_imp!(tab::AbstractAlgebra.Generic.YoungTableau{Int64})
     end
 
     mat = matrix_repr(tab)
-    pos_maximo = encontrar_posicion(tab, jm)
-    pos_malo = encontrar_posicion(tab, malo)
+    pos_maximo = determine_position(tab, jm)
+    pos_malo = determine_position(tab, malo)
 
-    pos_maximo = encontrar_esquina(lista_recorridos)
+    pos_maximo = determine_corner(lista_recorridos)
 
     mat[pos_maximo...] = malo
 
@@ -240,9 +242,11 @@ function encontrar_malo_imp!(tab::AbstractAlgebra.Generic.YoungTableau{Int64})
     tab
 end
 @doc Markdown.doc"""
-    encontrar_esquina(lista tuplas)
+    determine_corner(list of two-integer tuples, e.g. [(1,2),(3,4)])
+    was: encontrar_esquina(lista tuplas)
+    TODO: see what it actually expects as an input. vector of tuples is a bit weird.
 """
-function encontrar_esquina(lista::Array{Tuple{Int64,Int64},1})
+function determine_corner(lista::Array{Tuple{Int64,Int64},1})
     (fila_malo, col_malo) = lista[end]
     i_max, jm = (1,1)
     if col_malo == 1
@@ -628,9 +632,9 @@ function calcular_sα(tablon::AbstractAlgebra.Generic.YoungTableau{Int64})
 end
 
 function YoungTableau(tab::GTPattern)
-    filas = tab.filas
+    filas = tab.rows
     len = filas[1] |> length
-    conjunto_contenido = [obtener_diferencias_patron(tab, x) for x in 1:len]
+    conjunto_contenido = [calculate_pattern_differences(tab, x) for x in 1:len]
     p = Partition(filter(x -> x>0, filas[1]))
     Generic.YoungTableau(p, vcat(conjunto_contenido...))
 end

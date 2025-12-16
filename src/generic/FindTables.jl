@@ -3,7 +3,7 @@ module FindTables
 using JuMP
 using HiGHS
 
-export encontrar_prototablones
+export find_tablaeux_fillings
 
 mutable struct FixedValues
     positions::Matrix{Int}
@@ -11,7 +11,13 @@ mutable struct FixedValues
     count::Int
 end
 
-function encontrar_prototablones(A::Vector{Int}, B::Vector{Int})
+"""
+    find_tablaeux_fillings(A::Vector{Int}, B::Vector{Int})
+    was: encontrar_prototablones
+    see the following discussion for context: 
+        https://discourse.julialang.org/t/right-solver-for-jump-to-find-every-solution-of-a-linear-system-of-equations-with-integer-solutions/44709/6
+"""
+function find_tablaeux_fillings(A::Vector{Int}, B::Vector{Int})
     if length(A) != length(B) || sum(A) != sum(B)
         println("No solution exists: row sums must equal column sums")
         return []
