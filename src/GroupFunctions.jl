@@ -16,7 +16,6 @@ module GroupFunctions
   export indice_tablon_semistandard, content, Θ
   export group_function, mma_to_julia
   export zweight, pweight
-  export initial_gt
   export generate_matrix
   export bloquesun, simplefactorization, simple
   export expand

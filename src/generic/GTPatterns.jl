@@ -435,16 +435,3 @@ function decreasable(x::GTPattern)
     return nothing
 end
 
-function initial_gt(irrep::Row)
-    n = length(irrep)
-    # Pre-allocate array with known size
-    rows = Vector{Vector{Int64}}(undef, n)
-    rows[1] = irrep
-    
-    # Build subsequent rows more efficiently
-    for i in 2:n
-        rows[i] = rows[i-1][1:end-1]
-    end
-    
-    return GTPattern(rows, rows[end])
-end
