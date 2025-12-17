@@ -1,7 +1,7 @@
 import Combinatorics: permutations
 import LinearAlgebra: transpose
 import StaticArrays: SArray
-export group_function, mma_to_julia
+export group_function
 export zweight, pweight
 export find_tablaeux_fillings
 
@@ -553,30 +553,6 @@ end
   # mma_to_julia(s)
 # end
 
-@doc Markdown.doc"""
-    mma_to_julia(s::String)
-> Calcula el polinomio de MMA a uno de Julia usando SymEngine
-
-# Example:
-
-```
-julia > mma_to_julia("x[1, 1])
-u_1_1
-```
-"""
-function mma_to_julia(edo::String)
-    edo = replace(edo, ", " => "_")
-    edo = replace(edo, "["  => "_")
-    edo = replace(edo, "]"  => "")
-
-    edo = replace(edo, r"x(_\d_\d)(\^\d{1})" => s"*(SymEngine.symbols(\"u\1\")\2)")
-    edo = replace(edo, r"(x_\d_\d)"          => s"SymEngine.symbols(\"\g<1>\")")
-
-    edo = replace(edo, " " => "")
-    edo = replace(edo, "x" => "u")
-
-    eval(Meta.parse(edo))
-end
 
 @doc Markdown.doc"""
 > Computes _zweight_ of a GTPattern.

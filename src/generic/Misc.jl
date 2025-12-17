@@ -1,5 +1,5 @@
 export bloquesun, simplefactorization, simple
-export julia_to_mma
+export julia_to_mma, mma_to_julia
 
 function julia_to_mma(symbolic_expression::SymEngine.Basic)
   expression = string(symbolic_expression)
@@ -22,6 +22,33 @@ function julia_to_mma(symbolic_expression::SymEngine.Basic)
     
     return strip(expr)
     
+end
+
+
+
+@doc Markdown.doc"""
+    mma_to_julia(s::String)
+> Calcula el polinomio de MMA a uno de Julia usando SymEngine
+
+# Example:
+
+```
+julia > mma_to_julia("x[1, 1])
+u_1_1
+```
+"""
+function mma_to_julia(edo::String)
+    edo = replace(edo, ", " => "_")
+    edo = replace(edo, "["  => "_")
+    edo = replace(edo, "]"  => "")
+
+    edo = replace(edo, r"x(_\d_\d)(\^\d{1})" => s"*(SymEngine.symbols(\"u\1\")\2)")
+    edo = replace(edo, r"(x_\d_\d)"          => s"SymEngine.symbols(\"\g<1>\")")
+
+    edo = replace(edo, " " => "")
+    edo = replace(edo, "x" => "u")
+
+    eval(Meta.parse(edo))
 end
 
 
