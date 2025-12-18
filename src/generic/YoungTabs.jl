@@ -167,16 +167,25 @@ julia> generate_matrix(guilty, Perm([1,3,2,4,5]), [3,2])
 [5, 5]  =  1.0
 ```
 """
+const GENERATE_MATRIX_CACHE = Dict{Tuple{Perm,Vector{Int64}}, SparseMatrixCSC{Basic,Int64}}()
+
 function generate_matrix(patrones::Array{AbstractAlgebra.Generic.YoungTableau{Int64},1}, p::Perm, irrep::Array{Int64,1})
-    descom_en_trans = descomp_total(p)
+    cache_key = (p, copy(irrep))
+    if haskey(GENERATE_MATRIX_CACHE, cache_key)
+        return GENERATE_MATRIX_CACHE[cache_key]
+    end
+
+    transposition_factors = descomp_total(p)
     len::Int64 = length(patrones)
     mat::SparseMatrixCSC{Basic,Int64} = spzeros(Basic, len, len)
     @simd for i in 1:len
       @inbounds mat[i,i] = Basic(1)
     end
-    for (_,b) in descom_en_trans # a + 1 = b
-        mat = generate_matrix(patrones, b, irrep)*mat
+    for (_, transposition) in transposition_factors # a + 1 = b
+        mat = generate_matrix(patrones, transposition, irrep) * mat
     end
+
+    GENERATE_MATRIX_CACHE[cache_key] = mat
     mat
 end
 function generate_matrix(lista_tablones::Array{AbstractAlgebra.Generic.YoungTableau{Int64},1}, m::Int, irrep::Array{Int64,1})
