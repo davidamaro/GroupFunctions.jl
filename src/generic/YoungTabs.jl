@@ -185,11 +185,11 @@ end
 function generate_matrix(lista_tablones::Array{AbstractAlgebra.Generic.YoungTableau{Int64},1}, m::Int, irrep::Array{Int64,1})
     mat = spzeros(Basic,length(lista_tablones), length(lista_tablones))
 
-    for i in 1:length(lista_tablones), k in 1:length(lista_tablones)
-        if i == k && mat[i,i] == 0
-            mat[i,i] = determinar_coeficiente_irrep_yamanouchi(lista_tablones[i], m)
-        elseif i < k
-            bloque_yamanouchi(mat, lista_tablones, i, k, m, irrep)
+    for row_idx in 1:length(lista_tablones), col_idx in 1:length(lista_tablones)
+        if row_idx == col_idx && mat[row_idx,row_idx] == 0
+            mat[row_idx,row_idx] = determinar_coeficiente_irrep_yamanouchi(lista_tablones[row_idx], m)
+        elseif row_idx < col_idx
+            yamanouchi_block!(mat, lista_tablones, row_idx, col_idx, m, irrep)
         end
     end
 
@@ -261,15 +261,32 @@ function determine_corner(lista::Array{Tuple{Int64,Int64},1})
     (i_max, jm)
 end
 
-function bloque_yamanouchi(mat::SparseMatrixCSC{Basic,Int64}, lista_tablones::Array{AbstractAlgebra.Generic.YoungTableau{Int64},1}, i::Int64, k::Int64, m::Int64, irrep::Array{Int64,1})
-    tab_1 = lista_tablones[i]
-    tab_2 = lista_tablones[k]
-    if i < k && lista_tablones[i] == swap_adjacent_entries(lista_tablones[k], m,irrep)
-        mat[i,i] = -((Basic( axialdistance(tab_1,m, m-1) ))^(-1))
-        mat[i,k] = sqrt(1-((Basic( axialdistance(tab_1,m, m-1) ))^(-2)))
-        mat[k,i] = sqrt(1-((Basic( axialdistance(tab_1,m, m-1) ))^(-2)))
-        mat[k,k] = ((Basic( axialdistance(tab_1,m, m-1) ))^(-1))
+@doc Markdown.doc"""
+    yamanouchi_block!(mat, tableaux, row_idx, col_idx, swap_entry, irrep)
+> Fill the 2×2 Yamanouchi block for the given pair of tableaux when they differ
+> by swapping `swap_entry` and `swap_entry - 1`.
+
+Updates `mat` in place; no effect if the pair is not related by the swap.
+"""
+function yamanouchi_block!(mat::SparseMatrixCSC{Basic,Int64}, tableaux::Array{AbstractAlgebra.Generic.YoungTableau{Int64},1}, row_idx::Int64, col_idx::Int64, swap_entry::Int64, irrep::Array{Int64,1})
+    if row_idx >= col_idx
+        return mat
     end
+
+    base_tab = tableaux[row_idx]
+    target_tab = tableaux[col_idx]
+    if base_tab != swap_adjacent_entries(target_tab, swap_entry, irrep)
+        return mat
+    end
+
+    axial = Basic(axialdistance(base_tab, swap_entry, swap_entry - 1))
+    inv_axial = axial^(-1)
+    sqrt_term = sqrt(1 - inv_axial^2)
+
+    mat[row_idx,row_idx] = -inv_axial
+    mat[row_idx,col_idx] = sqrt_term
+    mat[col_idx,row_idx] = sqrt_term
+    mat[col_idx,col_idx] = inv_axial
     mat
 end
 
