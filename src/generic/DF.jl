@@ -269,22 +269,21 @@ function double_coset(μ::Content, ν::Content)
     
     # Calculate stabilizers for both contents
     stabilizer_left, stabilizer_right = stabilizer_permutations.([μ, ν])
-    
-    # Pre-allocate array for cosets
-    coset_list = Vector{Vector{Perm}}(undef, length(representatives))
-    
-    # Process each representative
+
+    # Precompute cartesian size to sizehint! and reuse a set for dedup
+    reps_count = length(representatives)
+    coset_list = Vector{Vector{Perm}}(undef, reps_count)
+
     @inbounds for (idx, representative) in enumerate(representatives)
-        # Initialize storage for current coset permutations
-        current_permutations = Vector{Perm}()
-        
-        # Generate all possible combinations
-        for left_perm in stabilizer_left, right_perm in stabilizer_right
-            push!(current_permutations, left_perm * representative * right_perm)
+        coset = Vector{Perm}()
+        sizehint!(coset, length(stabilizer_left) * length(stabilizer_right))
+        for left_perm in stabilizer_left
+            for right_perm in stabilizer_right
+                push!(coset, left_perm * representative * right_perm)
+            end
         end
-        
-        # Store unique permutations for current coset
-        coset_list[idx] = unique!(current_permutations)
+        unique!(coset)
+        coset_list[idx] = coset
     end
     
     return representatives, coset_list
