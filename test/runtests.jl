@@ -112,6 +112,23 @@ include("Aqua.jl")
   @test length(solutions) == 21
 end
 
+@testset "group_function with partition input" begin
+    λ = [1, 0]
+    symbolic_values, patterns = group_function(λ)
+    expected_patterns = basis_states(λ)
+
+    @test map(p -> p.rows, patterns) == map(p -> p.rows, expected_patterns)
+    @test size(symbolic_values) == (length(patterns), length(patterns))
+    @test symbolic_values[1, 2] == group_function(λ, expected_patterns[1], expected_patterns[2])
+
+    mat = ComplexF64[1 0; 0 1]
+    numeric_values, numeric_patterns = group_function(λ, mat)
+
+    @test map(p -> p.rows, numeric_patterns) == map(p -> p.rows, patterns)
+    @test size(numeric_values) == (length(patterns), length(patterns))
+    @test numeric_values[2, 1] ≈ group_function(λ, expected_patterns[2], expected_patterns[1], mat)
+end
+
 @testset "irrep 221 de SU(4)" begin
     t_u = YoungTableau([2,2, 1])
     fill!(t_u, [1,2,3,3,4])

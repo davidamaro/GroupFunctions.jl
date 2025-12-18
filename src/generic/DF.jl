@@ -349,12 +349,15 @@ function group_function(λ::Irrep, tab_u::YTableau, tab_v::YTableau; verbose::Bo
     end
     
     # Initialize polynomial computation
-    polynomial = zero(SymEngine.symbols("x"))
+    polynomial = zero(Basic)
     
     # Process each gamma and corresponding coset
-    for (gamma, coset) in zip(gamma_list, coset_list)
+    @inbounds for (gamma, coset) in zip(gamma_list, coset_list)
         monomial_term = monomial(mapping_u, mapping_v, inv(gamma), dimension)
-        coset_sum = sum(generate_matrix(standard_tableaux, σ, λ)[index_u, index_v] for σ in coset)
+        coset_sum = zero(Basic)
+        @inbounds for σ in coset
+            coset_sum += generate_matrix(standard_tableaux, σ, λ)[index_u, index_v]
+        end
         polynomial += coset_sum * monomial_term
     end
     
@@ -423,19 +426,16 @@ function group_function(λ::Irrep, pat_u::GTPattern, pat_v::GTPattern; verbose::
     end
     
     # Initialize polynomial and accumulator
-    polynomial::Basic = zero(SymEngine.symbols("x"))
-    coset_sum::Basic = zero(Basic)
+    polynomial::Basic = zero(Basic)
     
     # Process each gamma and corresponding coset
-    for (index, gamma) in enumerate(gamma_list)
+    @inbounds for (index, gamma) in enumerate(gamma_list)
         coset = coset_list[index]
         monomial_term = monomial(mapping_u, mapping_v, inv(gamma), dimension)
         
-        # Reset accumulator for current coset
-        coset_sum = zero(Basic)
-        
         # Sum over current coset
-        for permutation in coset
+        coset_sum = zero(Basic)
+        @inbounds for permutation in coset
             coset_sum += generate_matrix(standard_tableaux, permutation, λ)[index_u, index_v]
         end
         
@@ -546,6 +546,67 @@ function group_function(λ::Irrep, tab_u::YTableau, tab_v::YTableau, mat::Array{
     end
     
     pol*inversos
+end
+
+@doc Markdown.doc"""
+    group_function(λ::Irrep; verbose::Bool = false) -> Tuple{Matrix{Basic}, Vector{GTPattern}}
+
+Compute all symbolic group functions associated with the partition `λ`.
+The routine builds every valid GT pattern for `λ` and evaluates the group
+function for each pair.
+
+Arguments:
+- `λ::Irrep`: Partition describing the irrep
+- `verbose::Bool`: Forwarded to the underlying pairwise `group_function`
+
+Returns:
+- `Tuple`: `(values, patterns)` where `values[i,j]` corresponds to
+  `group_function(λ, patterns[i], patterns[j])` and `patterns` is the basis
+  returned by `basis_states(λ)`
+"""
+function group_function(λ::Irrep; verbose::Bool = false)
+    patterns = basis_states(λ)
+    n_states = length(patterns)
+    values = Matrix{Basic}(undef, n_states, n_states)
+
+    @inbounds for (i, pat_u) in enumerate(patterns)
+        for (j, pat_v) in enumerate(patterns)
+            values[i, j] = group_function(λ, pat_u, pat_v; verbose = verbose)
+        end
+    end
+
+    return values, patterns
+end
+
+@doc Markdown.doc"""
+    group_function(λ::Irrep, mat::Array{Complex{Float64}, 2}; verbose::Bool = false) -> Tuple{Matrix{ComplexF64}, Vector{GTPattern}}
+
+Compute all numeric group functions associated with the partition `λ` and a
+matrix `mat`. Generates the GT patterns for `λ` and evaluates every pair using
+the provided matrix.
+
+Arguments:
+- `λ::Irrep`: Partition describing the irrep
+- `mat::Array{Complex{Float64}, 2}`: Matrix representing the SU(n) element
+- `verbose::Bool`: Forwarded to the underlying pairwise `group_function`
+
+Returns:
+- `Tuple`: `(values, patterns)` where `values[i,j]` corresponds to
+  `group_function(λ, patterns[i], patterns[j], mat)` and `patterns` is the basis
+  returned by `basis_states(λ)`
+"""
+function group_function(λ::Irrep, mat::Array{Complex{Float64}, 2}; verbose::Bool = false)
+    patterns = basis_states(λ)
+    n_states = length(patterns)
+    values = Matrix{ComplexF64}(undef, n_states, n_states)
+
+    @inbounds for (i, pat_u) in enumerate(patterns)
+        for (j, pat_v) in enumerate(patterns)
+            values[i, j] = group_function(λ, pat_u, pat_v, mat; verbose = verbose)
+        end
+    end
+
+    return values, patterns
 end
 
 # macro mma_str(s)
