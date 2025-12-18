@@ -332,7 +332,7 @@ function indice_tablon_semistandard(tablon_semistandard::AbstractAlgebra.Generic
 end
 
 function generate_dictionary(lista::Array{Int64,1})
-    fvars = Dict()
+    fvars = Dict{Int64,Int64}()
     for (n, f) in enumerate(lista)
         fvars[f] = n
     end
