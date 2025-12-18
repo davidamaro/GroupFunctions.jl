@@ -131,15 +131,12 @@ julia> StandardYoungTableaux([2,1])
 """
 function StandardYoungTableaux(part::Array{Int64,1}) 
     part = filter(x -> x > 0, part)
-    len = length(part)
-    flat = zeros(Int, sum(part))
-    flat[1:len] = part
-    primero = first_young_tableau_lexicographic(YoungTableau(part))
-    lista = [deepcopy(primero)]
+    first_tab = first_young_tableau_lexicographic(YoungTableau(part))
+    tableaux = [deepcopy(first_tab)]
     for _ in 2:dim(YoungTableau(part))
-        push!(lista, deepcopy(reposition_out_of_order!(primero)))
+        push!(tableaux, deepcopy(reposition_out_of_order!(first_tab)))
     end
-    lista
+    tableaux
 end
 
 @doc Markdown.doc"""
