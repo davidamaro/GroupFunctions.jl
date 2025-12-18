@@ -137,7 +137,7 @@ function StandardYoungTableaux(part::Array{Int64,1})
     primero = first_young_tableau_lexicographic(YoungTableau(part))
     lista = [deepcopy(primero)]
     for _ in 2:dim(YoungTableau(part))
-        push!(lista, deepcopy(encontrar_malo_imp!(primero)))
+        push!(lista, deepcopy(reposition_out_of_order!(primero)))
     end
     lista
 end
@@ -198,38 +198,44 @@ function generate_matrix(lista_tablones::Array{AbstractAlgebra.Generic.YoungTabl
 end
 
 
-function encontrar_malo_imp!(tab::AbstractAlgebra.Generic.YoungTableau{Int64})
-    # TODO: beware. not used in the code, confusing usage in documentation. not sure what it actually does
-    i_max = 0
-    jm = 0
-    malo = 0
+@doc Markdown.doc"""
+    reposition_out_of_order!(tab::YoungTableau)
+> Attempt to fix the first out-of-order entry encountered in a Young tableau
+> by bumping it into a corner and renumbering the remaining path.
 
-    lista_recorridos = typeof((1,2))[]
+"""
+function reposition_out_of_order!(tab::AbstractAlgebra.Generic.YoungTableau{Int64})
+    max_row_seen = 0
+    last_label_at_max_row = 0
+    violating_label::Int = 0
 
-    for l in 1:sum(tab.part)
-        i,j = determine_position(tab, l)
-        push!(lista_recorridos,(i,j))
-        if i >= i_max
-            i_max = i
-            jm = l
+    traversal_path = Tuple{Int64,Int64}[]
+
+    for label in 1:sum(tab.part)
+        row, col = determine_position(tab, label)
+        push!(traversal_path,(row,col))
+        if row >= max_row_seen
+            max_row_seen = row
+            last_label_at_max_row = label
         else
-            malo = l
+            # first label that violates the row-increasing scan; triggers bump
+            violating_label = label
             break
         end
 
     end
 
     mat = matrix_repr(tab)
-    pos_maximo = determine_position(tab, jm)
-    pos_malo = determine_position(tab, malo)
+    pos_max = determine_position(tab, last_label_at_max_row)
+    pos_violation = determine_position(tab, violating_label)
 
-    pos_maximo = determine_corner(lista_recorridos)
+    pos_max = determine_corner(traversal_path)
 
-    mat[pos_maximo...] = malo
+    mat[pos_max...] = violating_label
 
-    filtrado = filter(x -> x != pos_maximo, sort(lista_recorridos,by = x->(x[2], x[1])) )
-    for (ind, val) in enumerate(filtrado)
-        if val == pos_maximo
+    filtered = filter(x -> x != pos_max, sort(traversal_path,by = x->(x[2], x[1])) )
+    for (ind, val) in enumerate(filtered)
+        if val == pos_max
             continue
         else
             mat[val...] = ind
