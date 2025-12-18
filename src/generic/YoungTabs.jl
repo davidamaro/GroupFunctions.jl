@@ -264,7 +264,7 @@ end
 function bloque_yamanouchi(mat::SparseMatrixCSC{Basic,Int64}, lista_tablones::Array{AbstractAlgebra.Generic.YoungTableau{Int64},1}, i::Int64, k::Int64, m::Int64, irrep::Array{Int64,1})
     tab_1 = lista_tablones[i]
     tab_2 = lista_tablones[k]
-    if i < k && lista_tablones[i] == intercambio(lista_tablones[k], m,irrep)
+    if i < k && lista_tablones[i] == swap_adjacent_entries(lista_tablones[k], m,irrep)
         mat[i,i] = -((Basic( axialdistance(tab_1,m, m-1) ))^(-1))
         mat[i,k] = sqrt(1-((Basic( axialdistance(tab_1,m, m-1) ))^(-2)))
         mat[k,i] = sqrt(1-((Basic( axialdistance(tab_1,m, m-1) ))^(-2)))
@@ -273,31 +273,40 @@ function bloque_yamanouchi(mat::SparseMatrixCSC{Basic,Int64}, lista_tablones::Ar
     mat
 end
 
-function intercambio(Y::AbstractAlgebra.Generic.YoungTableau{Int64}, m::Int64, irrep::Array{Int64,1})
-    V = deepcopy(Y)
-    relleno = V.fill
-    @assert m > 1 && m <= maximum([length(irrep), length(relleno)])
-    posiciones = Int[]
-    for (indx, elem) in enumerate(relleno)
-        if elem == m || elem == m - 1
-            push!(posiciones, indx)
+@doc Markdown.doc"""
+    swap_adjacent_entries(tableau::YoungTableau, entry::Int64, irrep::Vector{Int})
+> Swap the two occurrences of `entry` and `entry - 1` in a Young tableau, or
+> set the lone occurrence to `entry` if only one is present.
+
+Intended for use when building Yamanouchi blocks; assumes `entry > 1` and
+`entry` does not exceed the larger of `length(irrep)` and the tableau fill length.
+"""
+function swap_adjacent_entries(tableau::AbstractAlgebra.Generic.YoungTableau{Int64}, entry::Int64, irrep::Array{Int64,1})
+    new_tableau = deepcopy(tableau)
+    fill_values = new_tableau.fill
+    @assert entry > 1 && entry <= maximum((length(irrep), length(fill_values)))
+
+    positions = Int[]
+    for (idx, value) in enumerate(fill_values)
+        if value == entry || value == entry - 1
+            push!(positions, idx)
         end
-        if length(posiciones) == 2
+        if length(positions) == 2
             break
         end
     end
 
-    if length(posiciones) > 1
-      tmp = relleno[posiciones[1]]
-      relleno[posiciones[1]] = relleno[posiciones[2]]
-      relleno[posiciones[2]] = tmp
-      fill!(V, relleno)
+    if length(positions) > 1
+        tmp = fill_values[positions[1]]
+        fill_values[positions[1]] = fill_values[positions[2]]
+        fill_values[positions[2]] = tmp
+        fill!(new_tableau, fill_values)
     else
-      relleno[posiciones[1]] = m
-      fill!(V, relleno)
+        fill_values[positions[1]] = entry
+        fill!(new_tableau, fill_values)
     end
 
-    V
+    new_tableau
 end
 ##############################################################################
 #
@@ -309,26 +318,16 @@ end
 > Returns the index of the standard YoungTableau such that the function mapping
 > the filling of the semistandard to the standard Tableau is non decreasing
 
-# Examples:
-```
-julia> patrones_gt_prueba = genera_patrones([2,1,0]);
-julia> young_prueba = map(YoungTableau, patrones_gt_prueba);
-julia> for elemento in young_prueba
-           icons_abstract_thee(elemento)
-       end
-```
 """
+# TODO add examples
 function indice_tablon_semistandard(tablon_semistandard::AbstractAlgebra.Generic.YoungTableau{Int64})
     particion = (tablon_semistandard.part) |> collect
-    tablon_semistandard_v = YoungTableau(particion)# |> primero_lexi
-    orden = sortperm(tablon_semistandard.fill)
-    diccionario = generate_dictionary(orden)#Dict()
-    nuevo_fill = [diccionario[x] for x in tablon_semistandard_v.fill]
-    tablon_resultado_permutacion = AbstractAlgebra.fill!(tablon_semistandard_v, nuevo_fill)
     tablones_standard = StandardYoungTableaux(particion)
-    etiquetas_semi = map(gen_etiqueta, map(x->x.fill, tablones_standard))
-    
-    return findfirst(x -> x ≈ gen_etiqueta(tablon_resultado_permutacion.fill), etiquetas_semi)
+    target = tablon_standar_asociado_a_semiestandar(tablon_semistandard)
+
+    idx = findfirst(x -> x.fill == target.fill, tablones_standard)
+    idx === nothing && error("No matching standard tableau found for fill=$(tablon_semistandard.fill) and part=$(tablon_semistandard.part)")
+    return idx
 end
 
 function generate_dictionary(lista::Array{Int64,1})
@@ -337,11 +336,6 @@ function generate_dictionary(lista::Array{Int64,1})
         fvars[f] = n
     end
     fvars
-end
-
-function gen_etiqueta(lista::Array{Int64,1})
-    len = length(lista)
-    dot([Base.sqrt(prime(i)) for i in 1:len], lista)
 end
 
 @doc Markdown.doc"""
@@ -397,17 +391,17 @@ end
 """
 function tablon_standar_asociado_a_semiestandar(tablon_semistandard::AbstractAlgebra.Generic.YoungTableau{Int64})
     particion = (tablon_semistandard.part) |> collect
-    tablon_standard = YoungTableau(particion)# |> primero_lexi
+    tablon_standard = YoungTableau(particion)
 
-    orden = sortperm(tablon_semistandard.fill)
-    diccionario = generate_dictionary(orden)#Dict()
+    orden = sortperm(tablon_semistandard.fill)  # stable by default
+    diccionario = generate_dictionary(orden)
     nuevo_fill = [diccionario[x] for x in tablon_standard.fill]
 
     tablon_resultado_permutacion = AbstractAlgebra.fill!(tablon_standard, nuevo_fill)
     tablones_standard = StandardYoungTableaux(particion)
-    etiquetas_semi = map(gen_etiqueta, map(x->x.fill, tablones_standard))
-    
-    pos = findfirst(x -> x ≈ gen_etiqueta(tablon_resultado_permutacion.fill), etiquetas_semi)
+
+    pos = findfirst(x -> x.fill == tablon_resultado_permutacion.fill, tablones_standard)
+    pos === nothing && error("No matching standard tableau found for fill=$(tablon_semistandard.fill) and part=$(tablon_semistandard.part)")
     tablones_standard[pos]
 end
 
@@ -415,53 +409,50 @@ end
     Θ(patron_semi::YoungTableau)
 > Computes coefficient Θ. Returns a Float64
 """
-function Θ(patron_semi::AbstractAlgebra.Generic.YoungTableau{Int64}, irrep::Array{Int64,1})
-    relleno_semi = patron_semi.fill
-    tablones_standard = StandardYoungTableaux((patron_semi.part) |> collect)
+function Θ(patron_semi::AbstractAlgebra.Generic.YoungTableau{Int64}, _::Array{Int64,1})
     tablon_standard = tablon_standar_asociado_a_semiestandar(patron_semi)
     relleno_standard = tablon_standard.fill
-    n = ((patron_semi.fill) |> collect |> length)
-    n = irrep |> length
-    
-    parejas = zip(relleno_standard, relleno_semi) |> collect
-    prod = one(Basic)#1.0
-    for k in 1:n
-        α = map(first,filter((xx -> (last(xx) == k)), parejas))
-        if length(α) > 1
-            for indx in 1:length(α), indy in indx+1:length(α)
-                x,y = α[indx], α[indy]
-                if x > y
-                  prod *= (1 + (1/Basic( axialdistance(tablon_standard, y, x) )))
-                else
-                  prod *= (1 + (1/Basic( axialdistance(tablon_standard, x, y) )))
-                end
-            end
+    relleno_semi = patron_semi.fill
+
+    # group positions in the standard filling by their semistandard label
+    grupos = Dict{Int64,Vector{Int64}}()
+    @inbounds for (std, semi) in zip(relleno_standard, relleno_semi)
+        push!(get!(grupos, semi, Int[]), std)
+    end
+
+    prod = one(Basic)
+    for posiciones in values(grupos)
+        lenp = length(posiciones)
+        lenp <= 1 && continue
+        @inbounds for a in 1:lenp-1, b in a+1:lenp
+            u = posiciones[a]; v = posiciones[b]
+            u, v = u < v ? (u, v) : (v, u)
+            dist = axialdistance(tablon_standard, u, v)
+            prod *= (one(Basic) + inv(Basic(dist)))
         end
     end
     prod
 end
 
-function Θn(patron_semi::AbstractAlgebra.Generic.YoungTableau{Int64}, irrep::Array{Int64,1})
-    relleno_semi = patron_semi.fill
-    tablones_standard = StandardYoungTableaux((patron_semi.part) |> collect)
+function Θn(patron_semi::AbstractAlgebra.Generic.YoungTableau{Int64}, _::Array{Int64,1})
     tablon_standard = tablon_standar_asociado_a_semiestandar(patron_semi)
     relleno_standard = tablon_standard.fill
-    n = ((patron_semi.fill) |> collect |> length)
-    n = irrep |> length
-    
-    parejas = zip(relleno_standard, relleno_semi) |> collect
-    prod = one(Float64)#1.0
-    for k in 1:n
-        α = map(first,filter((xx -> (last(xx) == k)), parejas))
-        if length(α) > 1
-            for indx in 1:length(α), indy in indx+1:length(α)
-                x,y = α[indx], α[indy]
-                if x > y
-                  prod *= (1 + (1/axialdistance(tablon_standard, y, x) ))
-                else
-                  prod *= (1 + (1/axialdistance(tablon_standard, x, y) ))
-                end
-            end
+    relleno_semi = patron_semi.fill
+
+    grupos = Dict{Int64,Vector{Int64}}()
+    @inbounds for (std, semi) in zip(relleno_standard, relleno_semi)
+        push!(get!(grupos, semi, Int[]), std)
+    end
+
+    prod = one(Float64)
+    for posiciones in values(grupos)
+        lenp = length(posiciones)
+        lenp <= 1 && continue
+        @inbounds for a in 1:lenp-1, b in a+1:lenp
+            u = posiciones[a]; v = posiciones[b]
+            u, v = u < v ? (u, v) : (v, u)
+            dist = axialdistance(tablon_standard, u, v)
+            prod *= (1.0 + 1.0 / dist)
         end
     end
     prod
@@ -499,136 +490,115 @@ function calcula_proto_permutacion(proto::AbstractArray{Int64})
 end
 
 @doc Markdown.doc"""
-    genera_funcion(patron_semi::YoungTableau, irrep::Vector{T})
-    genera_funcion(patron_semi::YoungTableau)
-> Genera un diccionario con la función entre un tablón standar
-> y uno semistandar.
+    standard_to_semistandard_map(semi_tableau::YoungTableau, irrep::Vector{T})
+    standard_to_semistandard_map(semi_tableau::YoungTableau)
+> Build a dictionary mapping entries of the associated standard tableau
+> to the entries of the given semistandard tableau.
+
 # Examples:
 ```
 julia> t_u = YoungTableau([2,2, 1]);
 julia> fill!(t_u, [1,2,3,3,4]);
-julia> genera_funcion(t_u)
+julia> standard_to_semistandard_map(t_u)
 Dict(4=>4, 2=>2, 3=>3, 5=>5, 1=>1)
 ```
 """
-function genera_funcion(patron_semi::AbstractAlgebra.Generic.YoungTableau{Int64}, irrep::Array{Int64,1}) 
+function standard_to_semistandard_map(semi_tableau::AbstractAlgebra.Generic.YoungTableau{Int64}, irrep::Array{Int64,1}) 
     len = length(irrep)
-    relleno_semi = patron_semi.fill
+    semi_fill = semi_tableau.fill
 
-    if length(relleno_semi) >= len
-      return genera_funcion(patron_semi)
-    end
+    length(semi_fill) >= len && return standard_to_semistandard_map(semi_tableau)
 
-    tablones_standard = StandardYoungTableaux((patron_semi.part) |> collect)
-    tablon_standard = tablon_standar_asociado_a_semiestandar(patron_semi)
-    relleno_standard = tablon_standard.fill
+    standard_tableau = tablon_standar_asociado_a_semiestandar(semi_tableau)
+    standard_fill = standard_tableau.fill
     
-    parejas = zip(relleno_standard, relleno_semi) |> collect
-    dd = Dict{Int64, Int64}()
-
-    for (va, viene) in parejas
-      dd[va] = viene
-    end
-    nuevos = setdiff!(collect(1:len), relleno_standard)
-    for i in nuevos
-      cercano = sort(relleno_standard, by=(x -> abs(x-i))) |> first
-      dd[i] = dd[cercano]
+    mapping = Dict{Int64, Int64}()
+    @inbounds for (std, semi) in zip(standard_fill, semi_fill)
+        mapping[std] = semi
     end
 
-    dd
+    missing_labels = setdiff!(collect(1:len), standard_fill)
+    sorted_standard = sort(standard_fill)
+    # Missing-label policy: map unseen labels to the nearest existing standard label by absolute distance.
+    # This may send multiple missing labels to the same target; kept for backward compatibility.
+    @inbounds for label in missing_labels
+        nearest = sorted_standard[argmin(abs.(sorted_standard .- label))]
+        mapping[label] = mapping[nearest]
+    end
+
+    mapping
 end
 
-function genera_funcion(patron_semi::AbstractAlgebra.Generic.YoungTableau{Int64})
-    relleno_semi = patron_semi.fill
-    tablones_standard = StandardYoungTableaux((patron_semi.part) |> collect)
-    tablon_standard = tablon_standar_asociado_a_semiestandar(patron_semi)
-    relleno_standard = tablon_standard.fill
+function standard_to_semistandard_map(semi_tableau::AbstractAlgebra.Generic.YoungTableau{Int64})
+    semi_fill = semi_tableau.fill
+    standard_tableau = tablon_standar_asociado_a_semiestandar(semi_tableau)
+    standard_fill = standard_tableau.fill
     
-    parejas = zip(relleno_standard, relleno_semi) |> collect
-    dd = Dict{Int64, Int64}()
-
-    for (va, viene) in parejas
-      dd[va] = viene
+    mapping = Dict{Int64, Int64}()
+    @inbounds for (std, semi) in zip(standard_fill, semi_fill)
+      mapping[std] = semi
     end
-    dd
+    mapping
 end
+
+@deprecate genera_funcion(semi_tableau::AbstractAlgebra.Generic.YoungTableau{Int64}, irrep::Array{Int64,1}) standard_to_semistandard_map(semi_tableau, irrep)
+@deprecate genera_funcion(semi_tableau::AbstractAlgebra.Generic.YoungTableau{Int64}) standard_to_semistandard_map(semi_tableau)
 
 @doc Markdown.doc"""
-    calcular_sα(c::Content)
-> Return the size of the vector which represents the partition.
+    stabilizer_permutations(c::Content)
+> Return the list of permutations that stabilize each content block (product of symmetric groups).
 
 # Examples:
 ```
-julia> c = [0,1,2]; calcular_sα(c)
+julia> c = [0,1,2]; stabilizer_permutations(c)
 ```
 """
-function calcular_sα(c::Content)
-    inferior = 1
-    superior = length(c) 
-    list_perm_output = Perm{Int64}[]
-    for sub_cjto in c
-        if sub_cjto == 0
+function stabilizer_permutations(c::Content)
+    start_idx = 1
+    total_len = length(c)
+    perms = Perm{Int64}[]
+
+    for block_size in c
+        if block_size == 0
             continue
-        elseif sub_cjto == 1
-            inferior += 1
-        elseif sub_cjto > 1 && length(list_perm_output) == 0
-            conjunto = collect(inferior:(inferior + sub_cjto - 1))
-            permutaciones = permutations(conjunto) |> collect
+        elseif block_size == 1
+            start_idx += 1
+            continue
+        end
 
-            for p in permutaciones
-                lista = sortperm(vcat(collect(1:inferior - 1), p, collect((inferior + sub_cjto):superior)))
-                push!(list_perm_output, Perm(lista))
+        block = collect(start_idx:(start_idx + block_size - 1))
+        block_perms = collect(permutations(block))
+
+        if isempty(perms)
+            for p in block_perms
+                push!(perms, Perm(sortperm(vcat(collect(1:start_idx - 1), p, collect((start_idx + block_size):total_len)))))
             end
-            inferior += sub_cjto
         else
-            conjunto = collect(inferior:(inferior + sub_cjto - 1))
-            permutaciones = permutations(conjunto)
-
-            tmp = Perm{Int64}[]
-            for p in permutaciones
-                lista = sortperm(vcat(collect(1:inferior - 1), p , collect((inferior + sub_cjto):superior)))
-                for elem in list_perm_output
-                  push!(tmp, elem*Perm(lista))
+            new_perms = Perm{Int64}[]
+            for p in block_perms
+                perm_vec = vcat(collect(1:start_idx - 1), p, collect((start_idx + block_size):total_len))
+                perm = Perm(perm_vec)
+                for existing in perms
+                    push!(new_perms, existing * perm)
                 end
             end
-            list_perm_output = tmp
-            inferior += sub_cjto
+            perms = new_perms
         end
-        push!(list_perm_output, Perm(1:superior |> collect))
-        unique!(list_perm_output)
+
+        start_idx += block_size
     end
-    if length(list_perm_output) == 0
-      return [Perm(1:superior |> collect)]
+
+    if isempty(perms)
+        return [Perm(collect(1:total_len))]
     end
-    list_perm_output
+
+    unique!(perms)
+    perms
 end
 
-function calcular_sα(tablon::AbstractAlgebra.Generic.YoungTableau{Int64})
-  contenido = content(tablon)
-  inferior = 1
-  superior = length(contenido)
-  list_perm_output = Perm[]
-  for sub_cjto in contenido
-      if sub_cjto == 0
-          continue
-      elseif sub_cjto == 1
-          inferior += 1
-      elseif sub_cjto > 1
-          conjunto = collect(inferior:(inferior + sub_cjto - 1))
-          permutaciones = permutations(conjunto)
-
-          for p in permutaciones
-              lista = vcat(collect(1:inferior - 1), p, collect((inferior + sub_cjto):superior))
-              push!(list_perm_output, Perm(lista))
-          end
-          inferior += 1
-      end
-      unique!(list_perm_output)
-  end
-  if length(list_perm_output) == 0
-    return [Perm(1:superior |> collect)]
-  end
-  list_perm_output
+function stabilizer_permutations(tableau::AbstractAlgebra.Generic.YoungTableau{Int64})
+  content_vec = content(tableau)
+  stabilizer_permutations(content_vec)
 end
 
 function YoungTableau(tab::GTPattern)

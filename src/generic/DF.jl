@@ -260,7 +260,7 @@ Returns:
   - Vector{Vector{Perm}}: List of unique cosets for each representative
 
 Notes:
-- Uses calcular_sα for stabilizer computations
+- Uses stabilizer_permutations for stabilizer computations
 - Performs unique factorization of permutations
 """
 function double_coset(μ::Content, ν::Content)
@@ -268,7 +268,7 @@ function double_coset(μ::Content, ν::Content)
     representatives = find_double_coset_representatives(μ, ν)
     
     # Calculate stabilizers for both contents
-    stabilizer_left, stabilizer_right = calcular_sα.([μ, ν])
+    stabilizer_left, stabilizer_right = stabilizer_permutations.([μ, ν])
     
     # Pre-allocate array for cosets
     coset_list = Vector{Vector{Perm}}(undef, length(representatives))
@@ -326,8 +326,8 @@ function group_function(λ::Irrep, tab_u::YTableau, tab_v::YTableau; verbose::Bo
     index_v = indice_tablon_semistandard(tab_v)
     
     # Generate mapping functions
-    mapping_u = genera_funcion(tab_u, λ)
-    mapping_v = genera_funcion(tab_v, λ)
+    mapping_u = standard_to_semistandard_map(tab_u, λ)
+    mapping_v = standard_to_semistandard_map(tab_v, λ)
     
     # Calculate dimension
     dimension = length(content(tab_u))
@@ -400,8 +400,8 @@ function group_function(λ::Irrep, pat_u::GTPattern, pat_v::GTPattern; verbose::
     index_v = indice_tablon_semistandard(tableau_v)
     
     # Generate mapping functions
-    mapping_u = genera_funcion(tableau_u, λ)
-    mapping_v = genera_funcion(tableau_v, λ)
+    mapping_u = standard_to_semistandard_map(tableau_u, λ)
+    mapping_v = standard_to_semistandard_map(tableau_v, λ)
     
     # Calculate dimension from content
     dimension = length(content(tableau_u))
@@ -464,8 +464,8 @@ function group_function(λ::Irrep, pat_u::GTPattern, pat_v::GTPattern, mat::Arra
     tablones = StandardYoungTableaux(filter(x -> x > 0, λ))
     i = indice_tablon_semistandard(tab_u)
     j = indice_tablon_semistandard(tab_v)
-    f = genera_funcion(tab_u,λ)
-    g = genera_funcion(tab_v,λ)
+    f = standard_to_semistandard_map(tab_u,λ)
+    g = standard_to_semistandard_map(tab_v,λ)
     
     # probablemente se pueda sustituir con sum(λ)
     n = tab_u |> content |> length
@@ -515,8 +515,8 @@ function group_function(λ::Irrep, tab_u::YTableau, tab_v::YTableau, mat::Array{
     tablones = StandardYoungTableaux(filter(x -> x > 0, λ))
     i = indice_tablon_semistandard(tab_u)
     j = indice_tablon_semistandard(tab_v)
-    f = genera_funcion(tab_u,λ)
-    g = genera_funcion(tab_v,λ)
+    f = standard_to_semistandard_map(tab_u,λ)
+    g = standard_to_semistandard_map(tab_v,λ)
     
     # probablemente se pueda sustituir con sum(λ)
     n = tab_u |> content |> length
