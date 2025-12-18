@@ -380,29 +380,26 @@ end
 
 """
 function decreasable(x::GTPattern)
-    rows = deepcopy(x.rows)
-    
-    # Iterate from bottom to top
-    for row in length(rows):-1:2
-        row_vals = rows[row]
-        
-        # Check each position in the current row
-        for col in eachindex(row_vals)
-            row_vals[col] == 0 && continue
+    rows = x.rows
+    n_rows = length(rows)
 
-            # Try decreasing the current value
-            row_vals[col] -= 1
+    # Scan from bottom to top, checking GT inequalities in-place
+    @inbounds for row_idx in n_rows:-1:2
+        upper = rows[row_idx - 1]
+        current = rows[row_idx]
+        for col_idx in eachindex(current)
+            val = current[col_idx]
+            val == 0 && continue
 
-            # Check if the resulting pattern is valid
-            if isvalid(GTPattern(rows, rows[end]))
-                return row, col
+            val -= 1
+            # Check GT constraints locally without allocations
+            left_ok = col_idx == 1 || val <= upper[col_idx - 1]
+            right_ok = val >= upper[col_idx]
+            if left_ok && right_ok
+                return row_idx, col_idx
             end
-            
-            # Restore the value if invalid
-            row_vals[col] += 1
         end
     end
-    
+
     return nothing
 end
-
