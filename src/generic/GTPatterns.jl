@@ -238,21 +238,16 @@ function determine_next_row(patterns::Vector{GTPattern})
 end
 
 function basis_states(weight::Row)
-    # Initialize with first pattern
-    initial_pattern = GTPattern([], [])
-    create_first_pattern!(weight, initial_pattern)
-    
-    # Generate patterns iteratively
+    isempty(weight) && return GTPattern[]
+
+    initial_pattern = GTPattern(Row[weight], weight)
     current_patterns = determine_next_row(initial_pattern)
-    
-    # Pre-calculate iterations needed
-    iterations = length(weight) - 2
-    
-    # Generate subsequent patterns
+
+    iterations = max(length(weight) - 2, 0)
     @inbounds for _ in 1:iterations
         current_patterns = determine_next_row(current_patterns)
     end
-    
+
     return current_patterns
 end
 
@@ -319,46 +314,6 @@ end
     return content
 end
 
-
-@doc Markdown.doc"""
-> Custom `isvalid` for GTPattern
-
-  isvalid(x::GTPattern)
-
-# Examples:
-
-```julia
-julia> t = GTPattern([[2,1,0],[2,1],[2]],[2])
-julia> isvalid(t)
->true
-
-
-julia> t = GTPattern([[2,1,0],[2,2],[2]],[2])
-julia> isvalid(t)
->false
-```
-"""
-function isvalid(x::GTPattern)
-    rows = x.rows
-    n_rows = length(rows)
-    
-    # Early return for single-row patterns
-    n_rows == 1 && return true
-    
-    # Vectorized comparison instead of nested loops
-    for i in 1:n_rows-1
-        upper = rows[i]
-        lower = rows[i+1]
-        
-        # Check if any element violates the GT pattern conditions
-        # Using broadcasting for element-wise comparison
-        if any(!(lower[j] <= upper[j] && lower[j] >= upper[j+1]) 
-               for j in eachindex(lower))
-            return false
-        end
-    end
-    return true
-end
 
 """
     determine_next_pattern!(x::GTPattern)
