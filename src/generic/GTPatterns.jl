@@ -138,20 +138,23 @@ end
     Given a GTPattern, returns a vector of all GTPatterns extended by a single row.
 """
 function determine_next_row(pattern::GTPattern)
-    # Pre-calculate size for allocation
     next_possibilities = determine_next_possibilities(pattern.last_row)
-    patterns = Vector{GTPattern}(undef, length(collect(next_possibilities)))
-    
-    # Fill patterns array directly
-    for (idx, next_row) in enumerate(next_possibilities)
+    count = length(next_possibilities)
+    patterns = Vector{GTPattern}(undef, count)
+
+    rows_prefix = pattern.rows
+    prefix_len = length(rows_prefix)
+
+    idx = 1
+    for next_row in next_possibilities
         next_row_vec = collect(next_row)
-        new_pattern = GTPattern(
-            [pattern.rows..., next_row_vec],
-            next_row_vec
-        )
-        patterns[idx] = new_pattern
+        new_rows = Vector{Row}(undef, prefix_len + 1)
+        copyto!(new_rows, 1, rows_prefix, 1, prefix_len)
+        new_rows[end] = next_row_vec
+        patterns[idx] = GTPattern(new_rows, next_row_vec)
+        idx += 1
     end
-    
+
     return patterns
 end
 
@@ -162,27 +165,23 @@ Given a collection of GT patterns, extend each by one row in all valid ways.
 Returns a flat vector containing every resulting `GTPattern`.
 """
 function determine_next_row(patterns::Vector{GTPattern})
-    # Calculate total size for pre-allocation
-    total_patterns = sum(pattern -> 
-        length(collect(determine_next_possibilities(pattern.last_row))), 
-        patterns
-    )
-    
+    total_patterns = sum(pattern -> length(determine_next_possibilities(pattern.last_row)), patterns)
     result_patterns = Vector{GTPattern}(undef, total_patterns)
     current_idx = 1
     
     # Process each pattern
     for pattern in patterns
         next_possibilities = determine_next_possibilities(pattern.last_row)
+        rows_prefix = pattern.rows
+        prefix_len = length(rows_prefix)
         
         # Add new patterns directly to pre-allocated array
         for next_row in next_possibilities
             next_row_vec = collect(next_row)
-            new_pattern = GTPattern(
-                [pattern.rows..., next_row_vec],
-                next_row_vec
-            )
-            result_patterns[current_idx] = new_pattern
+            new_rows = Vector{Row}(undef, prefix_len + 1)
+            copyto!(new_rows, 1, rows_prefix, 1, prefix_len)
+            new_rows[end] = next_row_vec
+            result_patterns[current_idx] = GTPattern(new_rows, next_row_vec)
             current_idx += 1
         end
     end
