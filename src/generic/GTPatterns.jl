@@ -224,48 +224,50 @@ end
 """
 function calculate_pattern_differences(tab::GTPattern, row_number::Int64)
     rows = tab.rows
-    number_of_rows = length(rows)
-    
-    # Input validation with descriptive error
-    row_number > number_of_rows && throw(BoundsError("Row number $row_number exceeds pattern size $number_of_rows"))
-    
-    # Calculate the relevant rows we need to process
-    relevant_rows = number_of_rows - row_number + 1
-    
-    # Pre-allocate the differences array with known size
-    differences = zeros(Int64, relevant_rows + 1)
-    
-    # Process rows in reverse order more efficiently
+    row_num, n_rows = _validate_row_number(row_number, rows)
+    return _calculate_pattern_differences(rows, row_num, n_rows)
+end
+
+@inline function _validate_row_number(row_number::Integer, rows::Vector{Row})
+    row_number < 1 && throw(BoundsError("row_number must be at least 1, got $row_number"))
+    n_rows = length(rows)
+    row_number > n_rows && throw(BoundsError("Row number $row_number exceeds pattern size $n_rows"))
+    return Int(row_number), n_rows
+end
+
+@inline function _calculate_pattern_differences(rows::Vector{Row}, row_number::Int, n_rows::Int)
+    relevant_rows = n_rows - row_number + 1
+    differences = Vector{Int}(undef, relevant_rows)
+
+    # Walk the relevant rows from bottom to top, accumulating positive jumps
     max_value = 0
-    for (idx, row) in enumerate(view(rows[1:relevant_rows], reverse(1:relevant_rows)))
-        current_value = row[row_number]
-        current_difference = current_value - max_value
-        
-        if current_difference > 0
-            differences[idx + 1] = current_difference
-            max_value = current_value
+    @inbounds for i in 1:relevant_rows
+        row = rows[relevant_rows - i + 1]
+        val = row[row_number]
+        diff = val - max_value
+        if diff > 0
+            differences[i] = diff
+            max_value = val
+        else
+            differences[i] = 0
         end
     end
-    
-    # Pre-calculate final array size to avoid resizing
+
     total_elements = sum(differences)
-    content = Vector{Int64}(undef, total_elements)
-    
-    # Fill the content array more efficiently
+    content = Vector{Int}(undef, total_elements)
+
     pos = 1
     current_value = row_number
-    
-    # Process all differences except the first (which is always 0)
-    for diff_count in view(differences, 2:length(differences))
+    @inbounds for diff_count in differences
         if diff_count > 0
-            # Use range assignment instead of repeated push!
-            range_end = pos + diff_count - 1
-            content[pos:range_end] .= current_value
-            pos = range_end + 1
+            for j in 0:diff_count-1
+                content[pos + j] = current_value
+            end
+            pos += diff_count
         end
         current_value += 1
     end
-    
+
     return content
 end
 
