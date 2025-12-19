@@ -115,22 +115,72 @@ function create_first_pattern!(row::Row, pattern::GTPattern)
     return pattern
 end
 
+struct NextRowIterator
+    ranges::Vector{UnitRange{Int}}
+    len::Int
+end
+
+Base.IteratorSize(::Type{NextRowIterator}) = Base.HasLength()
+Base.IteratorEltype(::Type{NextRowIterator}) = Base.HasEltype()
+Base.eltype(::Type{NextRowIterator}) = Row
+Base.length(it::NextRowIterator) = it.len
+
+@inline function Base.iterate(it::NextRowIterator)
+    it.len == 0 && return nothing
+    n = length(it.ranges)
+    if n == 0
+        return (Int[], nothing)
+    end
+    current = Vector{Int}(undef, n)
+    @inbounds for i in 1:n
+        current[i] = first(it.ranges[i])
+    end
+    return (copy(current), current)
+end
+
+@inline function Base.iterate(it::NextRowIterator, state::Union{Nothing, Vector{Int}})
+    current = state
+    current === nothing && return nothing
+
+    n = length(it.ranges)
+    @inbounds for i in n:-1:1
+        rng = it.ranges[i]
+        if current[i] < last(rng)
+            current[i] += 1
+            # reset lower positions
+            for j in i+1:n
+                current[j] = first(it.ranges[j])
+            end
+            return (copy(current), current)
+        end
+    end
+
+    return nothing
+end
+
 """
     determine_next_possibilities(row::Row)
     Given one row of a GT pattern, calculates all the candidates for the next row.
-    TODO: check if the returned items are valid 
 """
 function determine_next_possibilities(row::Row)
-    # Pre-allocate the array with known size
     n_ranges = length(row) - 1
-    ranges = Vector{UnitRange{Int64}}(undef, n_ranges)
-    
-    # Fill ranges directly without push!
+    ranges = Vector{UnitRange{Int}}(undef, n_ranges)
+
     @inbounds for i in 1:n_ranges
         ranges[i] = row[i+1]:row[i]
     end
-    
-    return product(ranges...)
+
+    len = n_ranges == 0 ? 1 : begin
+        prod = 1
+        @inbounds for r in ranges
+            rlen = length(r)
+            prod *= rlen
+            rlen == 0 && break
+        end
+        prod
+    end
+
+    return NextRowIterator(ranges, len)
 end
 
 """
@@ -146,8 +196,7 @@ function determine_next_row(pattern::GTPattern)
     prefix_len = length(rows_prefix)
 
     idx = 1
-    for next_row in next_possibilities
-        next_row_vec = collect(next_row)
+    for next_row_vec in next_possibilities
         new_rows = Vector{Row}(undef, prefix_len + 1)
         copyto!(new_rows, 1, rows_prefix, 1, prefix_len)
         new_rows[end] = next_row_vec
@@ -176,8 +225,7 @@ function determine_next_row(patterns::Vector{GTPattern})
         prefix_len = length(rows_prefix)
         
         # Add new patterns directly to pre-allocated array
-        for next_row in next_possibilities
-            next_row_vec = collect(next_row)
+        for next_row_vec in next_possibilities
             new_rows = Vector{Row}(undef, prefix_len + 1)
             copyto!(new_rows, 1, rows_prefix, 1, prefix_len)
             new_rows[end] = next_row_vec
