@@ -1,6 +1,6 @@
 using LinearAlgebra: I, mul!
 
-export bloquesun, simplefactorization, simple
+export su2_block, bloquesun, su2_factorization, simplefactorization, simple, sud_from_angles
 export julia_to_mma, mma_to_julia
 
 """
@@ -46,12 +46,12 @@ end
 
 
 @doc Markdown.doc"""
-    bloquesun(size::Int, position::Int, angles::NTuple{3,Float64})
+    su2_block(size::Int, position::Int, angles::NTuple{3,Float64})
 
 Embed a 2×2 SU(2) rotation defined by Euler angles `(α, β, γ)` into an
 `size × size` identity matrix, acting on rows/cols `position` and `position+1`.
 """
-function bloquesun(size::Int, position::Int, angles::NTuple{3,Float64})
+function su2_block(size::Int, position::Int, angles::NTuple{3,Float64})
     @assert 0 < position < size
     @assert position + 1 <= size
 
@@ -67,24 +67,25 @@ function bloquesun(size::Int, position::Int, angles::NTuple{3,Float64})
 end
 
 """
-    simplefactorization(size::Int, quotient::Int)
+    su2_factorization(size::Int; skip_tail::Int = 0)
 
-Build a random `size × size` unitary as a product of SU(2) blocks; the
-`quotient` argument skips the last `quotient` layers of factors.
+Build a random `size × size` unitary (SU(d)) as a product of SU(2) blocks; setting
+`skip_tail` skips the last `skip_tail` layers of factors.
 """
-function simplefactorization(size::Int, quotient::Int)
-    @assert size > quotient
+function su2_factorization(size::Int; skip_tail::Int = 0)
+    @assert size > skip_tail
 
     mat = Matrix{ComplexF64}(I, size, size)
     tmp = similar(mat)
-    @inbounds for layer in 1:size-(1 + quotient)
+    last_layer = size - (1 + skip_tail)
+    @inbounds for layer in 1:last_layer
         @inbounds for position in layer:-1:1
             if position == 1
                 angles = rand(Float64,3) .* π
-                blk = bloquesun(size, position, (angles[1], angles[2], angles[3]))
+                blk = su2_block(size, position, (angles[1], angles[2], angles[3]))
             else
                 angles = rand(Float64,2) .* π
-                blk = bloquesun(size, position, (angles[1], angles[2], angles[1]))
+                blk = su2_block(size, position, (angles[1], angles[2], angles[1]))
             end
             mul!(tmp, mat, blk)
             mat, tmp = tmp, mat
@@ -93,37 +94,17 @@ function simplefactorization(size::Int, quotient::Int)
     return mat
 end
 
-"""
-    simplefactorization(size::Int)
-
-Build a random `size × size` unitary as a full product of SU(2) blocks.
-"""
-function simplefactorization(size::Int)
-    mat = Matrix{ComplexF64}(I, size, size)
-    tmp = similar(mat)
-    @inbounds for layer in 1:size-1
-        @inbounds for position in layer:-1:1
-            if position == 1
-                angles = rand(Float64,3) .* π
-                blk = bloquesun(size, position, (angles[1], angles[2], angles[3]))
-            else
-                angles = rand(Float64,2) .* π
-                blk = bloquesun(size, position, (angles[1], angles[2], angles[1]))
-            end
-            mul!(tmp, mat, blk)
-            mat, tmp = tmp, mat
-        end
-    end
-    return mat
-end
+# Backward-compatible wrappers
+simplefactorization(size::Int, quotient::Int) = su2_factorization(size; skip_tail = quotient)
+simplefactorization(size::Int) = su2_factorization(size)
 
 """
-    simple(angles::Vector{Float64}, size::Int; quotient::Bool = false)
+    sud_from_angles(angles::Vector{Float64}, size::Int; quotient::Bool = false)
 
-Construct a unitary matrix from a supplied list of Euler angles, optionally
+Construct an SU(d) matrix from a supplied list of Euler angles, optionally
 zeroing the earliest layers when `quotient` is true.
 """
-function simple(angles::Vector{Float64}, size::Int; quotient::Bool = false)
+function sud_from_angles(angles::Vector{Float64}, size::Int; quotient::Bool = false)
     @assert length(angles) == size^2 - 1
 
     angles_buf = copy(angles)
@@ -141,12 +122,12 @@ function simple(angles::Vector{Float64}, size::Int; quotient::Bool = false)
             if position == 1
                 ang1, ang2, ang3 = angles_buf[idx], angles_buf[idx+1], angles_buf[idx+2]
                 idx += 3
-                blk = bloquesun(size, position, (ang1, ang2, ang3))
+                blk = su2_block(size, position, (ang1, ang2, ang3))
                 mul!(tmp, blk, mat)
             else
                 ang1, ang2 = angles_buf[idx], angles_buf[idx+1]
                 idx += 2
-                blk = bloquesun(size, position, (ang1, ang2, ang1))
+                blk = su2_block(size, position, (ang1, ang2, ang1))
                 mul!(tmp, blk, mat)
             end
             mat, tmp = tmp, mat
@@ -155,3 +136,7 @@ function simple(angles::Vector{Float64}, size::Int; quotient::Bool = false)
 
     return mat
 end
+
+const simple = sud_from_angles
+# Backward compatibility for older callers
+const bloquesun = su2_block

@@ -142,11 +142,11 @@ end
 
 @testset "Comparison between Legendre polynomails and D-function" begin
   α1,β1,γ1 = rand(Float64,3)
-  xx=bloquesun(3,1,(α1,β1,γ1))
+  xx=su2_block(3,1,(α1,β1,γ1))
   α2,β2 = rand(Float64,2)
-  yy=bloquesun(3,2,(α2,β2,α2))
+  yy=su2_block(3,2,(α2,β2,α2))
   α3,β3,γ3 = rand(Float64,3)
-  zz=bloquesun(3,1,(α3,β3,γ3))
+  zz=su2_block(3,1,(α3,β3,γ3))
 
   uu = xx*yy*zz
 
@@ -462,11 +462,11 @@ end
     welcome = basis_states([2,0,0]);
 
     α1,β1,γ1 = rand(Float64,3)
-    xx=bloquesun(3,1,(α1,β1,γ1))
+    xx=su2_block(3,1,(α1,β1,γ1))
     α2,β2 = rand(Float64,2)
-    yy=bloquesun(3,2,(α2,β2,α2))
+    yy=su2_block(3,2,(α2,β2,α2))
     α3,β3,γ3 = rand(Float64,3)
-    zz=bloquesun(3,1,(α3,β3,γ3))
+    zz=su2_block(3,1,(α3,β3,γ3))
 
     mat = xx*yy*zz;
     rate1 = abs( group_function([2,1,0], welcome[5], welcome[3], mat) )^2 + abs( group_function([2,1,0], welcome[5], welcome[5], mat) )^2
@@ -477,17 +477,17 @@ end
 
 @testset "Sum rules 4x4" begin
     α1,β1,γ1 = rand(Float64,3)
-    xx=bloquesun(4,1,(α1,β1,γ1))
+    xx=su2_block(4,1,(α1,β1,γ1))
     α2,β2 = rand(Float64,2)
-    yy=bloquesun(4,2,(α2,β2,α2))
+    yy=su2_block(4,2,(α2,β2,α2))
     α3,β3,γ3 = rand(Float64,3)
-    zz=bloquesun(4,1,(α3,β3,γ3))
+    zz=su2_block(4,1,(α3,β3,γ3))
     α4,β4 = rand(Float64,3)
-    xx2=bloquesun(4,3,(α4,β4,α4))
+    xx2=su2_block(4,3,(α4,β4,α4))
     α5,β5 = rand(Float64,2)
-    yy2=bloquesun(4,2,(α5,β5,α5))
+    yy2=su2_block(4,2,(α5,β5,α5))
     α6,β6,γ6 = rand(Float64,3)
-    zz2=bloquesun(4,1,(α6,β6,γ6))
+    zz2=su2_block(4,1,(α6,β6,γ6))
 
     welcome = basis_states([2,0,0,0])
 
@@ -501,17 +501,17 @@ end
 
 @testset "Comparison with permanent of a submatrix" begin
     α1,β1,γ1 = rand(Float64,3)
-    xx=bloquesun(4,1,(α1,β1,γ1))
+    xx=su2_block(4,1,(α1,β1,γ1))
     α2,β2 = rand(Float64,2)
-    yy=bloquesun(4,2,(α2,β2,α2))
+    yy=su2_block(4,2,(α2,β2,α2))
     α3,β3,γ3 = rand(Float64,3)
-    zz=bloquesun(4,1,(α3,β3,γ3))
+    zz=su2_block(4,1,(α3,β3,γ3))
     α4,β4 = rand(Float64,3)
-    xx2=bloquesun(4,3,(α4,β4,α4))
+    xx2=su2_block(4,3,(α4,β4,α4))
     α5,β5 = rand(Float64,2)
-    yy2=bloquesun(4,2,(α5,β5,α5))
+    yy2=su2_block(4,2,(α5,β5,α5))
     α6,β6,γ6 = rand(Float64,3)
-    zz2=bloquesun(4,1,(α6,β6,γ6))
+    zz2=su2_block(4,1,(α6,β6,γ6))
 
     mat4 = xx*yy*zz*xx2*yy2*zz2
     welcome = basis_states([3,0,0,0])
@@ -525,20 +525,20 @@ end
 
 @testset "Testing labelling for construction of unitary matrices" begin
   α1,β1,γ1 = rand(Float64,3)
-  xx=bloquesun(4,1,(α1,β1,γ1))
+  xx=su2_block(4,1,(α1,β1,γ1))
   α2,β2 = rand(Float64,2)
-  yy=bloquesun(4,2,(α2,β2,α2))
+  yy=su2_block(4,2,(α2,β2,α2))
   α3,β3,γ3 = rand(Float64,3)
-  zz=bloquesun(4,1,(α3,β3,γ3))
+  zz=su2_block(4,1,(α3,β3,γ3))
   α4,β4 = rand(Float64,3)
-  xx2=bloquesun(4,3,(α4,β4,α4))
+  xx2=su2_block(4,3,(α4,β4,α4))
   α5,β5 = rand(Float64,2)
-  yy2=bloquesun(4,2,(α5,β5,α5))
+  yy2=su2_block(4,2,(α5,β5,α5))
   α6,β6,γ6 = rand(Float64,3)
-  zz2=bloquesun(4,1,(α6,β6,γ6))
+  zz2=su2_block(4,1,(α6,β6,γ6))
 
-  matsimple = simple([α1,β1,γ1,α2,β2,α3,β3,γ3,α4,β4,α5,β5,α6,β6,γ6], 4)
-  matsimple_quotient = simple([α1,β1,γ1,α2,β2,α3,β3,γ3,α4,β4,α5,β5,α6,β6,γ6], 4; quotient = true)
+  matsimple = sud_from_angles([α1,β1,γ1,α2,β2,α3,β3,γ3,α4,β4,α5,β5,α6,β6,γ6], 4)
+  matsimple_quotient = sud_from_angles([α1,β1,γ1,α2,β2,α3,β3,γ3,α4,β4,α5,β5,α6,β6,γ6], 4; quotient = true)
   mat =  zz2*yy2*xx2*zz*yy*xx 
   mat_quotient =  zz2*yy2*xx2#*zz*yy*xx 
 
@@ -548,12 +548,12 @@ end
 
 @testset "Testing labelling for construction of unitary matrices" begin
     α1,β1,γ1 = rand(Float64,3)
-    xx=bloquesun(3,1,(α1,β1,γ1))
+    xx=su2_block(3,1,(α1,β1,γ1))
     α2,β2 = rand(Float64,2)
-    yy=bloquesun(3,2,(α2,β2,α2))
+    yy=su2_block(3,2,(α2,β2,α2))
     α3,β3,γ3 = rand(Float64,3)
-    zz=bloquesun(3,1,(α3,β3,γ3))
-    mat = simple([α1,β1,γ1, α2,β2, α3,β3,γ3 ], 3)
+    zz=su2_block(3,1,(α3,β3,γ3))
+    mat = sud_from_angles([α1,β1,γ1, α2,β2, α3,β3,γ3 ], 3)
     mat2 = zz*yy*xx;
     @test norm(mat-mat2) < 10^(-5)
 

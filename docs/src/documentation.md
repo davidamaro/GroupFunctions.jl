@@ -19,5 +19,5 @@ GT patterns are used to denote the basis states.
 GT patterns are used to denote the basis states.
 
 ```@docs
-    bloquesun
+    su2_block
 ```

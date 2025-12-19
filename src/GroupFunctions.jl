@@ -17,7 +17,7 @@ module GroupFunctions
   export group_function, mma_to_julia
   export zweight, pweight
   export generate_matrix
-  export bloquesun, simplefactorization, simple
+  export su2_block, bloquesun, su2_factorization, simplefactorization, simple, sud_from_angles
   export expand
   export julia_to_mma
 end # module
