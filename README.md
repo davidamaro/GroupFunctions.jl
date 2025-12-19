@@ -1,13 +1,27 @@
-[![Build Status](https://github.com/davidamaro/GroupFunctions.jl/actions/workflows/CI.yml/badge.svg?branch=master)](https://github.com/davidamaro/GroupFunctions.jl/actions/workflows/CI.yml?query=branch%3Amaster)
-[![](https://img.shields.io/badge/docs-dev-blue.svg)](https://davidamaro.github.io/GroupFunctions.jl/dev)
+[![CI](https://github.com/davidamaro/GroupFunctions.jl/actions/workflows/CI.yml/badge.svg?branch=master)](https://github.com/davidamaro/GroupFunctions.jl/actions/workflows/CI.yml?query=branch%3Amaster)
+[![Docs – stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://davidamaro.github.io/GroupFunctions.jl/stable)
+[![Docs – dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://davidamaro.github.io/GroupFunctions.jl/dev)
 # GroupFunctions.jl
 
 A Julia library to compute D-functions, which are entries of the irreducible representations of the unitary group U(d). These entries can be numeric or symbolic.
 
+## Highlights
+- Numerical and symbolic D-functions for U(d) irreps
+- Gelfand–Tsetlin basis construction via `basis_states`
+- Works with Haar-random unitaries (e.g. using RandomMatrices.jl)
+- Export symbolic results to Mathematica with `julia_to_mma`
+
 ## Installation
 
-### Julia is already installed
-Alternatively, you can install the package directly from the repository:
+Requires Julia 1.6 or newer.
+
+- **From the Julia registry (recommended):**
+
+```julia
+pkg> add GroupFunctions
+```
+
+- **From this repository:**
 
 ```console
 user@machine:~$ mkdir new_code && cd new_code
@@ -21,34 +35,36 @@ julia> ] add https://github.com/davidamaro/GroupFunctions.jl
 - **Linux**: Use the appropriate package manager (e.g., `sudo pacman -S julia`).
 - **Windows**: Run `winget install julia -s msstore` in your terminal and follow the steps.
 
-## Usage
+## Quick start
 
 ```julia
-julia> using RandomMatrices # You may be asked to install it. Just answer yes.
-julia> using GroupFunctions
-julia> my_fav_irrep = [2, 1, 0]
-julia> my_fav_matrix = rand(Haar(2), 3)
-julia> my_fav_basis = basis_states(my_fav_irrep)
-julia> # Check out some cool Gelfand-Tsetlin patterns:
-julia> my_fav_basis[1]
-julia> my_fav_basis[3]
-julia> group_function(my_fav_irrep, my_fav_basis[1], my_fav_basis[3], my_fav_matrix)
-julia> # For a symbolic matrix, simply omit the matrix argument
-julia> output = group_function(my_fav_irrep, my_fav_basis[1], my_fav_basis[3])
-julia> # Translate the symbolic D-function for use in Mathematica
-julia> julia_to_mma(output)
+using GroupFunctions
+using RandomMatrices  # Optional: for Haar-random unitaries
+
+irrep = [2, 1, 0]
+U = rand(Haar(2), 3)
+basis = basis_states(irrep)
+
+# Numerical D-function entry
+group_function(irrep, basis[1], basis[3], U)
+
+# Symbolic D-function entry
+sym = group_function(irrep, basis[1], basis[3])
+julia_to_mma(sym)  # Mathematica-friendly expression
 ```
 
-For more examples, see the "Tutorials" section in the [documentation](https://davidamaro.github.io/GroupFunctions.jl/dev/).
+For more examples and API details, see the documentation: https://davidamaro.github.io/GroupFunctions.jl/dev/
 
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request. A to-do list is included in the `todo.txt` file.
 
+- Run tests: `julia --project -e 'using Pkg; Pkg.test()'`
+- Build docs locally: `julia --project=docs docs/make.jl`
+
 ## License
 
-Until the code from AbstractAlgebra.jl (to deal with Young tableaux) is removed from this package,
-the license will align with AbstractAlgebra.jl's.
+GroupFunctions.jl is distributed under the MIT License (see `LICENSE`). While the package still contains code derived from AbstractAlgebra.jl to handle Young tableaux, it follows the same (MIT) license terms.
 
 ## References
 
@@ -59,8 +75,4 @@ the license will align with AbstractAlgebra.jl's.
 
 ## Citation
 
-Pending.
-
-[![build](https://github.com/davidamaro/GroupFunctions.jl/workflows/CI/badge.svg)](https://github.com/davidamaro/GroupFunctions.jl/actions?query=workflow%3ACI)
-[![Documentation](https://img.shields.io/badge/docs-stable-blue.svg)](https://davidamaro.github.io/GroupFunctions.jl/stable)
-[![Documentation](https://img.shields.io/badge/docs-master-blue.svg)](https://davidamaro.github.io/GroupFunctions.jl/dev)
+Citation information is pending. In the meantime, please cite the repository URL and version tag (e.g., “GroupFunctions.jl v0.1.5, 2024, https://github.com/davidamaro/GroupFunctions.jl”).
