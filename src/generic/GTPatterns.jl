@@ -24,9 +24,9 @@ TODO: either make it immutable, or somehow auto-change last_row upon change in r
 
 ```julia
 julia> gt=GTPattern([[2,1,0],[2,1],[2]])
-│ 2 1 0 ╲
-│ 2 1    〉
-│ 2     ╱
+│ 2   1   0 ╲
+│   2   1    〉
+│     2     ╱
 
 
 julia> gt.rows
@@ -56,44 +56,51 @@ const Row = Array{Int64,1}
 
 Pretty-print a `GTPattern` as a triangular diagram with slashes indicating
 the GT interlacing structure.
-#TODO make them centered.
 """
 function Base.show(io::IO, ::MIME"text/plain", G::GTPattern)
     list_of_rows = G.rows
-    pattern = ""
     n = length(list_of_rows)
+    num_width = maximum(length(string(num)) for row in list_of_rows for num in row)
+    spacing = num_width + 2                       # keep entries apart and guarantees even padding
+    first_row_len = length(list_of_rows[1])
+    first_row_width = first_row_len * num_width + (first_row_len - 1) * spacing
+    conn_upper = '╲'
+    conn_middle = '〉'
+    conn_lower = '╱'
+
     mitad = n ÷ 2
     between = isodd(n)
     cont = 1
     i = 1
-    length_first_row = length(list_of_rows[1])*2
+
+    buffer = IOBuffer()
     for row in list_of_rows
-        pattern *= "│ "
-        for number in row
-            pattern *= string(number)
-            pattern *= " "
+        row_width = length(row) * num_width + (length(row) - 1) * spacing
+        padding = (first_row_width - row_width) ÷ 2
+
+        print(buffer, "│ ", repeat(" ", padding))
+        for (j, number) in enumerate(row)
+            num_str = string(number)
+            print(buffer, rpad(num_str, num_width))
+            j < length(row) && print(buffer, repeat(" ", spacing))
         end
-        pattern *= repeat(" ", length_first_row - 2*length(row))
+
+        print(buffer, repeat(" ", padding + 1))
         if i <= mitad
-            pattern *= repeat(" ", cont - 1)
-            pattern *= "╲\n"
+            print(buffer, repeat(" ", cont - 1), conn_upper, "\n")
             cont += 1
         elseif between
-            pattern *= repeat(" ", cont - 1)
-            pattern *= "〉\n"
+            print(buffer, repeat(" ", cont - 1), conn_middle, "\n")
             between = false
         else
-            if !between && cont > mitad
-                cont -= 1
-            end
-            pattern *= repeat(" ", cont - 1)
-            pattern *= "╱\n"
+            cont > mitad && (cont -= 1)
+            print(buffer, repeat(" ", cont - 1), conn_lower, "\n")
             cont -= 1
         end
         i += 1
     end
 
-    print(io, pattern)
+    print(io, String(take!(buffer)))
 end
 
 """
