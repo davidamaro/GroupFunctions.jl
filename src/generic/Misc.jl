@@ -36,10 +36,13 @@ u_1_1
 ```
 """
 function mma_to_julia(expr_str::String)
-    expr_str = replace(expr_str, ", " => "_", "[" => "_", "]" => "")
+    expr_str = replace(expr_str, ", " => "_")
+    expr_str = replace(expr_str, "[" => "_")
+    expr_str = replace(expr_str, "]" => "")
     expr_str = replace(expr_str, r"x(_\d_\d)(\^\d{1})" => s"*(SymEngine.symbols(\"u\1\")\2)")
     expr_str = replace(expr_str, r"(x_\d_\d)"          => s"SymEngine.symbols(\"\g<1>\")")
-    expr_str = replace(expr_str, " " => "", "x" => "u")
+    expr_str = replace(expr_str, " " => "")
+    expr_str = replace(expr_str, "x" => "u")
 
     eval(Meta.parse(expr_str))
 end
