@@ -309,32 +309,47 @@ end
 
 Intended for use when building Yamanouchi blocks; assumes `entry > 1` and
 `entry` does not exceed the larger of `length(irrep)` and the tableau fill length.
+
+# Examples:
+```
+julia> t = YoungTableau([2,1]); fill!(t, [1,2,3]);
+julia> swap_adjacent_entries(t, 3, [2,1]).fill
+3-element Vector{Int64}:
+ 1
+ 3
+ 2
+
+julia> t = YoungTableau([2,1]); fill!(t, [1,1,2]);
+julia> swap_adjacent_entries(t, 3, [3]).fill
+3-element Vector{Int64}:
+ 1
+ 1
+ 3
+```
 """
 function swap_adjacent_entries(tableau::AbstractAlgebra.Generic.YoungTableau{Int64}, entry::Int64, irrep::Array{Int64,1})
-    new_tableau = deepcopy(tableau)
-    fill_values = new_tableau.fill
-    @assert entry > 1 && entry <= maximum((length(irrep), length(fill_values)))
+    fill_entries = copy(tableau.fill)
+    @assert entry > 1 && entry <= maximum((length(irrep), length(fill_entries)))
 
-    positions = Int[]
-    for (idx, value) in enumerate(fill_values)
+    swap_positions = Int[]
+    for (idx, value) in enumerate(fill_entries)
         if value == entry || value == entry - 1
-            push!(positions, idx)
+            push!(swap_positions, idx)
         end
-        if length(positions) == 2
+        if length(swap_positions) == 2
             break
         end
     end
 
-    if length(positions) > 1
-        tmp = fill_values[positions[1]]
-        fill_values[positions[1]] = fill_values[positions[2]]
-        fill_values[positions[2]] = tmp
-        fill!(new_tableau, fill_values)
+    if length(swap_positions) > 1
+        pos1, pos2 = swap_positions
+        fill_entries[pos1], fill_entries[pos2] = fill_entries[pos2], fill_entries[pos1]
     else
-        fill_values[positions[1]] = entry
-        fill!(new_tableau, fill_values)
+        fill_entries[swap_positions[1]] = entry
     end
 
+    new_tableau = YoungTableau(tableau.part)
+    fill!(new_tableau, fill_entries)
     new_tableau
 end
 ##############################################################################
