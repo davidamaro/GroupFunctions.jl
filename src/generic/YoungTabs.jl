@@ -64,17 +64,17 @@ julia> matrix_repr(y)
   [1, 4]  =  4
 ```
 """
-function determine_position(Y::AbstractAlgebra.Generic.YoungTableau{Int64}, entrada::Int64)
-   k=1
-   for (idx, p) in enumerate(Y.part)
-      for (idy, q) in enumerate(Y.fill[k:k+p-1])
-        if q == entrada
-          return idx, idy
+function determine_position(tableau::AbstractAlgebra.Generic.YoungTableau{Int64}, entry::Int64)
+   row_start = 1
+   @inbounds for (row_idx, row_len) in enumerate(tableau.part)
+      for col_idx in 1:row_len
+        if tableau.fill[row_start + col_idx - 1] == entry
+          return row_idx, col_idx
         end
       end
-      k += p
+      row_start += row_len
    end
-   0,0
+   return 0, 0
 end
 
 function determinar_coeficiente_irrep_yamanouchi(Y::AbstractAlgebra.Generic.YoungTableau{Int64}, u::Integer)
