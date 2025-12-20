@@ -367,7 +367,7 @@ end
 function indice_tablon_semistandard(tablon_semistandard::AbstractAlgebra.Generic.YoungTableau{Int64})
     particion = (tablon_semistandard.part) |> collect
     tablones_standard = StandardYoungTableaux(particion)
-    target = tablon_standar_asociado_a_semiestandar(tablon_semistandard)
+    target = standard_tableau_from_semistandard(tablon_semistandard)
 
     idx = findfirst(x -> x.fill == target.fill, tablones_standard)
     idx === nothing && error("No matching standard tableau found for fill=$(tablon_semistandard.fill) and part=$(tablon_semistandard.part)")
@@ -399,41 +399,145 @@ julia> content(ss, [2,1,0,0])
 ```
 """
 #function content(y::YoungTableau, λ::Irrep)
-function content(y::AbstractAlgebra.Generic.YoungTableau{Int64}, λ::Irrep)
-    relleno = y.fill
-    if length(relleno) <= length(λ)
-      len = length(λ)
-    else
-      len = length(relleno)
-    end
-    tablon_nuevo = tablon_standar_asociado_a_semiestandar(y).fill
-    nuevo_relleno = deepcopy(relleno)
-    anterior = relleno[1]
-    for i in 1:len
-      if i ∉ tablon_nuevo
-        push!(nuevo_relleno, anterior)
-      end
-      if i > length(relleno)
-        break
-      end
-      relleno[i] > anterior ? anterior = relleno[i] : continue
-    end
+@doc Markdown.doc"""
+    content_length(fill_values::Vector{Int64}, irrep::Irrep) -> Int
+> Return the length used for content calculations, i.e. `max(length(fill_values), length(irrep))`.
 
-    [count(y -> x == y,nuevo_relleno) for x in 1:len]
-end
+# Examples:
+```
+julia> content_length([1,2,3], [2,1])
+3
 
-function content(p::AbstractAlgebra.Generic.YoungTableau{Int64})
-    relleno = p.fill
-    len = length(relleno)
-    [count(y -> x == y,relleno) for x in 1:len]
+julia> content_length([1,2], [2,1,0,0])
+4
+```
+"""
+function content_length(fill_values::Vector{Int64}, irrep::Irrep)
+    return max(length(fill_values), length(irrep))
 end
 
 @doc Markdown.doc"""
-    tablon_standar_asociado_a_semiestandar(tablon_semistandard::YoungTableau)
+    expanded_fill_values(fill_values::Vector{Int64}, standard_fill::Vector{Int64}, len::Int) -> Vector{Int64}
+> Expand `fill_values` by inserting the most recent seen label for missing indices
+> in `standard_fill`, up to `len`.
+
+# Examples:
+```
+julia> expanded_fill_values([1,2,2], [1,3], 4)
+4-element Vector{Int64}:
+ 1
+ 2
+ 2
+ 2
+```
+"""
+function expanded_fill_values(fill_values::Vector{Int64}, standard_fill::Vector{Int64}, len::Int)
+    expanded_fill = copy(fill_values)
+    last_seen = fill_values[1]
+
+    present = falses(len)
+    @inbounds for value in standard_fill
+        if value <= len
+            present[value] = true
+        end
+    end
+
+    for i in 1:len
+      if !present[i]
+        push!(expanded_fill, last_seen)
+      end
+      if i > length(fill_values)
+        break
+      end
+      if fill_values[i] > last_seen
+        last_seen = fill_values[i]
+      end
+    end
+
+    return expanded_fill
+end
+
+@doc Markdown.doc"""
+    count_entries(values::Vector{Int64}, len::Int) -> Vector{Int}
+> Count occurrences of integers `1:len` in `values`.
+
+# Examples:
+```
+julia> count_entries([1,1,3,2,3], 3)
+3-element Vector{Int64}:
+ 2
+ 1
+ 2
+```
+"""
+function count_entries(values::Vector{Int64}, len::Int)
+    counts = zeros(Int, len)
+    @inbounds for value in values
+        if value <= len
+            counts[value] += 1
+        end
+    end
+    return counts
+end
+
+@doc Markdown.doc"""
+    content(y::YoungTableau, λ::Irrep) -> Vector{Int}
+> Return the content vector sized to `max(length(y.fill), length(λ))`.
+> In simple terms: it counts how many times each label (1, 2, 3, ...) appears
+> in the tableau, padding as needed to match the irrep length.
+
+# Examples:
+```
+julia> t = YoungTableau([2,1]); fill!(t, [1,2,2]);
+julia> content(t, [2,1,0])
+3-element Vector{Int64}:
+ 1
+ 2
+ 0
+
+julia> t = YoungTableau([2,1]); fill!(t, [1,1,2]);
+julia> content(t, [3])
+3-element Vector{Int64}:
+ 2
+ 1
+ 0
+```
+"""
+function content(y::AbstractAlgebra.Generic.YoungTableau{Int64}, λ::Irrep)
+    fill_values = y.fill
+    len = content_length(fill_values, λ)
+    standard_fill = standard_tableau_from_semistandard(y).fill
+    expanded = expanded_fill_values(fill_values, standard_fill, len)
+    return count_entries(expanded, len)
+end
+
+@doc Markdown.doc"""
+    content(p::YoungTableau) -> Vector{Int}
+> Return the content vector of the tableau fill (counts of each label).
+> In simple terms: it counts how many times each label (1, 2, 3, ...) appears
+> in the tableau.
+
+# Examples:
+```
+julia> t = YoungTableau([2,1]); fill!(t, [1,2,2]);
+julia> content(t)
+2-element Vector{Int64}:
+ 1
+ 2
+```
+"""
+function content(p::AbstractAlgebra.Generic.YoungTableau{Int64})
+    fill_values = p.fill
+    len = length(fill_values)
+    return count_entries(fill_values, len)
+end
+
+@doc Markdown.doc"""
+    standard_tableau_from_semistandard(tablon_semistandard::YoungTableau)
 > Returns a YoungTableau corresponding to the standard YoungTableau such that
 > f is non decreasing.
 """
-function tablon_standar_asociado_a_semiestandar(tablon_semistandard::AbstractAlgebra.Generic.YoungTableau{Int64})
+function standard_tableau_from_semistandard(tablon_semistandard::AbstractAlgebra.Generic.YoungTableau{Int64})
     particion = (tablon_semistandard.part) |> collect
     tablon_standard = YoungTableau(particion)
 
@@ -454,7 +558,7 @@ end
 > Computes coefficient Θ. Returns a Float64
 """
 function Θ(patron_semi::AbstractAlgebra.Generic.YoungTableau{Int64}, _::Array{Int64,1})
-    tablon_standard = tablon_standar_asociado_a_semiestandar(patron_semi)
+    tablon_standard = standard_tableau_from_semistandard(patron_semi)
     relleno_standard = tablon_standard.fill
     relleno_semi = patron_semi.fill
 
@@ -479,7 +583,7 @@ function Θ(patron_semi::AbstractAlgebra.Generic.YoungTableau{Int64}, _::Array{I
 end
 
 function Θn(patron_semi::AbstractAlgebra.Generic.YoungTableau{Int64}, _::Array{Int64,1})
-    tablon_standard = tablon_standar_asociado_a_semiestandar(patron_semi)
+    tablon_standard = standard_tableau_from_semistandard(patron_semi)
     relleno_standard = tablon_standard.fill
     relleno_semi = patron_semi.fill
 
@@ -553,7 +657,7 @@ function standard_to_semistandard_map(semi_tableau::AbstractAlgebra.Generic.Youn
 
     length(semi_fill) >= len && return standard_to_semistandard_map(semi_tableau)
 
-    standard_tableau = tablon_standar_asociado_a_semiestandar(semi_tableau)
+    standard_tableau = standard_tableau_from_semistandard(semi_tableau)
     standard_fill = standard_tableau.fill
     
     mapping = Dict{Int64, Int64}()
@@ -575,7 +679,7 @@ end
 
 function standard_to_semistandard_map(semi_tableau::AbstractAlgebra.Generic.YoungTableau{Int64})
     semi_fill = semi_tableau.fill
-    standard_tableau = tablon_standar_asociado_a_semiestandar(semi_tableau)
+    standard_tableau = standard_tableau_from_semistandard(semi_tableau)
     standard_fill = standard_tableau.fill
     
     mapping = Dict{Int64, Int64}()
