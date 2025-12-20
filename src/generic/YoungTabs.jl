@@ -670,11 +670,37 @@ function standard_to_semistandard_map(semi_tableau::AbstractAlgebra.Generic.Youn
     # Missing-label policy: map unseen labels to the nearest existing standard label by absolute distance.
     # This may send multiple missing labels to the same target; kept for backward compatibility.
     @inbounds for label in missing_labels
-        nearest = sorted_standard[argmin(abs.(sorted_standard .- label))]
+        nearest = nearest_standard_label(sorted_standard, label)
         mapping[label] = mapping[nearest]
     end
 
     mapping
+end
+
+@doc Markdown.doc"""
+    nearest_standard_label(sorted_standard::Vector{Int64}, label::Int) -> Int
+> Return the nearest label in `sorted_standard` to `label` (ties choose the lower neighbor).
+
+# Examples:
+```
+julia> nearest_standard_label([1,4,7], 6)
+7
+
+julia> nearest_standard_label([1,4,7], 5)
+4
+```
+"""
+function nearest_standard_label(sorted_standard::Vector{Int64}, label::Int)
+    idx = searchsortedlast(sorted_standard, label)
+    if idx == 0
+        return sorted_standard[1]
+    elseif idx == length(sorted_standard)
+        return sorted_standard[end]
+    else
+        left = sorted_standard[idx]
+        right = sorted_standard[idx + 1]
+        return (label - left) <= (right - label) ? left : right
+    end
 end
 
 function standard_to_semistandard_map(semi_tableau::AbstractAlgebra.Generic.YoungTableau{Int64})
