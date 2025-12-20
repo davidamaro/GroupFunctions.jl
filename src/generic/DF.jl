@@ -666,3 +666,4 @@ function pweight(gt::GTPattern)
     end
     total
 end
+import Combinatorics: permutations

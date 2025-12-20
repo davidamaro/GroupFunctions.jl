@@ -1,6 +1,6 @@
 using AbstractAlgebra
+import Combinatorics: permutations
 import LinearAlgebra:  dot, I
-import Combinatorics:  permutations
 import SymEngine: Basic
 
 const Content = Vector{T} where T <: Integer
