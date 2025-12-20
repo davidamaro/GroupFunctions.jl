@@ -258,19 +258,19 @@ end
     was: encontrar_esquina(lista tuplas)
     TODO: see what it actually expects as an input. vector of tuples is a bit weird.
 """
-function determine_corner(lista::Array{Tuple{Int64,Int64},1})
-    (fila_malo, col_malo) = lista[end]
-    i_max, jm = (1,1)
-    if col_malo == 1
-        return lista[end-1]
+function determine_corner(path::Array{Tuple{Int64,Int64},1})
+    (violation_row, violation_col) = path[end]
+    corner_row, corner_col = (1, 1)
+    if violation_col == 1
+        return path[end-1]
     else
-       pre_col = col_malo - 1
-        while (i_max <= fila_malo && pre_col > 0)
-            (i_max, jm) = filter(x -> x[2] == pre_col, lista[1:end-1])[end]
-            pre_col -= 1
+       prev_col = violation_col - 1
+        while (corner_row <= violation_row && prev_col > 0)
+            (corner_row, corner_col) = filter(x -> x[2] == prev_col, path[1:end-1])[end]
+            prev_col -= 1
         end
     end
-    (i_max, jm)
+    (corner_row, corner_col)
 end
 
 @doc Markdown.doc"""
