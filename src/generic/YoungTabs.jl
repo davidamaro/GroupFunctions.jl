@@ -1,5 +1,4 @@
 using AbstractAlgebra
-import Primes: prime
 import LinearAlgebra:  dot, I
 import Combinatorics:  permutations
 import SymEngine: Basic
