@@ -4,13 +4,13 @@
 
 Julia package to compute entries of the irreducible representations of the
 unitary group (D-functions or group functions).
-It supports both numerical and symbolical group functions.
+It supports both numerical and symbolic group functions.
 
 ## [Documentation](https://davidamaro.github.io/GroupFunctions.jl/dev/)
 ## Installation
 
 ### Julia is already installed
-Alternatively, you can install the package directly from the repository:
+You can install the package directly from the repository:
 
 ```console
 user@machine:~$ mkdir new_code 
@@ -28,11 +28,11 @@ pkg > add https://github.com/davidamaro/GroupFunctions.jl
 ## Computing a single group function (symbolical)
 
 ```julia
-my_fav_irrep = [2, 1, 0]
-my_fav_basis = basis_states(my_fav_irrep)
-output = group_function(my_fav_irrep, my_fav_basis[1], my_fav_basis[3])
+irrep = [2, 1, 0]
+basis = basis_states(irrep)
+output = group_function(irrep, basis[1], basis[3])
 julia_to_mma(output)
 ```
 
 ## Contact
-For questions and suggestions : `david.amaroalcala@ucalgary.ca`
+For questions and suggestions: `david.amaroalcala@ucalgary.ca`

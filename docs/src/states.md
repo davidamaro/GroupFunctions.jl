@@ -2,7 +2,7 @@
 The preferred method to denote the basis states is by using Gelfand–Tsetlin patterns.  
 Without going into detail, this can be seen in the paper by Alex et al.  
 The top row of the pattern is the partition that labels the irrep.  
-The rest of the entries should satisfy the betweenness condition, which I now explain.  
+The rest of the entries should satisfy the betweenness condition, explained below.  
 
 I start with an example. (Due to $\LaTeX$ limitations, I denote the pattern as left-justified.)  
 The pattern is:  
@@ -15,14 +15,14 @@ c_{2,0} & &
 ```
 
 
-The betweenness condition imposes the requirement: 
+The betweenness condition imposes the requirement:
 ```math
 c_{i-1,j} \geq c_{i,j} \geq c_{i-1,j+1}.
 ```
 
 
-To introduce a `GTPattern`, simply write an array of arrays with the content of
-the pattern as argument:
+To introduce a `GTPattern`, write an array of arrays with the content of
+the pattern as the argument:
 ```julia
 GTPattern([[2,1,0], [2,1], [2]])
 ```
