@@ -1,6 +1,4 @@
-import Combinatorics: permutations
 import LinearAlgebra: transpose
-import StaticArrays: SArray
 export group_function
 export zweight, pweight
 export find_tablaeux_fillings
