@@ -8,10 +8,6 @@ const YTableau = AbstractAlgebra.Generic.YoungTableau{T} where T <: Integer
 const Content = Array{T,1} where T <: Integer
 const MapST2SST = Dict{T,T} where T <: Integer
 
-function flatten(x)
-    n, _ = x |> size
-    reshape(x, (n^2,1))
-end
 
 include("FindTables.jl")
 using .FindTables

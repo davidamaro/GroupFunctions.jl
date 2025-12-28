@@ -103,17 +103,6 @@ function Base.show(io::IO, ::MIME"text/plain", G::GTPattern)
     print(io, String(take!(buffer)))
 end
 
-"""
-    create_first_pattern!(row::Row, pattern::GTPattern)
-
-Attach the first row to an empty `GTPattern`, recording it as both `rows[1]`
-and `last_row` for subsequent construction.
-"""
-function create_first_pattern!(row::Row, pattern::GTPattern)
-    isempty(pattern.last_row) && (pattern.last_row = row)
-    push!(pattern.rows, row)
-    return pattern
-end
 
 struct NextRowIterator
     ranges::Vector{UnitRange{Int}}

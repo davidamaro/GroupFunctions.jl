@@ -32,15 +32,6 @@ function adjacent_transpositions(original::Perm)
     return output
 end
 
-function decompose_cycle!(cycle::AbstractVector{<:Integer}, output::Vector{NTuple{2,Int}})
-    len = length(cycle)
-    len <= 1 && return output
-
-    @inbounds for i in 1:len-1
-        expand_transposition!((cycle[i], cycle[i+1]), output)
-    end
-    return output
-end
 
 @inline function expand_transposition!(j::Int, k::Int, output::Vector{NTuple{2,Int}}, idx::Int)
     if k < j
@@ -74,5 +65,4 @@ end
 
 # Backward-compatible aliases
 const descomp_total = adjacent_transpositions
-const descomponer_ciclo! = decompose_cycle!
 const individual! = expand_transposition!
