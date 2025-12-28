@@ -13,7 +13,7 @@ module GroupFunctions
   export YoungTableau, axialdistance, determine_position
   export GTPattern, basis_states, determine_next_pattern, determine_next_pattern!
   export first_young_tableau_lexicographic, StandardYoungTableaux, generate_matrix
-  export indice_tablon_semistandard, content, Θ
+  export index_of_semistandard_tableau, content, Θ
   export group_function, mma_to_julia
   export zweight, pweight
   export generate_matrix

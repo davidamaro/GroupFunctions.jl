@@ -315,8 +315,8 @@ Notes:
 function group_function(λ::Irrep, tab_u::YTableau, tab_v::YTableau; verbose::Bool = false)
     # Initialize standard tableaux and indices
     standard_tableaux = StandardYoungTableaux(filter(x -> x > 0, λ))
-    index_u = indice_tablon_semistandard(tab_u)
-    index_v = indice_tablon_semistandard(tab_v)
+    index_u = index_of_semistandard_tableau(tab_u)
+    index_v = index_of_semistandard_tableau(tab_v)
     
     # Generate mapping functions
     mapping_u = standard_to_semistandard_map(tab_u, λ)
@@ -392,8 +392,8 @@ function group_function(λ::Irrep, pat_u::GTPattern, pat_v::GTPattern; verbose::
     
     # Initialize standard tableaux and indices
     standard_tableaux = StandardYoungTableaux(filter(x -> x > 0, λ))
-    index_u = indice_tablon_semistandard(tableau_u)
-    index_v = indice_tablon_semistandard(tableau_v)
+    index_u = index_of_semistandard_tableau(tableau_u)
+    index_v = index_of_semistandard_tableau(tableau_v)
     
     # Generate mapping functions
     mapping_u = standard_to_semistandard_map(tableau_u, λ)
@@ -455,8 +455,8 @@ function group_function(λ::Irrep, pat_u::GTPattern, pat_v::GTPattern, mat::Arra
     tab_u = pat_u |> YoungTableau
     tab_v = pat_v |> YoungTableau
     tablones = StandardYoungTableaux(filter(x -> x > 0, λ))
-    i = indice_tablon_semistandard(tab_u)
-    j = indice_tablon_semistandard(tab_v)
+    i = index_of_semistandard_tableau(tab_u)
+    j = index_of_semistandard_tableau(tab_v)
     f = standard_to_semistandard_map(tab_u,λ)
     g = standard_to_semistandard_map(tab_v,λ)
     
@@ -506,8 +506,8 @@ julia> group_function([2,1,0], t, t, mat)
 """
 function group_function(λ::Irrep, tab_u::YTableau, tab_v::YTableau, mat::Array{Complex{Float64}, 2}; verbose = false) 
     tablones = StandardYoungTableaux(filter(x -> x > 0, λ))
-    i = indice_tablon_semistandard(tab_u)
-    j = indice_tablon_semistandard(tab_v)
+    i = index_of_semistandard_tableau(tab_u)
+    j = index_of_semistandard_tableau(tab_v)
     f = standard_to_semistandard_map(tab_u,λ)
     g = standard_to_semistandard_map(tab_v,λ)
     

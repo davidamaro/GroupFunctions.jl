@@ -127,7 +127,9 @@ end
 julia> StandardYoungTableaux([2,1])
 [1 3; 2 0]
 [1 2; 3 0]
+```
 """
+
 function StandardYoungTableaux(part::Array{Int64,1}) 
     part = filter(x -> x > 0, part)
     first_tab = first_young_tableau_lexicographic(YoungTableau(part))
@@ -357,19 +359,19 @@ end
 #
 ##############################################################################
 @doc Markdown.doc"""
-    indice_tablon_semistandard(p::YoungTableau)
+    index_of_semistandard_tableau(p::YoungTableau)
+    was: indice_tablon_semistandard
 > Returns the index of the standard YoungTableau such that the function mapping
 > the filling of the semistandard to the standard Tableau is non decreasing
 
 """
 # TODO add examples
-function indice_tablon_semistandard(tablon_semistandard::AbstractAlgebra.Generic.YoungTableau{Int64})
-    particion = (tablon_semistandard.part) |> collect
-    tablones_standard = StandardYoungTableaux(particion)
-    target = standard_tableau_from_semistandard(tablon_semistandard)
-
-    idx = findfirst(x -> x.fill == target.fill, tablones_standard)
-    idx === nothing && error("No matching standard tableau found for fill=$(tablon_semistandard.fill) and part=$(tablon_semistandard.part)")
+function index_of_semistandard_tableau(semistandard_tableau::AbstractAlgebra.Generic.YoungTableau{Int64})
+    partition = (semistandard_tableau.part) |> collect
+    standard_tables = StandardYoungTableaux(partition)
+    target = standard_tableau_from_semistandard(semistandard_tableau)
+    idx = findfirst(x -> x.fill == target.fill, standard_tables)
+    idx === nothing && error("No matching standard tableau found for fill=$(semistandard_tableau.fill) and part=$(semistandard_tableau.part)")
     return idx
 end
 
@@ -536,20 +538,20 @@ end
 > Returns a YoungTableau corresponding to the standard YoungTableau such that
 > f is non decreasing.
 """
-function standard_tableau_from_semistandard(tablon_semistandard::AbstractAlgebra.Generic.YoungTableau{Int64})
-    particion = (tablon_semistandard.part) |> collect
-    tablon_standard = YoungTableau(particion)
+function standard_tableau_from_semistandard(semistandard_table::AbstractAlgebra.Generic.YoungTableau{Int64})
+    partition = (semistandard_table.part) |> collect
+    standard_table = YoungTableau(partition)
 
-    orden = sortperm(tablon_semistandard.fill)  # stable by default
-    diccionario = generate_dictionary(orden)
-    nuevo_fill = [diccionario[x] for x in tablon_standard.fill]
+    ordering = sortperm(semistandard_table.fill)  # stable by default
+    dictionary = generate_dictionary(ordering)
+    new_fill = [dictionary[x] for x in standard_table.fill]
 
-    tablon_resultado_permutacion = AbstractAlgebra.fill!(tablon_standard, nuevo_fill)
-    tablones_standard = StandardYoungTableaux(particion)
+    table_after_permutation = AbstractAlgebra.fill!(standard_table, new_fill)
+    standard_tables = StandardYoungTableaux(partition)
 
-    pos = findfirst(x -> x.fill == tablon_resultado_permutacion.fill, tablones_standard)
-    pos === nothing && error("No matching standard tableau found for fill=$(tablon_semistandard.fill) and part=$(tablon_semistandard.part)")
-    tablones_standard[pos]
+    pos = findfirst(x -> x.fill == table_after_permutation.fill, standard_tables)
+    pos === nothing && error("No matching standard tableau found for fill=$(semistandard_table.fill) and part=$(semistandard_table.part)")
+    standard_tables[pos]
 end
 
 @doc Markdown.doc"""
