@@ -76,6 +76,7 @@ function determine_position(tableau::AbstractAlgebra.Generic.YoungTableau{Int64}
    return 0, 0
 end
 
+#TODO: reference? Is it somehow related to Yamanouchi basis?
 function determinar_coeficiente_irrep_yamanouchi(Y::AbstractAlgebra.Generic.YoungTableau{Int64}, u::Integer)
   v = u - 1
   i,j = determine_position(Y, u)
@@ -608,7 +609,36 @@ function Θn(patron_semi::AbstractAlgebra.Generic.YoungTableau{Int64}, _::Array{
 end
 
 @doc Markdown.doc"""
-calcula_proto_permutacion(proto::Array{Int64,1})
+expand_frequency_matrix(freq_matrix::AbstractArray{Int64}) -> Vector{Int64}
+  Convert a frequency matrix to an expanded filling where each label appears 
+  the specified number of times.
+
+  Given an n×n matrix where entry (i,j) represents how many times label j should 
+  appear at position i, returns a flattened vector with labels expanded according 
+  to their frequencies.
+  The argument can be either a 2D array of size n×n, or 1D vector of length n² (will be reshaped).
+
+  In the example below, the output vector will contain concatenated `a1` copies of 1, `a2` copies of 2,
+  `b1` copies of 1, and `b2` copies of 2. Note the order of the parameters inside the 2D array!
+  > a1=1
+  > a2=2
+  > b1=3
+  > b2=4
+  > expand_frequency_matrix([a1 a2; b1 b2]) # == expand_frequency_matrix([a1,b1,a2,b2]) #sic!
+ 10-element Vector{Int64}:
+ 1
+ 2
+ 2
+ 1
+ 1
+ 1
+ 2
+ 2
+ 2
+ 2
+
+
+was: calcula_proto_permutacion(proto::Array{Int64,1})
 Notese que el orden en que se ingresa la matriz es igual a la traspuesta.
 Esto es debido a la forman en la que Julia recorre matrices.
 > calcula_proto_permutacion([2 0 1 1])
@@ -617,25 +647,25 @@ Esto es debido a la forman en la que Julia recorre matrices.
 2
 2
 """
-function calcula_proto_permutacion(proto::AbstractArray{Int64})
-    if ndims(proto) == 1
-        len = length(proto) |> sqrt |> Int
-        new_proto = reshape(proto, len, len)'
-    elseif ndims(proto) == 2
-        len = size(proto, 1)
-        new_proto = proto'
+function expand_frequency_matrix(freq_matrix::AbstractArray{Int64})
+    if ndims(freq_matrix) == 1
+        len = length(freq_matrix) |> sqrt |> Int
+        new_proto = reshape(freq_matrix, len, len)'
+    elseif ndims(freq_matrix) == 2
+        len = size(freq_matrix, 1)
+        new_proto = freq_matrix'
     else
-        error("Unsupported input dimension: ", ndims(proto))
+        error("Unsupported input dimension: ", ndims(freq_matrix))
     end
 
     mult = 0
-    yard = Array{Int64,1}[]
+    subresult = Array{Int64,1}[]
     for i in 1:len
-        densidad = vcat(fill.(1:len, new_proto[mult*len + 1:len*(mult + 1)])...)
-        push!(yard, densidad)
+        dense = vcat(fill.(1:len, new_proto[mult*len + 1:len*(mult + 1)])...)
+        push!(subresult, dense)
         mult += 1
     end
-    vcat(yard...)
+    vcat(subresult...)
 end
 
 @doc Markdown.doc"""

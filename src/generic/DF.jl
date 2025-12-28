@@ -89,7 +89,7 @@ function find_double_coset_representatives(c_a::Content, c_b::Content)
     # Transform proto-tableaux into permutations
     representatives = map(proto_tableaux) do proto
         # Convert to permutation and sort
-        proto_perm = proto |> collect |> calcula_proto_permutacion |> sortperm
+        proto_perm = proto |> collect |> expand_frequency_matrix |> sortperm
         # Adjust permutation to fit dimension
         adjusted_perm = adjust_permutation_list(proto_perm, dimension)
         # Create final permutation
@@ -123,7 +123,7 @@ function find_double_coset_representatives(t_a, t_b)
     # Transform proto-tableaux into permutations
     representatives = map(proto_tableaux) do proto
         proto_array = collect(proto)
-        permutation = calcula_proto_permutacion(proto_array)
+        permutation = expand_frequency_matrix(proto_array)
         Perm(collect(sortperm(permutation)))
     end
     
