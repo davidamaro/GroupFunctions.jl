@@ -191,6 +191,26 @@ function monomial(f::MapST2SST, g::MapST2SST, per::Perm, n::Int64)
     return result
 end
 
+function standard_tableaux_for_irrep(irrep::Irrep)
+    return StandardYoungTableaux(filter(x -> x > 0, irrep))
+end
+
+function semistandard_indices(tab_u::YTableau, tab_v::YTableau)
+    return index_of_semistandard_tableau(tab_u), index_of_semistandard_tableau(tab_v)
+end
+
+function semistandard_maps(tab_u::YTableau, tab_v::YTableau, irrep::Irrep)
+    return standard_to_semistandard_map(tab_u, irrep), standard_to_semistandard_map(tab_v, irrep)
+end
+
+function normalization_factor(tab_u::YTableau, tab_v::YTableau, irrep::Irrep)
+    return sqrt((1 / Θ(tab_u, irrep)) * (1 / Θ(tab_v, irrep)))
+end
+
+function coset_debug_stats(coset_list)
+    return length(unique(vcat(coset_list...)))
+end
+
 """
     compute_monomial(mapping1::MapST2SST, mapping2::MapST2SST, permutation::Perm, size::Int64, matrix::Matrix{ComplexF64}) -> ComplexF64
 
@@ -313,39 +333,27 @@ Notes:
 - Involves matrix operations and coset calculations
 """
 function group_function(λ::Irrep, tab_u::YTableau, tab_v::YTableau; verbose::Bool = false)
-    # Initialize standard tableaux and indices
-    standard_tableaux = StandardYoungTableaux(filter(x -> x > 0, λ))
-    index_u = index_of_semistandard_tableau(tab_u)
-    index_v = index_of_semistandard_tableau(tab_v)
-    
-    # Generate mapping functions
-    mapping_u = standard_to_semistandard_map(tab_u, λ)
-    mapping_v = standard_to_semistandard_map(tab_v, λ)
-    
-    # Calculate dimension
+    standard_tableaux = standard_tableaux_for_irrep(λ)
+    index_u, index_v = semistandard_indices(tab_u, tab_v)
+    mapping_u, mapping_v = semistandard_maps(tab_u, tab_v, λ)
     dimension = length(content(tab_u))
-    
-    # Calculate normalization factor
-    normalization = sqrt((1 / Θ(tab_u, λ)) * (1 / Θ(tab_v, λ)))
+    normalization = normalization_factor(tab_u, tab_v, λ)
+
     if verbose
         @show normalization
     end
-    
-    # Generate double cosets
+
     content_u = content(tab_u, λ)
     content_v = content(tab_v, λ)
     gamma_list, coset_list = double_coset(content_u, content_v)
-    
+
     if verbose
-        unique_elements = length(unique(vcat(coset_list...)))
+        unique_elements = coset_debug_stats(coset_list)
         total_gammas = length(gamma_list)
         @show unique_elements, total_gammas
     end
-    
-    # Initialize polynomial computation
+
     polynomial = zero(Basic)
-    
-    # Process each gamma and corresponding coset
     @inbounds for (gamma, coset) in zip(gamma_list, coset_list)
         monomial_term = monomial(mapping_u, mapping_v, inv(gamma), dimension)
         coset_sum = zero(Basic)
@@ -354,7 +362,7 @@ function group_function(λ::Irrep, tab_u::YTableau, tab_v::YTableau; verbose::Bo
         end
         polynomial += coset_sum * monomial_term
     end
-    
+
     return polynomial * normalization
 end
 

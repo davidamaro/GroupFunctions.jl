@@ -376,6 +376,8 @@ function index_of_semistandard_tableau(semistandard_tableau::AbstractAlgebra.Gen
     return idx
 end
 
+@deprecate indice_tablon_semistandard(semistandard_tableau::AbstractAlgebra.Generic.YoungTableau{Int64}) index_of_semistandard_tableau(semistandard_tableau)
+
 function generate_dictionary(lista::Array{Int64,1})
     fvars = Dict{Int64,Int64}()
     for (n, f) in enumerate(lista)
