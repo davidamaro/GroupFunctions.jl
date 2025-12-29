@@ -4,6 +4,7 @@ makedocs(sitename="GroupFunctions documentation",
     pages = [
         "Getting started" => "index.md",
         "Tutorials" => ["Basis states" => "states.md",
+			"Basic quantum optics" => "quantum_optics.md",
                         "Sum rules"=>"sum_rules.md",
                         "Immanants"=>"immanants.md",
                        ],
