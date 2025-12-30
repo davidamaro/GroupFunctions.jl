@@ -60,6 +60,30 @@ julia_to_mma(sym)  # Mathematica-friendly expression
 
 For more examples and API details, see the documentation: https://davidamaro.github.io/GroupFunctions.jl/dev/
 
+## Example: variance of Weyl characters
+
+```julia
+using GroupFunctions
+using RandomMatrices
+using LinearAlgebra: det
+using Statistics: var
+
+nsamples = 1_000
+n = 3
+irrep = [2, 1, 0]
+
+values = Vector{ComplexF64}(undef, nsamples)
+for i in 1:nsamples
+    U = rand(Haar(2), n)
+    U_su = U / det(U)^(1 / n)
+    values[i] = character_weyl(irrep, U_su)
+end
+
+variance = var(values)
+# Expect variance ≈ 1 for these samples.
+variance
+```
+
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request. A to-do list is included in the `todo.txt` file.
