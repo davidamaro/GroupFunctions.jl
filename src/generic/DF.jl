@@ -1,4 +1,4 @@
-import LinearAlgebra: transpose
+import LinearAlgebra: transpose, det, eigvals
 export group_function
 export zweight, pweight
 export find_tablaeux_fillings
@@ -189,6 +189,44 @@ function monomial(f::MapST2SST, g::MapST2SST, per::Perm, n::Int64)
     end
     
     return result
+end
+
+function pad_partition(irrep::Irrep, n::Int)
+    length(irrep) <= n || error("Partition length $(length(irrep)) exceeds matrix size $n")
+    padded = Vector{Int}(irrep)
+    if length(padded) < n
+        append!(padded, zeros(Int, n - length(padded)))
+    end
+    return padded
+end
+
+@doc Markdown.doc"""
+    character_weyl(λ::Irrep, mat::Array{Complex{Float64},2}) -> ComplexF64
+> Compute the U(n) character using the Weyl/Schur determinant formula, without
+> using the characteristic polynomial.
+
+# Notes
+- `mat` must be square; the length of `λ` must not exceed `size(mat,1)`.
+- The formula evaluates the Schur polynomial at the eigenvalues of `mat`:
+  `det(z_i^(λ_j+n-j)) / det(z_i^(n-j))`.
+"""
+function character_weyl(λ::Irrep, mat::Array{Complex{Float64},2})
+    n = size(mat, 1)
+    size(mat, 2) == n || error("Matrix must be square; got $(size(mat))")
+    padded = pad_partition(λ, n)
+    eigenvalues = eigvals(mat)
+
+    numer = Matrix{ComplexF64}(undef, n, n)
+    denom = Matrix{ComplexF64}(undef, n, n)
+    @inbounds for i in 1:n
+        z = eigenvalues[i]
+        for j in 1:n
+            numer[i, j] = z^(padded[j] + n - j)
+            denom[i, j] = z^(n - j)
+        end
+    end
+
+    return det(numer) / det(denom)
 end
 
 function standard_tableaux_for_irrep(irrep::Irrep)
