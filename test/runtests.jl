@@ -2,7 +2,7 @@ using GroupFunctions, Test, SymEngine, Combinatorics
 
 # , Immanants
 import RandomMatrices: Haar
-import LinearAlgebra: norm
+import LinearAlgebra: norm, tr, det, eigvals
 
 """
     permanent(matrix::AbstractMatrix)
@@ -127,6 +127,41 @@ end
     @test map(p -> p.rows, numeric_patterns) == map(p -> p.rows, patterns)
     @test size(numeric_values) == (length(patterns), length(patterns))
     @test numeric_values[2, 1] ≈ group_function(λ, expected_patterns[2], expected_patterns[1], mat)
+end
+
+@testset "comparison of the character" begin
+    mat = rand(Haar(2), 3)
+    nmat = mat / det(mat)^(1/3)
+    rep, _states = group_function([2,1,0], nmat)
+    lambdas = eigvals(nmat)
+    ideal_character = lambdas[1]/lambdas[2] + lambdas[2]/lambdas[1] +
+                      lambdas[1]/lambdas[3] + lambdas[3]/lambdas[1] +
+                      lambdas[2]/lambdas[3] + lambdas[3]/lambdas[2] + 2
+    @test tr(rep) ≈ ideal_character
+end
+
+@testset "comparison of the character (2,0)" begin
+    mat = rand(Haar(2), 3)
+    nmat = mat / det(mat)^(1/3)
+    rep, _states = group_function([2,0,0], nmat)
+    lambdas = eigvals(nmat)
+    ideal_character = lambdas[1]^2 + lambdas[2]^2 + lambdas[3]^2 +
+                      lambdas[1]*lambdas[2] + lambdas[1]*lambdas[3] +
+                      lambdas[2]*lambdas[3]
+    @test tr(rep) ≈ ideal_character
+end
+
+@testset "comparison of the character (3,0)" begin
+    mat = rand(Haar(2), 3)
+    nmat = mat / det(mat)^(1/3)
+    rep, _states = group_function([3,0,0], nmat)
+    lambdas = eigvals(nmat)
+    ideal_character = lambdas[1]^3 + lambdas[2]^3 + lambdas[3]^3 +
+                      lambdas[1]^2*lambdas[2] + lambdas[1]^2*lambdas[3] +
+                      lambdas[2]^2*lambdas[1] + lambdas[2]^2*lambdas[3] +
+                      lambdas[3]^2*lambdas[1] + lambdas[3]^2*lambdas[2] +
+                      lambdas[1]*lambdas[2]*lambdas[3]
+    @test tr(rep) ≈ ideal_character
 end
 
 @testset "irrep 221 de SU(4)" begin
