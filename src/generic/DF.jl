@@ -1,5 +1,5 @@
 import LinearAlgebra: transpose, det, eigvals
-export group_function
+export group_function, group_function_sym
 export zweight, pweight
 export find_tablaeux_fillings
 
@@ -268,24 +268,24 @@ Notes:
 - Uses identity mapping (original index) when a key is not found in mapping1 or mapping2
 - Matrix dimensions must be compatible with the mappings and size parameter
 """
-function compute_monomial(mapping1::MapST2SST, mapping2::MapST2SST, permutation::Perm, size::Int64, matrix::Matrix{ComplexF64})
+function compute_monomial(mapping1::MapST2SST, mapping2::MapST2SST, permutation::Perm, size::Int64, matrix::AbstractMatrix{T}) where T
     # Pre-allocate arrays for transformed indices
     transformed_indices1 = Vector{Int}(undef, size)
     transformed_indices2 = Vector{Int}(undef, size)
-    
+
     # Apply first mapping with permutation
     @inbounds for index in 1:size
         transformed_indices1[index] = get(mapping1, permutation[index], permutation[index])
     end
-    
+
     # Apply second mapping
     @inbounds for index in 1:size
         transformed_indices2[index] = get(mapping2, index, index)
     end
-    
+
     # Calculate the monomial by multiplying corresponding matrix elements
     @inbounds monomial = prod(matrix[transformed_indices1[i], transformed_indices2[i]] for i in 1:size)
-    
+
     return monomial
 end
 
@@ -534,6 +534,48 @@ function group_function(λ::Irrep, pat_u::GTPattern, pat_v::GTPattern, mat::Arra
         pol += (total*mon)
     end
     
+    pol*inversos
+end
+
+
+
+function group_function_sym(λ::Irrep, pat_u::GTPattern, pat_v::GTPattern, mat::AbstractMatrix{T}; verbose = false) where T
+    tab_u = pat_u |> YoungTableau
+    tab_v = pat_v |> YoungTableau
+    tablones = StandardYoungTableaux(filter(x -> x > 0, λ))
+    i = index_of_semistandard_tableau(tab_u)
+    j = index_of_semistandard_tableau(tab_v)
+    f = standard_to_semistandard_map(tab_u,λ)
+    g = standard_to_semistandard_map(tab_v,λ)
+
+    # probablemente se pueda sustituir con sum(λ)
+    n = tab_u |> content |> length
+
+    inversos = sqrt((1/Θ(tab_u,λ))*(1/Θ(tab_v,λ)))
+    if verbose
+      @show inversos
+    end
+
+    (lista_gamas, lista_cosets) = double_coset(content(tab_u, λ), content(tab_v, λ))
+
+    if verbose
+      @show length(vcat(lista_cosets...) |> unique), length(lista_gamas)
+    end
+
+    pol = zero(eltype(mat))
+    total = zero(eltype(mat))#zero(Float64)
+
+    for ind in 1:length(lista_gamas)
+        γ = lista_gamas[ind]
+        cjto_σ = lista_cosets[ind]
+        mon = compute_monomial(f, g, inv(γ), n,mat)
+        total = zero(eltype(mat))
+        for σ in cjto_σ
+            total += generate_matrix(tablones, σ,λ)[i,j]
+        end
+        pol += (total*mon)
+    end
+
     pol*inversos
 end
 

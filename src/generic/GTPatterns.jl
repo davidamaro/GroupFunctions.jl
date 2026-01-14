@@ -196,7 +196,7 @@ function determine_next_row(pattern::GTPattern)
     return patterns
 end
 
-"""
+@doc Markdown.doc"""
     determine_next_row(patterns::Vector{GTPattern})
 
 Given a collection of GT patterns, extend each by one row in all valid ways.
@@ -226,6 +226,10 @@ function determine_next_row(patterns::Vector{GTPattern})
     return result_patterns
 end
 
+@doc Markdown.doc"""
+    basis_states(weight::Row)
+    Generate basis states (GTPatterns) of a given representation.
+"""
 function basis_states(weight::Row)
     isempty(weight) && return GTPattern[]
 

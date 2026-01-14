@@ -120,6 +120,7 @@ function first_young_tableau_lexicographic(pat::AbstractAlgebra.Generic.YoungTab
     fill!(pat, filter(x -> x > 0,reshape(orco', *(size(orco)...)) ) )
     pat
 end
+
 @doc Markdown.doc"""
     StandardYoungTableaux(part::Array{Int64,1}) -> list of YoungTableaux
 > Return a list of Standard YoungTableaux.
@@ -130,7 +131,6 @@ julia> StandardYoungTableaux([2,1])
 [1 2; 3 0]
 ```
 """
-
 function StandardYoungTableaux(part::Array{Int64,1}) 
     part = filter(x -> x > 0, part)
     first_tab = first_young_tableau_lexicographic(YoungTableau(part))
@@ -140,6 +140,10 @@ function StandardYoungTableaux(part::Array{Int64,1})
     end
     tableaux
 end
+
+
+
+const GENERATE_MATRIX_CACHE = Dict{Tuple{Perm{Int64},Tuple}, SparseMatrixCSC{Basic,Int64}}()
 
 @doc Markdown.doc"""
     generate_matrix(Y::Array{YoungTableau}, p::Perm, λ::Array{Int64,1}) -> SparseMatrixCSC
@@ -169,8 +173,6 @@ julia> generate_matrix(guilty, Perm([1,3,2,4,5]), [3,2])
 [5, 5]  =  1.0
 ```
 """
-const GENERATE_MATRIX_CACHE = Dict{Tuple{Perm{Int64},Tuple}, SparseMatrixCSC{Basic,Int64}}()
-
 function generate_matrix(patrones::Array{AbstractAlgebra.Generic.YoungTableau{Int64},1}, p::Perm{Int64}, irrep::Array{Int64,1})
     cache_key = (p, Tuple(irrep))
     if haskey(GENERATE_MATRIX_CACHE, cache_key)
@@ -359,14 +361,15 @@ end
 #   Codigo para representates double coset
 #
 ##############################################################################
+
+
 @doc Markdown.doc"""
     index_of_semistandard_tableau(p::YoungTableau)
     was: indice_tablon_semistandard
 > Returns the index of the standard YoungTableau such that the function mapping
 > the filling of the semistandard to the standard Tableau is non decreasing
-
-"""
 # TODO add examples
+"""
 function index_of_semistandard_tableau(semistandard_tableau::AbstractAlgebra.Generic.YoungTableau{Int64})
     partition = (semistandard_tableau.part) |> collect
     standard_tables = StandardYoungTableaux(partition)
@@ -375,6 +378,7 @@ function index_of_semistandard_tableau(semistandard_tableau::AbstractAlgebra.Gen
     idx === nothing && error("No matching standard tableau found for fill=$(semistandard_tableau.fill) and part=$(semistandard_tableau.part)")
     return idx
 end
+
 
 @deprecate indice_tablon_semistandard(semistandard_tableau::AbstractAlgebra.Generic.YoungTableau{Int64}) index_of_semistandard_tableau(semistandard_tableau)
 
@@ -808,6 +812,8 @@ function stabilizer_permutations(tableau::AbstractAlgebra.Generic.YoungTableau{I
   stabilizer_permutations(content_vec)
 end
 
+@doc Markdown.doc"""
+Construct Young tableau from a given GTPattern."""
 function YoungTableau(tab::GTPattern)
     filas = tab.rows
     len = filas[1] |> length
