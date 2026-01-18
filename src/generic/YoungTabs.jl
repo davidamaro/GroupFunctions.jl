@@ -393,7 +393,8 @@ end
 @doc Markdown.doc"""
     content(p::Partition, λ::Irrep)
 > Return the size of the vector which represents the partition.
-> ADVERTENCIA content sin λ ignora los 0s de la irrep.
+> WARNING calling content without an irrep λ assumes you are working with SU(d)
+> with d the length of the partition `p`.
 
 # Examples:
 ```jldoctest; setup = :(using AbstractAlgebra)
