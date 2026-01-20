@@ -421,6 +421,7 @@ julia> content_length([1,2], [2,1,0,0])
 4
 ```
 """
+# todo maybe this can be done by overloading length
 function content_length(fill_values::Vector{Int64}, irrep::Irrep)
     return max(length(fill_values), length(irrep))
 end
@@ -545,21 +546,26 @@ end
     standard_tableau_from_semistandard(tablon_semistandard::YoungTableau)
 > Returns a YoungTableau corresponding to the standard YoungTableau such that
 > f is non decreasing.
+
+# Examples:
+```
+julia> t = YoungTableau([2,1]); fill!(t, [1,1,2]);
+julia> standard_tableau_from_semistandard(t)
+[1 2; 3 0]
+
+julia> t = YoungTableau([2,2]); fill!(t, [1,2,2,3]);
+julia> standard_tableau_from_semistandard(t)
+[1 3; 2 4]
+```
 """
 function standard_tableau_from_semistandard(semistandard_table::AbstractAlgebra.Generic.YoungTableau{Int64})
     partition = (semistandard_table.part) |> collect
     standard_table = YoungTableau(partition)
 
     ordering = sortperm(semistandard_table.fill)  # stable by default
-    dictionary = generate_dictionary(ordering)
-    new_fill = [dictionary[x] for x in standard_table.fill]
-
-    table_after_permutation = AbstractAlgebra.fill!(standard_table, new_fill)
-    standard_tables = StandardYoungTableaux(partition)
-
-    pos = findfirst(x -> x.fill == table_after_permutation.fill, standard_tables)
-    pos === nothing && error("No matching standard tableau found for fill=$(semistandard_table.fill) and part=$(semistandard_table.part)")
-    standard_tables[pos]
+    # Use the inverse permutation to standardize without enumerating all tableaux.
+    new_standard_tableau = invperm(ordering)
+    AbstractAlgebra.fill!(standard_table, new_standard_tableau)
 end
 
 @doc Markdown.doc"""
@@ -681,19 +687,42 @@ end
 > Build a dictionary mapping entries of the associated standard tableau
 > to the entries of the given semistandard tableau.
 
+This is the implementation of the mappings `f` and `g` in Theorem 4.4 of
+Grabmeier and Kerber (1987). For two semistandard tableaux `tab_u` and `tab_v`,
+compute:
+```
+f = standard_to_semistandard_map(tab_u)
+g = standard_to_semistandard_map(tab_v)
+```
+
+When `length(irrep)` exceeds the number of boxes `n`, the standard labels are
+only `1:n`. The `irrep`-taking method extends the mapping to labels
+`n+1:length(irrep)` by repeating the value at label `n`, which keeps the map
+non-decreasing (equivalent to choosing the nearest existing label).
+
 # Examples:
 ```
-julia> t_u = YoungTableau([2,2, 1]);
-julia> fill!(t_u, [1,2,3,3,4]);
-julia> standard_to_semistandard_map(t_u)
-Dict(4=>4, 2=>2, 3=>3, 5=>5, 1=>1)
+julia> t = YoungTableau([2,1]); fill!(t, [1,1,2]);
+julia> f = standard_to_semistandard_map(t);
+julia> f[1], f[2], f[3]
+(1, 1, 2)
+
+julia> t2 = YoungTableau([2,1]); fill!(t2, [1,2,2]);
+julia> g = standard_to_semistandard_map(t2);
+julia> g[1], g[2], g[3]
+(1, 2, 2)
+
+julia> f_ext = standard_to_semistandard_map(t, [2,1,0,0]);
+julia> f_ext[4]
+2
 ```
 """
 function standard_to_semistandard_map(semi_tableau::AbstractAlgebra.Generic.YoungTableau{Int64}, irrep::Array{Int64,1}) 
     len = length(irrep)
     semi_fill = semi_tableau.fill
+    n = length(semi_fill)
 
-    length(semi_fill) >= len && return standard_to_semistandard_map(semi_tableau)
+    n >= len && return standard_to_semistandard_map(semi_tableau)
 
     standard_tableau = standard_tableau_from_semistandard(semi_tableau)
     standard_fill = standard_tableau.fill
@@ -703,13 +732,10 @@ function standard_to_semistandard_map(semi_tableau::AbstractAlgebra.Generic.Youn
         mapping[std] = semi
     end
 
-    missing_labels = setdiff!(collect(1:len), standard_fill)
-    sorted_standard = sort(standard_fill)
-    # Missing-label policy: map unseen labels to the nearest existing standard label by absolute distance.
-    # This may send multiple missing labels to the same target; kept for backward compatibility.
-    @inbounds for label in missing_labels
-        nearest = nearest_standard_label(sorted_standard, label)
-        mapping[label] = mapping[nearest]
+    # Extend the map to labels beyond the number of boxes by repeating the last value.
+    last_value = mapping[n]
+    @inbounds for label in (n + 1):len
+        mapping[label] = last_value
     end
 
     mapping

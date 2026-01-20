@@ -129,6 +129,32 @@ end
     @test numeric_values[2, 1] ≈ group_function(λ, expected_patterns[2], expected_patterns[1], mat)
 end
 
+@testset "standard_to_semistandard_map is non-decreasing" begin
+    t = YoungTableau([3]); fill!(t, [1,2,5])
+    std = GroupFunctions.standard_tableau_from_semistandard(t)
+    @test std.fill == [1,2,3]
+    f = GroupFunctions.standard_to_semistandard_map(t, [3,0,0,0,0])
+    fvals = [f[i] for i in 1:5]
+    @test fvals == [1,2,5,5,5]
+    @test issorted(fvals)
+
+    t2 = YoungTableau([2,1]); fill!(t2, [1,1,2])
+    f2 = GroupFunctions.standard_to_semistandard_map(t2)
+    f2vals = [f2[i] for i in 1:3]
+    @test issorted(f2vals)
+
+    f2_ext = GroupFunctions.standard_to_semistandard_map(t2, [2,1,0,0])
+    f2ext_vals = [f2_ext[i] for i in 1:4]
+    @test f2ext_vals == [1,1,2,2]
+    @test issorted(f2ext_vals)
+
+    t3 = YoungTableau([2,1]); fill!(t3, [1,3,3])
+    f3 = GroupFunctions.standard_to_semistandard_map(t3, [2,1,0,0,0])
+    f3vals = [f3[i] for i in 1:5]
+    @test issorted(f3vals)
+    @test f3vals[4] == f3vals[3] == f3vals[5]
+end
+
 @testset "comparison of the character (2,1,0) of SU3" begin
     mat = rand(Haar(2), 3)
     nmat = mat / det(mat)^(1/3)

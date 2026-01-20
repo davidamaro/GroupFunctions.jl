@@ -249,6 +249,59 @@ function coset_debug_stats(coset_list)
     return length(unique(vcat(coset_list...)))
 end
 
+struct DoubleCosetSumContext{TG,TC,TM,TT,TTabs,TIrr,P,T}
+    gamma_list::TG
+    coset_list::TC
+    map_u::TM
+    map_v::TM
+    dim::Int
+    mat::TT
+    standard_tableaux::TTabs
+    row_index::Int
+    col_index::Int
+    irrep::TIrr
+    pol_zero::P
+    total_zero::T
+end
+
+struct SymbolicDoubleCosetSumContext{TG,TC,TM,TTabs,TIrr}
+    gamma_list::TG
+    coset_list::TC
+    map_u::TM
+    map_v::TM
+    dim::Int
+    standard_tableaux::TTabs
+    row_index::Int
+    col_index::Int
+    irrep::TIrr
+end
+
+function sum_over_double_cosets(ctx::DoubleCosetSumContext{TG,TC,TM,TT,TTabs,TIrr,P,T}) where {TG,TC,TM,TT,TTabs,TIrr,P,T}
+    pol::P = ctx.pol_zero
+    @inbounds for (gamma, coset) in zip(ctx.gamma_list, ctx.coset_list)
+        mon = compute_monomial(ctx.map_u, ctx.map_v, inv(gamma), ctx.dim, ctx.mat)
+        total::T = ctx.total_zero
+        @inbounds for sigma in coset
+            total += convert(T, generate_matrix(ctx.standard_tableaux, sigma, ctx.irrep)[ctx.row_index, ctx.col_index])
+        end
+        pol += total * mon
+    end
+    return pol
+end
+
+function sum_over_double_cosets(ctx::SymbolicDoubleCosetSumContext)
+    polynomial::Basic = zero(Basic)
+    @inbounds for (gamma, coset) in zip(ctx.gamma_list, ctx.coset_list)
+        monomial_term = monomial(ctx.map_u, ctx.map_v, inv(gamma), ctx.dim)
+        coset_sum::Basic = zero(Basic)
+        @inbounds for sigma in coset
+            coset_sum += generate_matrix(ctx.standard_tableaux, sigma, ctx.irrep)[ctx.row_index, ctx.col_index]
+        end
+        polynomial += coset_sum * monomial_term
+    end
+    return polynomial
+end
+
 """
     compute_monomial(mapping1::MapST2SST, mapping2::MapST2SST, permutation::Perm, size::Int64, matrix::Matrix{ComplexF64}) -> ComplexF64
 
@@ -391,15 +444,18 @@ function group_function(λ::Irrep, tab_u::YTableau, tab_v::YTableau; verbose::Bo
         @show unique_elements, total_gammas
     end
 
-    polynomial = zero(Basic)
-    @inbounds for (gamma, coset) in zip(gamma_list, coset_list)
-        monomial_term = monomial(mapping_u, mapping_v, inv(gamma), dimension)
-        coset_sum = zero(Basic)
-        @inbounds for σ in coset
-            coset_sum += generate_matrix(standard_tableaux, σ, λ)[index_u, index_v]
-        end
-        polynomial += coset_sum * monomial_term
-    end
+    ctx = SymbolicDoubleCosetSumContext(
+        gamma_list,
+        coset_list,
+        mapping_u,
+        mapping_v,
+        dimension,
+        standard_tableaux,
+        index_u,
+        index_v,
+        λ,
+    )
+    polynomial = sum_over_double_cosets(ctx)
 
     return polynomial * normalization
 end
@@ -432,57 +488,7 @@ Notes:
 - Uses SymEngine for symbolic computation
 """
 function group_function(λ::Irrep, pat_u::GTPattern, pat_v::GTPattern; verbose::Bool = false)
-    # Convert GT patterns to Young tableaux
-    tableau_u = YoungTableau(pat_u)
-    tableau_v = YoungTableau(pat_v)
-    
-    # Initialize standard tableaux and indices
-    standard_tableaux = StandardYoungTableaux(filter(x -> x > 0, λ))
-    index_u = index_of_semistandard_tableau(tableau_u)
-    index_v = index_of_semistandard_tableau(tableau_v)
-    
-    # Generate mapping functions
-    mapping_u = standard_to_semistandard_map(tableau_u, λ)
-    mapping_v = standard_to_semistandard_map(tableau_v, λ)
-    
-    # Calculate dimension from content
-    dimension = length(content(tableau_u))
-    
-    # Calculate normalization factor
-    normalization = sqrt((1 / Θ(tableau_u, λ)) * (1 / Θ(tableau_v, λ)))
-    if verbose
-        @show normalization
-    end
-    
-    # Generate double cosets
-    content_u = content(tableau_u, λ)
-    content_v = content(tableau_v, λ)
-    gamma_list, coset_list = double_coset(content_u, content_v)
-    
-    if verbose
-        unique_elements = length(unique(vcat(coset_list...)))
-        total_gammas = length(gamma_list)
-        @show unique_elements, total_gammas
-    end
-    
-    # Initialize polynomial and accumulator
-    polynomial::Basic = zero(Basic)
-    
-    # Process each gamma and corresponding coset
-    @inbounds for (index, gamma) in enumerate(gamma_list)
-        coset = coset_list[index]
-        monomial_term = monomial(mapping_u, mapping_v, inv(gamma), dimension)
-        
-        # Sum over current coset
-        coset_sum = zero(Basic)
-        @inbounds for permutation in coset
-            coset_sum += generate_matrix(standard_tableaux, permutation, λ)[index_u, index_v]
-        end
-        
-        polynomial += coset_sum * monomial_term
-    end
-    
-    return polynomial * normalization
+    return group_function(λ, YoungTableau(pat_u), YoungTableau(pat_v); verbose = verbose)
 end
 
 @doc Markdown.doc"""
@@ -500,41 +506,43 @@ julia> group_function([2,1,0], t, t, mat)
 function group_function(λ::Irrep, pat_u::GTPattern, pat_v::GTPattern, mat::Array{Complex{Float64}, 2}; verbose = false) 
     tab_u = pat_u |> YoungTableau
     tab_v = pat_v |> YoungTableau
-    tablones = StandardYoungTableaux(filter(x -> x > 0, λ))
-    i = index_of_semistandard_tableau(tab_u)
-    j = index_of_semistandard_tableau(tab_v)
-    f = standard_to_semistandard_map(tab_u,λ)
-    g = standard_to_semistandard_map(tab_v,λ)
+    standard_tableaux = standard_tableaux_for_irrep(λ)
+    row_index = index_of_semistandard_tableau(tab_u)
+    col_index = index_of_semistandard_tableau(tab_v)
+    map_u = standard_to_semistandard_map(tab_u, λ)
+    map_v = standard_to_semistandard_map(tab_v, λ)
     
     # probablemente se pueda sustituir con sum(λ)
-    n = tab_u |> content |> length
+    dim = tab_u |> content |> length
     
-    inversos = sqrt((1/Θn(tab_u,λ))*(1/Θn(tab_v,λ)))
+    normalization = sqrt((1 / Θn(tab_u, λ)) * (1 / Θn(tab_v, λ)))
     if verbose 
-      @show inversos
+      @show normalization
     end
 
-    (lista_gamas, lista_cosets) = double_coset(content(tab_u, λ), content(tab_v, λ))
+    (gamma_list, coset_list) = double_coset(content(tab_u, λ), content(tab_v, λ))
 
     if verbose
-      @show length(vcat(lista_cosets...) |> unique), length(lista_gamas)
+      @show length(vcat(coset_list...) |> unique), length(gamma_list)
     end
     
-    pol::Complex{Float64} = zero(Complex{Float64})
-    total::Float64 = zero(Float64)
+    ctx = DoubleCosetSumContext(
+        gamma_list,
+        coset_list,
+        map_u,
+        map_v,
+        dim,
+        mat,
+        standard_tableaux,
+        row_index,
+        col_index,
+        λ,
+        zero(ComplexF64),
+        zero(Float64),
+    )
+    pol = sum_over_double_cosets(ctx)
     
-    for ind in 1:length(lista_gamas)
-        γ = lista_gamas[ind]
-        cjto_σ = lista_cosets[ind]
-        mon = compute_monomial(f, g, inv(γ), n,mat)
-        total = 0.0
-        for σ in cjto_σ
-            total += generate_matrix(tablones, σ,λ)[i,j]
-        end
-        pol += (total*mon)
-    end
-    
-    pol*inversos
+    pol * normalization
 end
 
 
@@ -542,41 +550,43 @@ end
 function group_function_sym(λ::Irrep, pat_u::GTPattern, pat_v::GTPattern, mat::AbstractMatrix{T}; verbose = false) where T
     tab_u = pat_u |> YoungTableau
     tab_v = pat_v |> YoungTableau
-    tablones = StandardYoungTableaux(filter(x -> x > 0, λ))
-    i = index_of_semistandard_tableau(tab_u)
-    j = index_of_semistandard_tableau(tab_v)
-    f = standard_to_semistandard_map(tab_u,λ)
-    g = standard_to_semistandard_map(tab_v,λ)
+    standard_tableaux = standard_tableaux_for_irrep(λ)
+    row_index = index_of_semistandard_tableau(tab_u)
+    col_index = index_of_semistandard_tableau(tab_v)
+    map_u = standard_to_semistandard_map(tab_u, λ)
+    map_v = standard_to_semistandard_map(tab_v, λ)
 
     # probablemente se pueda sustituir con sum(λ)
-    n = tab_u |> content |> length
+    dim = tab_u |> content |> length
 
-    inversos = sqrt((1/Θ(tab_u,λ))*(1/Θ(tab_v,λ)))
+    normalization = sqrt((1 / Θ(tab_u, λ)) * (1 / Θ(tab_v, λ)))
     if verbose
-      @show inversos
+      @show normalization
     end
 
-    (lista_gamas, lista_cosets) = double_coset(content(tab_u, λ), content(tab_v, λ))
+    (gamma_list, coset_list) = double_coset(content(tab_u, λ), content(tab_v, λ))
 
     if verbose
-      @show length(vcat(lista_cosets...) |> unique), length(lista_gamas)
+      @show length(vcat(coset_list...) |> unique), length(gamma_list)
     end
 
-    pol = zero(eltype(mat))
-    total = zero(eltype(mat))#zero(Float64)
+    ctx = DoubleCosetSumContext(
+        gamma_list,
+        coset_list,
+        map_u,
+        map_v,
+        dim,
+        mat,
+        standard_tableaux,
+        row_index,
+        col_index,
+        λ,
+        zero(eltype(mat)),
+        zero(eltype(mat)),
+    )
+    pol = sum_over_double_cosets(ctx)
 
-    for ind in 1:length(lista_gamas)
-        γ = lista_gamas[ind]
-        cjto_σ = lista_cosets[ind]
-        mon = compute_monomial(f, g, inv(γ), n,mat)
-        total = zero(eltype(mat))
-        for σ in cjto_σ
-            total += generate_matrix(tablones, σ,λ)[i,j]
-        end
-        pol += (total*mon)
-    end
-
-    pol*inversos
+    pol * normalization
 end
 
 @doc Markdown.doc"""
@@ -593,41 +603,43 @@ julia> group_function([2,1,0], t, t, mat)
 ```
 """
 function group_function(λ::Irrep, tab_u::YTableau, tab_v::YTableau, mat::Array{Complex{Float64}, 2}; verbose = false) 
-    tablones = StandardYoungTableaux(filter(x -> x > 0, λ))
-    i = index_of_semistandard_tableau(tab_u)
-    j = index_of_semistandard_tableau(tab_v)
-    f = standard_to_semistandard_map(tab_u,λ)
-    g = standard_to_semistandard_map(tab_v,λ)
+    standard_tableaux = standard_tableaux_for_irrep(λ)
+    row_index = index_of_semistandard_tableau(tab_u)
+    col_index = index_of_semistandard_tableau(tab_v)
+    map_u = standard_to_semistandard_map(tab_u, λ)
+    map_v = standard_to_semistandard_map(tab_v, λ)
     
     # probablemente se pueda sustituir con sum(λ)
-    n = tab_u |> content |> length
+    dim = tab_u |> content |> length
     
-    inversos = sqrt((1/Θn(tab_u,λ))*(1/Θn(tab_v,λ)))
+    normalization = sqrt((1 / Θn(tab_u, λ)) * (1 / Θn(tab_v, λ)))
     if verbose 
-      @show inversos
+      @show normalization
     end
 
-    (lista_gamas, lista_cosets) = double_coset(content(tab_u, λ), content(tab_v, λ))
+    (gamma_list, coset_list) = double_coset(content(tab_u, λ), content(tab_v, λ))
 
     if verbose
-      @show length(vcat(lista_cosets...) |> unique), length(lista_gamas)
+      @show length(vcat(coset_list...) |> unique), length(gamma_list)
     end
     
-    pol::Complex{Float64} = zero(Complex{Float64})
-    total::Float64 = zero(Float64)
+    ctx = DoubleCosetSumContext(
+        gamma_list,
+        coset_list,
+        map_u,
+        map_v,
+        dim,
+        mat,
+        standard_tableaux,
+        row_index,
+        col_index,
+        λ,
+        zero(ComplexF64),
+        zero(Float64),
+    )
+    pol = sum_over_double_cosets(ctx)
     
-    for ind in 1:length(lista_gamas)
-        γ = lista_gamas[ind]
-        cjto_σ = lista_cosets[ind]
-        mon = compute_monomial(f, g, inv(γ), n,mat)
-        total = 0.0
-        for σ in cjto_σ
-            total += generate_matrix(tablones, σ,λ)[i,j]
-        end
-        pol += (total*mon)
-    end
-    
-    pol*inversos
+    pol * normalization
 end
 
 @doc Markdown.doc"""
