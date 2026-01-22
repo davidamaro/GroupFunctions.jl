@@ -7,7 +7,7 @@ Consider a system of $n$ modes, each described by a creation operator $a^\dagger
 $$|m_1, m_2, \ldots, m_n\rangle = \frac{(a_1^\dagger)^{m_1} \cdots (a_n^\dagger)^{m_n}}{\sqrt{m_1! \cdots m_n!}} |0\rangle.$$
 
 Now suppose the modes get mixed by a unitary transformation $U \in \mathrm{U}(n)$:
-$$a_i^\dagger \mapsto \sum_j U_{ij} a_j^\dagger.$$
+$$a_i^\dagger \mapsto \sum_j U_{ji} a_j^\dagger.$$
 
 What is the output state? Each creation operator in the original Fock state transforms according to the rule above. Expanding the product, we obtain a superposition of Fock states with coefficients that are polynomials in the matrix elements $U_{ij}$.
 
