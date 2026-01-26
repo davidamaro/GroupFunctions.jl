@@ -104,6 +104,7 @@ function es_cero(pol::Basic; ϵ = 10^(-5))
 end
 
 include("internals.jl")
+include("double_coset_representatives.jl")
 include("Aqua.jl")
 @testset "Number of zero weight states." begin
   solutions = find_tablaeux_fillings([1, 1, 2, 1, 0], [1, 1, 2, 1, 0])
