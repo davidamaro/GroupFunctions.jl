@@ -3,7 +3,8 @@
 [![Docs – dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://davidamaro.github.io/GroupFunctions.jl/dev)
 
 <p align="center">
-  <img src="docs/src/assets/banner.svg" alt="GroupFunctions.jl banner">
+  <img src="docs/src/assets/banner.svg#gh-light-mode-only" alt="GroupFunctions.jl banner">
+  <img src="docs/src/assets/dark-banner.svg#gh-dark-mode-only" alt="GroupFunctions.jl banner (dark)">
 </p>
 
 # GroupFunctions.jl
