@@ -5,9 +5,10 @@
 <p align="center">
   <img src="docs/src/assets/banner.svg" alt="GroupFunctions.jl banner">
 </p>
+
 # GroupFunctions.jl
 
-A Julia library to compute D-functions, which are entries of the irreducible representations of the unitary group U(d). These entries can be numeric or symbolic.
+A Julia library to compute D-functions, which are entries of the irreducible representations of the unitary group U(d). These entries can be numeric or symbolic.
 
 ## Highlights
 - Numerical and symbolic D-functions for U(d) irreps
@@ -64,30 +65,6 @@ julia_to_mma(sym)  # Mathematica-friendly expression
 
 For more examples and API details, see the documentation: https://davidamaro.github.io/GroupFunctions.jl/dev/
 
-## Example: variance of Weyl characters
-
-```julia
-using GroupFunctions
-using RandomMatrices
-using LinearAlgebra: det
-using Statistics: var
-
-nsamples = 1_000
-n = 3
-irrep = [2, 1, 0]
-
-values = Vector{ComplexF64}(undef, nsamples)
-for i in 1:nsamples
-    U = rand(Haar(2), n)
-    U_su = U / det(U)^(1 / n)
-    values[i] = character_weyl(irrep, U_su)
-end
-
-variance = var(values)
-# Expect variance ≈ 1 for these samples.
-variance
-```
-
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request. A to-do list is included in the `todo.txt` file.
@@ -108,4 +85,4 @@ GroupFunctions.jl is distributed under the MIT License (see `LICENSE`). While th
 
 ## Citation
 
-Citation information is pending. In the meantime, please cite the repository URL and version tag (e.g., “GroupFunctions.jl v0.1.5, 2024, https://github.com/davidamaro/GroupFunctions.jl”).
+Citation information is pending. In the meantime, please cite the repository URL and version tag (e.g., “GroupFunctions.jl v0.1.7, 2026, https://github.com/davidamaro/GroupFunctions.jl”).
