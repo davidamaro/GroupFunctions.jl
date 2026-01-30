@@ -2,6 +2,7 @@ import LinearAlgebra: transpose, det, eigvals
 export group_function, group_function_sym
 export zweight, pweight
 export find_tablaeux_fillings
+export find_double_coset_representative_matrices
 
 const Irrep = Array{T,1} where T <: Integer
 const YTableau = AbstractAlgebra.Generic.YoungTableau{T} where T <: Integer
@@ -81,7 +82,7 @@ Returns:
 """
 function find_double_coset_representatives(c_a::Content, c_b::Content)
     # Get proto-tableaux for the given contents
-    proto_tableaux = find_tablaeux_fillings(c_a, c_b) #find tableaux fillings
+    proto_tableaux = find_double_coset_representative_matrices(c_a, c_b)
     
     # Calculate and process permutations
     dimension = length(c_a)
@@ -97,6 +98,16 @@ function find_double_coset_representatives(c_a::Content, c_b::Content)
     end
     
     return representatives
+end
+
+"""
+    find_double_coset_representative_matrices(c_a::Content, c_b::Content) -> Vector{Matrix{Int}}
+
+Return the frequency matrices (proto-tableaux) used to build the double coset
+representative permutations.
+"""
+function find_double_coset_representative_matrices(c_a::Content, c_b::Content)
+    return find_tablaeux_fillings(c_a, c_b)
 end
 
 """
@@ -118,7 +129,7 @@ function find_double_coset_representatives(t_a, t_b)
     #TODO: make this function just a wrapper using the implementation above (with c_a::Content, c_b::Content)
 
     # Get proto-tableaux for the contents
-    proto_tableaux = find_tablaeux_fillings(content_a, content_b)
+    proto_tableaux = find_double_coset_representative_matrices(content_a, content_b)
     
     # Transform proto-tableaux into permutations
     representatives = map(proto_tableaux) do proto
@@ -128,6 +139,18 @@ function find_double_coset_representatives(t_a, t_b)
     end
     
     return representatives
+end
+
+"""
+    find_double_coset_representative_matrices(t_a, t_b) -> Vector{Matrix{Int}}
+
+Return the frequency matrices (proto-tableaux) for two tableaux by using their
+contents.
+"""
+function find_double_coset_representative_matrices(t_a, t_b)
+    content_a = content(t_a)
+    content_b = content(t_b)
+    return find_tablaeux_fillings(content_a, content_b)
 end
 
 ###############################################################################
