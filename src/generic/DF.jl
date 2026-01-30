@@ -11,7 +11,9 @@ const MapST2SST = Dict{T,T} where T <: Integer
 
 
 include("FindTables.jl")
+include("AllSolutionsMatrix.jl")
 using .FindTables
+using .AllSolutionsMatrix
 
 
 
@@ -68,6 +70,20 @@ function adjust_permutation_list(list::Vector{T}, n::T) where T <: Integer
     return adjusted_list
 end
 
+function rows_to_matrix(rows::Vector{Vector{T}}) where {T<:Integer}
+    nrows = length(rows)
+    nrows == 0 && return Matrix{T}(undef, 0, 0)
+    ncols = length(rows[1])
+    matrix = Matrix{T}(undef, nrows, ncols)
+    @inbounds for i in 1:nrows
+        row = rows[i]
+        @inbounds for j in 1:ncols
+            matrix[i, j] = row[j]
+        end
+    end
+    return matrix
+end
+
 """
     find_double_coset_representatives(c_a::Content, c_b::Content) -> Vector{Perm}
 was: encontrar_representativos
@@ -82,15 +98,16 @@ Returns:
 """
 function find_double_coset_representatives(c_a::Content, c_b::Content)
     # Get proto-tableaux for the given contents
-    proto_tableaux = find_double_coset_representative_matrices(c_a, c_b)
+    proto_tableaux = enumerate_matrices(c_a, c_b)
     
     # Calculate and process permutations
     dimension = length(c_a)
     
     # Transform proto-tableaux into permutations
-    representatives = map(proto_tableaux) do proto
+    representatives = map(proto_tableaux) do proto_rows
         # Convert to permutation and sort
-        proto_perm = proto |> collect |> expand_frequency_matrix |> sortperm
+        proto_matrix = rows_to_matrix(proto_rows)
+        proto_perm = expand_frequency_matrix(proto_matrix) |> sortperm
         # Adjust permutation to fit dimension
         adjusted_perm = adjust_permutation_list(proto_perm, dimension)
         # Create final permutation
@@ -107,7 +124,7 @@ Return the frequency matrices (proto-tableaux) used to build the double coset
 representative permutations.
 """
 function find_double_coset_representative_matrices(c_a::Content, c_b::Content)
-    return find_tablaeux_fillings(c_a, c_b)
+    return map(rows_to_matrix, enumerate_matrices(c_a, c_b))
 end
 
 """
@@ -129,12 +146,12 @@ function find_double_coset_representatives(t_a, t_b)
     #TODO: make this function just a wrapper using the implementation above (with c_a::Content, c_b::Content)
 
     # Get proto-tableaux for the contents
-    proto_tableaux = find_double_coset_representative_matrices(content_a, content_b)
+    proto_tableaux = enumerate_matrices(content_a, content_b)
     
     # Transform proto-tableaux into permutations
-    representatives = map(proto_tableaux) do proto
-        proto_array = collect(proto)
-        permutation = expand_frequency_matrix(proto_array)
+    representatives = map(proto_tableaux) do proto_rows
+        proto_matrix = rows_to_matrix(proto_rows)
+        permutation = expand_frequency_matrix(proto_matrix)
         Perm(collect(sortperm(permutation)))
     end
     
@@ -150,7 +167,7 @@ contents.
 function find_double_coset_representative_matrices(t_a, t_b)
     content_a = content(t_a)
     content_b = content(t_b)
-    return find_tablaeux_fillings(content_a, content_b)
+    return map(rows_to_matrix, enumerate_matrices(content_a, content_b))
 end
 
 ###############################################################################
