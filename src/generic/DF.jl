@@ -10,10 +10,10 @@ const Content = Array{T,1} where T <: Integer
 const MapST2SST = Dict{T,T} where T <: Integer
 
 
-include("FindTables.jl")
 include("AllSolutionsMatrix.jl")
-using .FindTables
 using .AllSolutionsMatrix
+include("FindTables.jl")
+using .FindTables
 
 
 
