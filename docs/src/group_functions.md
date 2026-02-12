@@ -1,5 +1,8 @@
 # Group Functions
 
+
+The [previous section](states.md) introduced GT patterns as labels for these basis states, with different irreps corresponding to different exchange symmetries. Here we sketch the mathematical framework behind the library; actual code is shown in the sections following this one ([HOM effect](quantum_optics.md), [qubit transmission with entangled light](qubit_transmission.md), calculation of [characters](characters.md), [sum rules](sum_rules.md) and [immanants](immanants.md)).
+
 ## The problem: mode mixing in quantum mechanics
 
 Consider a system of $n$ modes, each described by a creation operator $a^\dagger_i$. A Fock state is built by applying creation operators to the vacuum:
