@@ -2,9 +2,9 @@
 <!-- Created with Inkscape (http://www.inkscape.org/) -->
 
 <svg
-   width="138.28981mm"
+   width="127.88563mm"
    height="16.022411mm"
-   viewBox="0 0 138.28981 16.022412"
+   viewBox="0 0 127.88563 16.022412"
    version="1.1"
    id="svg1"
    xml:space="preserve"
@@ -66,4 +66,4 @@
          id="tspan49"
          style="font-size:14.1111px;fill:#ffffff;fill-opacity:1;stroke-width:0.12;stroke-dasharray:none"
          x="109.65394"
-         y="177.39113">GroupFunctions.jl</tspan></text></g></svg>
+         y="177.39113">GroupFunctions</tspan></text></g></svg>
