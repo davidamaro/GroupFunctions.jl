@@ -104,6 +104,7 @@ function es_cero(pol::Basic; ϵ = 10^(-5))
 end
 
 include("internals.jl")
+include("double_coset_representatives.jl")
 include("Aqua.jl")
 @testset "Number of zero weight states." begin
   solutions = find_tablaeux_fillings([1, 1, 2, 1, 0], [1, 1, 2, 1, 0])
@@ -231,6 +232,36 @@ end
     edo_julia = group_function([2,2,1,0],t_u, t_v) |> expand
     edo_final = expand(edo_mma - edo_julia)
     @test es_cero(edo_final)
+end
+
+@testset "SU(2) irrep homomorphism" begin
+    u = rand(Haar(2), 2)
+    u = u / det(u)^(1 / 2)
+    v = rand(Haar(2), 2)
+    v = v / det(v)^(1 / 2)
+    uv = u * v
+
+    for λ in ([2, 0], [3, 0])
+        rep_u, _ = group_function(λ, u)
+        rep_v, _ = group_function(λ, v)
+        rep_uv, _ = group_function(λ, uv)
+        @test isapprox(rep_u * rep_v, rep_uv; atol=1e-8, rtol=1e-8)
+    end
+end
+
+@testset "SU(3) irrep homomorphism" begin
+    u = rand(Haar(2), 3)
+    u = u / det(u)^(1 / 3)
+    v = rand(Haar(2), 3)
+    v = v / det(v)^(1 / 3)
+    uv = u * v
+
+    for λ in ([2, 1, 0], [2, 2, 0])
+        rep_u, _ = group_function(λ, u)
+        rep_v, _ = group_function(λ, v)
+        rep_uv, _ = group_function(λ, uv)
+        @test isapprox(rep_u * rep_v, rep_uv; atol=1e-8, rtol=1e-8)
+    end
 end
 
 @testset "Comparison between Legendre polynomails and D-function" begin
