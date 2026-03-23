@@ -26,7 +26,7 @@ using LinearAlgebra: I
 basis = basis_states(λ)
 
 # Helper: find pattern by occupation
-state(occ) = basis[findfirst(b -> pweight(b) == occ, basis)]
+state(occ) = basis[findfirst(b -> occupation_number(b) == occ, basis)]
 
 # Initial and postselected states
 initial_1 = state([2,0,0,0])

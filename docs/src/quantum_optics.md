@@ -13,7 +13,7 @@ The amplitudes $c_{m,m'}(U)$ are matrix elements of SU($n$) irreducible represen
 The basic items to translate between quantum optics and GT pattern language are thus the following:
 1. Define photon number subspace  `λ = [N, 0, ..., 0]` 
 2. Enumerate the basis of the above subspace using GT patterns  `basis = basis_states(λ)` 
-3. Each of the basis elements corresponds to the Fock state with occupation number provided by  `pweight(pattern)` 
+3. Each of the basis elements corresponds to the Fock state with occupation number provided by  `occupation_number(pattern)` 
 4. Transition amplitude is read out by `group_function(λ, final, initial, U)`, where $U$ is the $SU(n)$ unitary in previous paragraphs (e.g. provided by `su2_block(n, i, (α, β, γ))`), `final` and `initial` are the final and initial states (written as GT patterns).
 
 
@@ -30,9 +30,9 @@ using GroupFunctions
 λ = [2, 0, 0]
 basis = basis_states(λ)
 
-# Each GT pattern corresponds to a Fock state via pweight
+# Each GT pattern corresponds to a Fock state 
 for b in basis
-    occ = pweight(b)
+    occ = occupation_number(b)
     println("|", join(occ, ","), "⟩")
 end
 ```
@@ -74,10 +74,10 @@ The amplitude $\langle m' | U | m \rangle$ is computed via `group_function`:
 basis = basis_states(λ)
 
 # Initial state: |2,0,0⟩
-initial = basis[findfirst(b -> pweight(b) == [2,0,0], basis)]
+initial = basis[findfirst(b -> occupation_number(b) == [2,0,0], basis)]
 
 # Final state: |1,1,0⟩
-final = basis[findfirst(b -> pweight(b) == [1,1,0], basis)]
+final = basis[findfirst(b -> occupation_number(b) == [1,1,0], basis)]
 
 # Amplitude
 amp = group_function(λ, final, initial, U)
@@ -94,14 +94,14 @@ Two photons entering a 50:50 beamsplitter from different input ports:
 λ = [2, 0]
 basis = basis_states(λ)
 
-initial = basis[findfirst(b -> pweight(b) == [1,1], basis)]
+initial = basis[findfirst(b -> occupation_number(b) == [1,1], basis)]
 
 θ = float(π)/2
 BS = su2_block(2, 1, (0., θ, 0.))
 
 for final in basis
     amp = group_function(λ, final, initial, BS)
-    println("|", join(pweight(final), ","), "⟩: ", round(abs2(amp), digits=4))
+    println("|", join(occupation_number(final), ","), "⟩: ", round(abs2(amp), digits=4))
 end
 ```
 
