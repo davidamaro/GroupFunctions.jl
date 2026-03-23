@@ -9,20 +9,20 @@ The basic functionality of the function is the following: given a (symbolic or n
 As a quick example, the following code calculates the probability of photonic $\ket{1,1}$ state transforming to $\ket{2,0}$ photons after going through a 50:50 beamsplitter.
 ```julia
 using GroupFunctions
-
+using SymEngine 
 λ = [2, 0]                           # 2 photons, 2 modes
 basis = basis_states(λ)              # enumerate GT patterns
 
 # Check which Fock state each pattern represents
 for b in basis
-    println(pweight(b), " → ", b)    # pweight gives occupation numbers
+    println(occupation_number(b), " → ", b)   
 end
 # Output: [2,0], [1,1], [0,2]
 
 # Beamsplitter unitary and transition amplitude |1,1⟩ → |2,0⟩
-BS = su2_block(2, 1, (0., π/2, 0.))
-initial = basis[findfirst(b -> pweight(b) == [1,1], basis)]
-final   = basis[findfirst(b -> pweight(b) == [2,0], basis)]
+BS = BS=[ 1 -1; 1 1]/sqrt(Basic(2)) # Basic used for symbolic sqrt
+initial = basis[findfirst(b -> occupation_number(b) == [1,1], basis)]
+final   = basis[findfirst(b -> occupation_number(b) == [2,0], basis)]
 
 amp = group_function(λ, final, initial, BS)
 println("Probability: ", abs2(amp))  # ≈ 0.5 (HOM effect)

@@ -1,8 +1,9 @@
 import LinearAlgebra: transpose, det, eigvals
-export group_function, group_function_sym
+export group_function
 export zweight, pweight
 export find_tablaeux_fillings
 export find_double_coset_representative_matrices
+export occupation_number 
 
 const Irrep = Array{T,1} where T <: Integer
 const YTableau = AbstractAlgebra.Generic.YoungTableau{T} where T <: Integer
@@ -532,9 +533,10 @@ function group_function(λ::Irrep, pat_u::GTPattern, pat_v::GTPattern; verbose::
 end
 
 @doc Markdown.doc"""
-    group_function(λ::Irrep, tu::GTPattern, tv::GTPattern, mat::Array{Complex{Float64},2})
-> Returns the _numeric_ group function, for an SU(n) member `mat`, corresponding to irrep `λ` and a pair of GT patterns
-> `tu` and `tv`.
+    group_function(λ::Irrep, tu::GTPattern, tv::GTPattern, mat::AbstractMatrix{T}; verbose=false) where T
+Returns the group function for an SU(n) element `mat`, corresponding to irrep `λ` and a pair of GT patterns
+`tu` and `tv`. For numeric `mat` (real or complex floating point), computes the group function numerically.
+Otherwise, uses exact coefficients internally, and the result is a polynomial in the entries of `mat`.
 
 ```julia
 julia> using RandomMatrices
@@ -543,51 +545,8 @@ julia> t = GTPattern([[2,1,0],[2,1],[2]],[2]);
 julia> group_function([2,1,0], t, t, mat)
 ```
 """
-function group_function(λ::Irrep, pat_u::GTPattern, pat_v::GTPattern, mat::Array{Complex{Float64}, 2}; verbose = false) 
-    tab_u = pat_u |> YoungTableau
-    tab_v = pat_v |> YoungTableau
-    standard_tableaux = standard_tableaux_for_irrep(λ)
-    row_index = index_of_semistandard_tableau(tab_u)
-    col_index = index_of_semistandard_tableau(tab_v)
-    map_u = standard_to_semistandard_map(tab_u, λ)
-    map_v = standard_to_semistandard_map(tab_v, λ)
-    
-    # probablemente se pueda sustituir con sum(λ)
-    dim = tab_u |> content |> length
-    
-    normalization = sqrt((1 / Θn(tab_u, λ)) * (1 / Θn(tab_v, λ)))
-    if verbose 
-      @show normalization
-    end
 
-    (gamma_list, coset_list) = double_coset(content(tab_u, λ), content(tab_v, λ))
-
-    if verbose
-      @show length(vcat(coset_list...) |> unique), length(gamma_list)
-    end
-    
-    ctx = DoubleCosetSumContext(
-        gamma_list,
-        coset_list,
-        map_u,
-        map_v,
-        dim,
-        mat,
-        standard_tableaux,
-        row_index,
-        col_index,
-        λ,
-        zero(ComplexF64),
-        zero(Float64),
-    )
-    pol = sum_over_double_cosets(ctx)
-    
-    pol * normalization
-end
-
-
-
-function group_function_sym(λ::Irrep, pat_u::GTPattern, pat_v::GTPattern, mat::AbstractMatrix{T}; verbose = false) where T
+function group_function(λ::Irrep, pat_u::GTPattern, pat_v::GTPattern, mat::AbstractMatrix{T}; verbose = false) where T
     tab_u = pat_u |> YoungTableau
     tab_v = pat_v |> YoungTableau
     standard_tableaux = standard_tableaux_for_irrep(λ)
@@ -598,8 +557,13 @@ function group_function_sym(λ::Irrep, pat_u::GTPattern, pat_v::GTPattern, mat::
 
     # probablemente se pueda sustituir con sum(λ)
     dim = tab_u |> content |> length
-
-    normalization = sqrt((1 / Θ(tab_u, λ)) * (1 / Θ(tab_v, λ)))
+    if T <: Union{AbstractFloat, Complex{<:AbstractFloat}} 
+        #we're working with numerical matrix
+        normalization = sqrt((1 / Θn(tab_u, λ)) * (1 / Θn(tab_v, λ)))
+    else 
+        #it's potentially exact, let's have symbolic sqrt coefficients instead of floats
+        normalization = sqrt((1 / Θ(tab_u, λ)) * (1 / Θ(tab_v, λ)))
+    end
     if verbose
       @show normalization
     end
@@ -802,4 +766,7 @@ function pweight(gt::GTPattern)
     end
     total
 end
+
+
+occupation_number = reverse ∘ pweight
 import Combinatorics: permutations
