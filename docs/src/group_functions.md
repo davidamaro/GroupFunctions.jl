@@ -1,5 +1,5 @@
 # Group Functions
-
+#todo this looks more like a background than to a result. too technical. maybe intermix with the actual function calls. 
 
 The [previous section](states.md) introduced GT patterns as labels for these basis states, with different irreps corresponding to different exchange symmetries. Here we sketch the mathematical framework behind the library; actual code is shown in the sections following this one ([HOM effect](quantum_optics.md), [qubit transmission with entangled light](qubit_transmission.md), calculation of [characters](characters.md), [sum rules](sum_rules.md) and [immanants](immanants.md)).
 

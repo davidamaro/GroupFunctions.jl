@@ -1,5 +1,10 @@
 # Sum rules
 
+#todo needs an overhaul. 
+
+1. this goes into application
+2. 
+
 First, prepare the matrix using the simple factorization.
 ```julia
 α1,β1,γ1 = rand(Float64,3)

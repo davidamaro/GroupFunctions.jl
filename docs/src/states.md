@@ -144,5 +144,6 @@ end
 For mixed irreps, multiple GT patterns can share the same p-weight. This inner multiplicity reflects that occupation numbers alone do not uniquely specify a state when particles have mixed exchange symmetry.
 
 
-Now that we have a labeling scheme for basis states, the natural question is: how do transition amplitudes between these states depend on the unitary transformation $U$? For bosons, this involves permanents; for fermions, determinants; for mixed symmetry, a generalization called the Grabmeier-Kerber formula. This is the topic of [the next section](group_functions.md).
+Now that we have a labeling scheme for basis states, the natural question is: how do transition amplitudes between these states depend on the unitary transformation $U$? For bosons, this involves permanents; for fermions, determinants; for mixed symmetry, a generalization called the ==Grabmeier-Kerber formula==. This is the topic of [the next section](group_functions.md).
 
+#todo add a link to that.

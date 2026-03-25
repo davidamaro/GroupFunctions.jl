@@ -1,5 +1,6 @@
 # Characters
-
+#todo what are characters. if you know what a character is then compute this. if not then there's this intro. quick intro. then more details. 
+#todo split into tutorial. random computations. and background.
 SU(d) characters can be evaluated with the Weyl/Schur determinant formula.
 
 ```@docs

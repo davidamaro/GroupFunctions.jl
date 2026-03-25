@@ -90,9 +90,10 @@ state_y = filter(s -> pweight(s) == [1,0,2,0], basis)[1]
 M = U[[1,2,3], [2,2,4]]
 group_function([3,0,0,0], state_x, state_y, U) ≈ permanent3(M) / sqrt(2)
 ```
-
-## Two-photon coincidence rate with delay
-
+#todo write a funcion that return the occupation numbers
+## Application: Two-photon coincidence rate with delay
+#todo add another folder with applications. and add my paper. 
+==so we have application, tutorial, and background. ==
 For two photons entering input modes $k,l$ and detected at outputs $m,n$, with relative delay $\tau_{ab}$:
 
 ```math
@@ -175,5 +176,6 @@ Here $\tau_{13}$ is the only independent delay because $\tau_1=\tau_2$. At $\tau
 ## References
 
 - [B. Kostant, "On Macdonald's $\eta$-function formula, the Laplacian and generalized exponents"](http://www.jstor.org/stable/2152885)
-- [A. de Guise et al., "Coincidence landscapes for three-channel linear optical networks"](https://arxiv.org/pdf/1511.01851)
+- [Amaro-Alcala, D et al., "Coincidence landscapes for three-channel linear optical networks"](https://arxiv.org/pdf/1511.01851)
 - [Immanant (Wikipedia)](https://en.wikipedia.org/wiki/Immanant)
+#todo there's a typo here.
