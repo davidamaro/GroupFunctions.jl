@@ -4,14 +4,14 @@
 
 A Julia package for computing matrix elements of irreducible representations of the unitary group U(n), commonly known as *D-functions* or *group functions*. Supports both numerical evaluation and symbolic computation. Potential applications include quantum information and quantum optics problems (boson sampling, photonic state preparation), as well as general quantum many-body physics. 
 
-The basic functionality of the function is the following: given a (symbolic or numerical) U(n) matrix, calculate the transformation matrix in a given representation (e.g. fixed particle number subspace), mathematically described via basis states involving Gelfand-Tseltsin patterns.
+The basic functionality of the function is the following: given a (symbolic or numerical) U(n) matrix, calculate the transformation matrix in a given representation (e.g. fixed particle number subspace), mathematically described via basis states involving [Gelfand-Tsetlin patterns](tutorial/states.md).
 
 As a quick example, the following code calculates the probability of photonic $\ket{1,1}$ state transforming to $\ket{2,0}$ photons after going through a 50:50 beamsplitter.
 ```julia
 using GroupFunctions
 
 λ = [2, 0]                           # 2 photons, 2 modes
-basis = basis_states(λ)              # enumerate GT patterns
+basis = basis_states(λ)              # enumerate basis states
 
 # Check which Fock state each pattern represents
 for b in basis

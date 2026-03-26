@@ -1,7 +1,7 @@
 # Group Functions
 #todo this looks more like a background than to a result. too technical. maybe intermix with the actual function calls. 
 
-The [previous section](states.md) introduced GT patterns as labels for these basis states, with different irreps corresponding to different exchange symmetries. Here we sketch the mathematical framework behind the library; actual code is shown in the sections following this one ([HOM effect](quantum_optics.md), [qubit transmission with entangled light](qubit_transmission.md), calculation of [characters](characters.md), [sum rules](sum_rules.md) and [immanants](immanants.md)).
+The [basis states and GT patterns page](states.md) introduced these labels for basis states, with different irreps corresponding to different exchange symmetries. Here we sketch the mathematical framework behind the library; actual code is shown in the applications pages on [HOM effect](../applications/quantum_optics.md), [qubit transmission with entangled light](../applications/qubit_transmission.md), [sum rules](../applications/sum_rules.md), as well as the related notes on [characters](characters.md) and [immanants](immanants.md).
 
 ## The problem: mode mixing in quantum mechanics
 
@@ -99,6 +99,6 @@ For a general irrep $\lambda$, the representation has dimension $f^\lambda > 1$,
 
 $$T^\lambda_{U,V} = \frac{1}{\sqrt{\Theta^\lambda_U \Theta^\lambda_V}} \sum_{\gamma} \left( \sum_{\sigma \in S_\alpha \gamma S_\beta} \omega^\lambda_{i,j}(\sigma) \right) X_{f \circ \gamma, g}$$
 
-Here $U, V$ are semistandard tableaux labeling basis states (equivalent to GT patterns), $\Theta$ is a normalization factor generalizing $\sqrt{m!}$, and $X_{f \circ \gamma, g}$ is the monomial $\prod_k U_{i_k, j_k}$. The double coset decomposition $S_\alpha \backslash S_N / S_\beta$ groups permutations contributing the same monomial.
+Here $U, V$ are semistandard tableaux labeling basis states (equivalent to [GT patterns](states.md)), $\Theta$ is a normalization factor generalizing $\sqrt{m!}$, and $X_{f \circ \gamma, g}$ is the monomial $\prod_k U_{i_k, j_k}$. The double coset decomposition $S_\alpha \backslash S_N / S_\beta$ groups permutations contributing the same monomial.
 
 The partition $\lambda$ labels the symmetry type: $[N]$ for bosons, $[1^N]$ for fermions, mixed shapes for particles with mixed exchange symmetry. The function `group_function(λ, ...)` evaluates this formula.

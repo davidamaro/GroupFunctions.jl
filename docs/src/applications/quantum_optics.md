@@ -8,20 +8,20 @@ Consider $N$ photons distributed across $n$ modes. The Fock state $|m_1, m_2, \l
 $$|m_1, \ldots, m_n\rangle \xrightarrow{U} \sum_{m'} c_{m,m'}(U) |m'_1, \ldots, m'_n\rangle$$
 where $U \in \mathrm{SU}(n)$ mixes the mode creation operators: $a^\dagger_i \mapsto \sum_j U_{ij} a^\dagger_j$.
 
-The amplitudes $c_{m,m'}(U)$ are matrix elements of SU($n$) irreducible representations, specifically, the **symmetric irrep** $\lambda = [N, 0, \ldots, 0]$, corresponding to a single-row Young tableau. This is because bosonic states are symmetric under particle exchange. Importantly, for symmetric irreps, the p-weight of a Gelfand-Tsetlin pattern (used internally by this library) directly gives the occupation numbers, more natural in quantum optics.  
+The amplitudes $c_{m,m'}(U)$ are matrix elements of SU($n$) irreducible representations, specifically, the **symmetric irrep** $\lambda = [N, 0, \ldots, 0]$, corresponding to a single-row Young tableau. This is because bosonic states are symmetric under particle exchange. Importantly, for symmetric irreps, the p-weight of a [Gelfand-Tsetlin pattern](../tutorial/states.md) (used internally by this library) directly gives the occupation numbers, more natural in quantum optics.  
 
-The basic items to translate between quantum optics and GT pattern language are thus the following:
+The basic items to translate between quantum optics and [GT pattern](../tutorial/states.md) language are thus the following:
 1. Define photon number subspace  `λ = [N, 0, ..., 0]` 
-2. Enumerate the basis of the above subspace using GT patterns  `basis = basis_states(λ)` 
+2. Enumerate the basis of the above subspace using [GT patterns](../tutorial/states.md)  `basis = basis_states(λ)` 
 3. Each of the basis elements corresponds to the Fock state with occupation number provided by  `pweight(pattern)` 
-4. Transition amplitude is read out by `group_function(λ, final, initial, U)`, where $U$ is the $SU(n)$ unitary in previous paragraphs (e.g. provided by `su2_block(n, i, (α, β, γ))`), `final` and `initial` are the final and initial states (written as GT patterns).
+4. Transition amplitude is read out by `group_function(λ, final, initial, U)`, where $U$ is the $SU(n)$ unitary in previous paragraphs (e.g. provided by `su2_block(n, i, (α, β, γ))`), `final` and `initial` are the final and initial states (written as [GT patterns](../tutorial/states.md)).
 
 
 
 
 ### Basis states and occupation numbers
 
-The Hilbert space of $N$ photons in $n$ modes has dimension $\binom{N+n-1}{n-1}$. We enumerate basis states as GT patterns:
+The Hilbert space of $N$ photons in $n$ modes has dimension $\binom{N+n-1}{n-1}$. We enumerate basis states as [GT patterns](../tutorial/states.md):
 
 ```julia
 using GroupFunctions
@@ -30,7 +30,7 @@ using GroupFunctions
 λ = [2, 0, 0]
 basis = basis_states(λ)
 
-# Each GT pattern corresponds to a Fock state via pweight
+# Each basis element corresponds to a Fock state via pweight
 for b in basis
     occ = pweight(b)
     println("|", join(occ, ","), "⟩")
@@ -108,5 +108,4 @@ end
 Expected (HOM effect): The $|1,1\rangle \to |1,1\rangle$ amplitude vanishes due to destructive interference. Output is $\frac{1}{\sqrt{2}}(|2,0\rangle + |0,2\rangle)$.
 
 TODO: Verify output matches expected HOM signature. Check if beamsplitter convention gives the correct phases.
-
 

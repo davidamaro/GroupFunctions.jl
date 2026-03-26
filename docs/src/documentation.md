@@ -9,9 +9,9 @@
     group_function
 ```
 
-## Gelfand-Tsetlin patterns
+## [Gelfand-Tsetlin patterns](tutorial/states.md)
 
-GT patterns are used to denote the basis states.
+[GT patterns](tutorial/states.md) are used to denote the basis states.
 
 ```@docs
     GTPattern
@@ -38,9 +38,9 @@ Young tableaux are fundamental combinatorial objects used in representation theo
     index_of_semistandard_tableau
 ```
 
-## GT Pattern Generation
+## [GT Pattern Generation](tutorial/states.md)
 
-Functions for generating and iterating through Gelfand-Tsetlin patterns, which form a basis for irreducible representations.
+Functions for generating and iterating through [Gelfand-Tsetlin patterns](tutorial/states.md), which form a basis for irreducible representations.
 
 ```@docs
     basis_states
@@ -50,7 +50,7 @@ Functions for generating and iterating through Gelfand-Tsetlin patterns, which f
 
 ## Weight Functions
 
-Weight functions extract different types of weights from Gelfand-Tsetlin patterns, useful for quantum optics and physical applications.
+Weight functions extract different types of weights from [Gelfand-Tsetlin patterns](tutorial/states.md), useful for quantum optics and physical applications.
 
 ```@docs
     zweight
