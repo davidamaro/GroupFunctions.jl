@@ -2,31 +2,17 @@
 [![](https://img.shields.io/badge/docs-dev-blue.svg)](https://davidamaro.github.io/GroupFunctions.jl/dev)
 ## Overview
 
-A Julia package for computing matrix elements of irreducible representations of the unitary group U(n), commonly known as *D-functions* or *group functions*. Supports both numerical evaluation and symbolic computation. Potential applications include quantum information and quantum optics problems (boson sampling, photonic state preparation), as well as general quantum many-body physics. 
+`GroupFunctions.jl` computes matrix elements of irreducible representations of the unitary group `U(n)`, both numerically and symbolically. Given a unitary matrix and an irrep label, it returns the corresponding transformation matrix, with basis states represented by [Gelfand-Tsetlin patterns](tutorial/states.md).
 
-The basic functionality of the function is the following: given a (symbolic or numerical) U(n) matrix, calculate the transformation matrix in a given representation (e.g. fixed particle number subspace), mathematically described via basis states involving [Gelfand-Tsetlin patterns](tutorial/states.md).
-
-As a quick example, the following code calculates the probability of photonic $\ket{1,1}$ state transforming to $\ket{2,0}$ photons after going through a 50:50 beamsplitter.
-```julia
+```@repl index_symbolic
 using GroupFunctions
 
-λ = [2, 0]                           # 2 photons, 2 modes
-basis = basis_states(λ)              # enumerate basis states
-
-# Check which Fock state each pattern represents
-for b in basis
-    println(pweight(b), " → ", b)    # pweight gives occupation numbers
-end
-# Output: [2,0], [1,1], [0,2]
-
-# Beamsplitter unitary and transition amplitude |1,1⟩ → |2,0⟩
-BS = su2_block(2, 1, (0., π/2, 0.))
-initial = basis[findfirst(b -> pweight(b) == [1,1], basis)]
-final   = basis[findfirst(b -> pweight(b) == [2,0], basis)]
-
-amp = group_function(λ, final, initial, BS)
-println("Probability: ", abs2(amp))  # ≈ 0.5 (HOM effect)
+U = su2_block_symbolic(2,1);
+U
+group_function([2,0], U)[1]
 ```
+
+This computes the SU(2) irreps for symbolic matrices.
 
 ## Installation
 
@@ -41,6 +27,6 @@ pkg> add https://github.com/davidamaro/GroupFunctions.jl
 Requires Julia ≥ 1.6.
 
 ## Contact
-Questions and suggestions: `david.amaroalcala@ucalgary.ca`
+Questions and suggestions: `david.amaroalcala@savba.sk`
 
 ## References
