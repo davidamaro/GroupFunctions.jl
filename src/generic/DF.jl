@@ -630,6 +630,16 @@ function group_function_sym(λ::Irrep, pat_u::GTPattern, pat_v::GTPattern, mat::
 end
 
 @doc Markdown.doc"""
+    group_function(λ::Irrep, pat_u::GTPattern, pat_v::GTPattern, mat::AbstractMatrix{<:Basic}; verbose::Bool = false) -> Basic
+
+Evaluate a symbolic matrix element of the irrep `λ` using the same symbolic
+matrix path as `group_function_sym`, but through the main `group_function` API.
+"""
+function group_function(λ::Irrep, pat_u::GTPattern, pat_v::GTPattern, mat::AbstractMatrix{<:Basic}; verbose::Bool = false)
+    return group_function_sym(λ, pat_u, pat_v, mat; verbose = verbose)
+end
+
+@doc Markdown.doc"""
     group_function(λ::Irrep, tu::GTPattern, tv::GTPattern, mat::Array{Complex{Float64},2})
 > Returns the _numeric_ group function, for an SU(n) member `mat`, corresponding to irrep `λ` and STYT
 > `tu` and `tv`.
@@ -706,6 +716,27 @@ function group_function(λ::Irrep; verbose::Bool = false)
     @inbounds for (i, pat_u) in enumerate(patterns)
         for (j, pat_v) in enumerate(patterns)
             values[i, j] = group_function(λ, pat_u, pat_v; verbose = verbose)
+        end
+    end
+
+    return values, patterns
+end
+
+@doc Markdown.doc"""
+    group_function(λ::Irrep, mat::AbstractMatrix{<:Basic}; verbose::Bool = false) -> Tuple{Matrix{Basic}, Vector{GTPattern}}
+
+Compute the full symbolic irrep matrix for `λ` from a symbolic SU(n) matrix.
+This is the symbolic-matrix analog of the numeric `group_function(λ, mat)`
+overload.
+"""
+function group_function(λ::Irrep, mat::AbstractMatrix{<:Basic}; verbose::Bool = false)
+    patterns = basis_states(λ)
+    n_states = length(patterns)
+    values = Matrix{Basic}(undef, n_states, n_states)
+
+    @inbounds for (i, pat_u) in enumerate(patterns)
+        for (j, pat_v) in enumerate(patterns)
+            values[i, j] = group_function(λ, pat_u, pat_v, mat; verbose = verbose)
         end
     end
 

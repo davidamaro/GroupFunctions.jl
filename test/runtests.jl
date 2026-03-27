@@ -130,6 +130,19 @@ end
     @test numeric_values[2, 1] ≈ group_function(λ, expected_patterns[2], expected_patterns[1], mat)
 end
 
+@testset "group_function with symbolic matrix input" begin
+    λ = [2, 0]
+    mat = su2_block_symbolic(2, 1)
+
+    symbolic_values, patterns = group_function(λ, mat)
+    expected_patterns = basis_states(λ)
+
+    @test map(p -> p.rows, patterns) == map(p -> p.rows, expected_patterns)
+    @test size(symbolic_values) == (length(patterns), length(patterns))
+    @test eltype(symbolic_values) == Basic
+    @test symbolic_values[1, 2] == group_function(λ, expected_patterns[1], expected_patterns[2], mat)
+end
+
 @testset "standard_to_semistandard_map is non-decreasing" begin
     t = YoungTableau([3]); fill!(t, [1,2,5])
     std = GroupFunctions.standard_tableau_from_semistandard(t)
