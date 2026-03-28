@@ -1,15 +1,15 @@
 module GroupFunctions
   using Markdown
-  using AbstractAlgebra
   using SymEngine
-  import AbstractAlgebra: YoungTableau
   import SparseArrays: spzeros, SparseMatrixCSC
   import SymEngine: expand 
   include("generic/GTPatterns.jl")
+  include("generic/Tableaux.jl")
+  include("generic/PermGroups.jl")
   include("generic/YoungTabs.jl")
   include("generic/DF.jl")
-  include("generic/PermGroups.jl")
   include("generic/Misc.jl")
+  export Perm
   export YoungTableau, axialdistance, determine_position
   export GTPattern, basis_states, determine_next_pattern, determine_next_pattern!
   export first_young_tableau_lexicographic, StandardYoungTableaux, generate_matrix

@@ -5,7 +5,7 @@ export find_tablaeux_fillings
 export find_double_coset_representative_matrices
 
 const Irrep = Array{T,1} where T <: Integer
-const YTableau = AbstractAlgebra.Generic.YoungTableau{T} where T <: Integer
+const YTableau = YoungTableau
 const Content = Array{T,1} where T <: Integer
 const MapST2SST = Dict{T,T} where T <: Integer
 

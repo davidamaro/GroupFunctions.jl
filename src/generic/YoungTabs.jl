@@ -1,10 +1,10 @@
-using AbstractAlgebra
 import Combinatorics: permutations
 import LinearAlgebra:  dot, I
 import SymEngine: Basic
 
 const Content = Vector{T} where T <: Integer
 const Irrep = Vector{T} where T <: Integer
+const YTableau = YoungTableau
 
 @doc Markdown.doc"""
     axialdistance(Y::YoungTableau, i, j)
@@ -35,7 +35,7 @@ julia> axialdistance(y, 2,4)
 0
 ```
 """
-function axialdistance(Y::AbstractAlgebra.Generic.YoungTableau{Int64}, u::Int64, v::Int64)
+function axialdistance(Y::YTableau, u::Int64, v::Int64)
   i,j = determine_position(Y, u)
   k,l = determine_position(Y, v)
 
@@ -63,7 +63,7 @@ julia> matrix_repr(y)
   [1, 4]  =  4
 ```
 """
-function determine_position(tableau::AbstractAlgebra.Generic.YoungTableau{Int64}, entry::Int64)
+function determine_position(tableau::YTableau, entry::Int64)
    row_start = 1
    @inbounds for (row_idx, row_len) in enumerate(tableau.part)
       for col_idx in 1:row_len
@@ -77,7 +77,7 @@ function determine_position(tableau::AbstractAlgebra.Generic.YoungTableau{Int64}
 end
 
 #TODO: reference? Is it somehow related to Yamanouchi basis?
-function determinar_coeficiente_irrep_yamanouchi(Y::AbstractAlgebra.Generic.YoungTableau{Int64}, u::Integer)
+function determinar_coeficiente_irrep_yamanouchi(Y::YTableau, u::Integer)
   v = u - 1
   i,j = determine_position(Y, u)
   k,l = determine_position(Y, v)
@@ -99,15 +99,14 @@ end
 ```jldoctest; setup = :(using GroupFunctions)
 julia> pat = YoungTableau([2,1]);
 
-julia> first_young_tableau_lexicographic(pat)
-┌───┬───┐
-│ 1 │ 3 │
-├───┼───┘
-│ 2 │
-└───┘
+julia> first_young_tableau_lexicographic(pat).fill
+3-element Vector{Int64}:
+ 1
+ 3
+ 2
 ```
 """
-function first_young_tableau_lexicographic(pat::AbstractAlgebra.Generic.YoungTableau{Int64})
+function first_young_tableau_lexicographic(pat::YTableau)
     mat = Array(matrix_repr(pat))
 
     orco = zeros(Int, size(mat))
@@ -127,10 +126,10 @@ end
 > Return a list of Standard YoungTableaux.
 # Examples:
 ```jldoctest; setup = :(using GroupFunctions)
-julia> StandardYoungTableaux([2,1])
-2-element Vector{AbstractAlgebra.Generic.YoungTableau{Int64}}:
- [1 3; 2 0]
- [1 2; 3 0]
+julia> map(t -> t.fill, StandardYoungTableaux([2,1]))
+2-element Vector{Vector{Int64}}:
+ [1, 3, 2]
+ [1, 2, 3]
 ```
 """
 function StandardYoungTableaux(part::Array{Int64,1}) 
@@ -175,7 +174,7 @@ julia> generate_matrix(guilty, Perm([1,3,2,4,5]), [3,2])
 [5, 5]  =  1.0
 ```
 """
-function generate_matrix(patrones::Array{AbstractAlgebra.Generic.YoungTableau{Int64},1}, p::Perm{Int64}, irrep::Array{Int64,1})
+function generate_matrix(patrones::Vector{YTableau}, p::Perm{Int64}, irrep::Array{Int64,1})
     cache_key = (p, Tuple(irrep))
     if haskey(GENERATE_MATRIX_CACHE, cache_key)
         return GENERATE_MATRIX_CACHE[cache_key]
@@ -194,7 +193,7 @@ function generate_matrix(patrones::Array{AbstractAlgebra.Generic.YoungTableau{In
     GENERATE_MATRIX_CACHE[cache_key] = mat
     mat
 end
-function generate_matrix(lista_tablones::Array{AbstractAlgebra.Generic.YoungTableau{Int64},1}, m::Int, irrep::Array{Int64,1})
+function generate_matrix(lista_tablones::Vector{YTableau}, m::Int, irrep::Array{Int64,1})
     mat = spzeros(Basic,length(lista_tablones), length(lista_tablones))
 
     for row_idx in 1:length(lista_tablones), col_idx in 1:length(lista_tablones)
@@ -216,7 +215,7 @@ end
 > by bumping it into a corner and renumbering the remaining path.
 
 """
-function reposition_out_of_order!(tab::AbstractAlgebra.Generic.YoungTableau{Int64})
+function reposition_out_of_order!(tab::YTableau)
     max_row_seen = 0
     last_label_at_max_row = 0
     violating_label::Int = 0
@@ -286,7 +285,7 @@ end
 
 Updates `mat` in place; no effect if the pair is not related by the swap.
 """
-function yamanouchi_block!(mat::SparseMatrixCSC{Basic,Int64}, tableaux::Array{AbstractAlgebra.Generic.YoungTableau{Int64},1}, row_idx::Int64, col_idx::Int64, swap_entry::Int64, irrep::Array{Int64,1})
+function yamanouchi_block!(mat::SparseMatrixCSC{Basic,Int64}, tableaux::Vector{YTableau}, row_idx::Int64, col_idx::Int64, swap_entry::Int64, irrep::Array{Int64,1})
     if row_idx >= col_idx
         return mat
     end
@@ -333,7 +332,7 @@ julia> swap_adjacent_entries(t, 3, [3]).fill
  3
 ```
 """
-function swap_adjacent_entries(tableau::AbstractAlgebra.Generic.YoungTableau{Int64}, entry::Int64, irrep::Array{Int64,1})
+function swap_adjacent_entries(tableau::YTableau, entry::Int64, irrep::Array{Int64,1})
     fill_entries = copy(tableau.fill)
     @assert entry > 1 && entry <= maximum((length(irrep), length(fill_entries)))
 
@@ -372,7 +371,7 @@ end
 > the filling of the semistandard to the standard Tableau is non decreasing
 # TODO add examples
 """
-function index_of_semistandard_tableau(semistandard_tableau::AbstractAlgebra.Generic.YoungTableau{Int64})
+function index_of_semistandard_tableau(semistandard_tableau::YTableau)
     partition = (semistandard_tableau.part) |> collect
     standard_tables = StandardYoungTableaux(partition)
     target = standard_tableau_from_semistandard(semistandard_tableau)
@@ -382,7 +381,7 @@ function index_of_semistandard_tableau(semistandard_tableau::AbstractAlgebra.Gen
 end
 
 
-@deprecate indice_tablon_semistandard(semistandard_tableau::AbstractAlgebra.Generic.YoungTableau{Int64}) index_of_semistandard_tableau(semistandard_tableau)
+@deprecate indice_tablon_semistandard(semistandard_tableau::YTableau) index_of_semistandard_tableau(semistandard_tableau)
 
 function generate_dictionary(lista::Array{Int64,1})
     fvars = Dict{Int64,Int64}()
@@ -500,7 +499,7 @@ julia> content(ss, [2,1,0])
  0
 ```
 """
-function content(y::AbstractAlgebra.Generic.YoungTableau{Int64}, λ::Irrep)
+function content(y::YTableau, λ::Irrep)
     fill_values = y.fill
     len = content_length(fill_values, λ)
     standard_fill = standard_tableau_from_semistandard(y).fill
@@ -523,7 +522,7 @@ julia> content(t)
  2
 ```
 """
-function content(p::AbstractAlgebra.Generic.YoungTableau{Int64})
+function content(p::YTableau)
     fill_values = p.fill
     len = length(fill_values)
     return count_entries(fill_values, len)
@@ -545,21 +544,21 @@ julia> standard_tableau_from_semistandard(t)
 [1 3; 2 4]
 ```
 """
-function standard_tableau_from_semistandard(semistandard_table::AbstractAlgebra.Generic.YoungTableau{Int64})
+function standard_tableau_from_semistandard(semistandard_table::YTableau)
     partition = (semistandard_table.part) |> collect
     standard_table = YoungTableau(partition)
 
     ordering = sortperm(semistandard_table.fill)  # stable by default
     # Use the inverse permutation to standardize without enumerating all tableaux.
     new_standard_tableau = invperm(ordering)
-    AbstractAlgebra.fill!(standard_table, new_standard_tableau)
+    fill!(standard_table, new_standard_tableau)
 end
 
 @doc Markdown.doc"""
     Θ(patron_semi::YoungTableau)
 > Computes coefficient Θ. Returns a Float64
 """
-function Θ(patron_semi::AbstractAlgebra.Generic.YoungTableau{Int64}, _::Array{Int64,1})
+function Θ(patron_semi::YTableau, _::Array{Int64,1})
     tablon_standard = standard_tableau_from_semistandard(patron_semi)
     relleno_standard = tablon_standard.fill
     relleno_semi = patron_semi.fill
@@ -584,7 +583,7 @@ function Θ(patron_semi::AbstractAlgebra.Generic.YoungTableau{Int64}, _::Array{I
     prod
 end
 
-function Θn(patron_semi::AbstractAlgebra.Generic.YoungTableau{Int64}, _::Array{Int64,1})
+function Θn(patron_semi::YTableau, _::Array{Int64,1})
     tablon_standard = standard_tableau_from_semistandard(patron_semi)
     relleno_standard = tablon_standard.fill
     relleno_semi = patron_semi.fill
@@ -704,7 +703,7 @@ julia> f_ext[4]
 2
 ```
 """
-function standard_to_semistandard_map(semi_tableau::AbstractAlgebra.Generic.YoungTableau{Int64}, irrep::Array{Int64,1}) 
+function standard_to_semistandard_map(semi_tableau::YTableau, irrep::Array{Int64,1}) 
     len = length(irrep)
     semi_fill = semi_tableau.fill
     n = length(semi_fill)
@@ -754,7 +753,7 @@ function nearest_standard_label(sorted_standard::Vector{Int64}, label::Int)
     end
 end
 
-function standard_to_semistandard_map(semi_tableau::AbstractAlgebra.Generic.YoungTableau{Int64})
+function standard_to_semistandard_map(semi_tableau::YTableau)
     semi_fill = semi_tableau.fill
     standard_tableau = standard_tableau_from_semistandard(semi_tableau)
     standard_fill = standard_tableau.fill
@@ -766,8 +765,8 @@ function standard_to_semistandard_map(semi_tableau::AbstractAlgebra.Generic.Youn
     mapping
 end
 
-@deprecate genera_funcion(semi_tableau::AbstractAlgebra.Generic.YoungTableau{Int64}, irrep::Array{Int64,1}) standard_to_semistandard_map(semi_tableau, irrep)
-@deprecate genera_funcion(semi_tableau::AbstractAlgebra.Generic.YoungTableau{Int64}) standard_to_semistandard_map(semi_tableau)
+@deprecate genera_funcion(semi_tableau::YTableau, irrep::Array{Int64,1}) standard_to_semistandard_map(semi_tableau, irrep)
+@deprecate genera_funcion(semi_tableau::YTableau) standard_to_semistandard_map(semi_tableau)
 
 @doc Markdown.doc"""
     stabilizer_permutations(c::Content)
@@ -821,7 +820,7 @@ function stabilizer_permutations(c::Content)
     perms
 end
 
-function stabilizer_permutations(tableau::AbstractAlgebra.Generic.YoungTableau{Int64})
+function stabilizer_permutations(tableau::YTableau)
   content_vec = content(tableau)
   stabilizer_permutations(content_vec)
 end
@@ -832,6 +831,5 @@ function YoungTableau(tab::GTPattern)
     filas = tab.rows
     len = filas[1] |> length
     conjunto_contenido = [calculate_pattern_differences(tab, x) for x in 1:len]
-    p = Partition(filter(x -> x>0, filas[1]))
-    Generic.YoungTableau(p, vcat(conjunto_contenido...))
+    YoungTableau(filter(x -> x > 0, filas[1]), vcat(conjunto_contenido...))
 end
