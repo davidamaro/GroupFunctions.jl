@@ -807,18 +807,23 @@ function zweight(gt::GTPattern)
 end
 
 @doc Markdown.doc"""
-> Computes _pweight_ of a GTPattern.
-> This array is related to the occupation number.
+    pweight(x::GTPattern)
 
-  pweight(x::GTPattern)
+Compute the `pweight` of a `GTPattern`.
 
-# Examples:
+This array is related to the occupation number.
 
-```julia
-julia> t = GTPattern([[2,1,0],[2,1],[2]],[2])
+# Examples
+```jldoctest
+julia> using GroupFunctions
+
+julia> t = GTPattern([[2, 1, 0], [2, 1], [2]]);
+
 julia> pweight(t)
->[0,1,2]
-
+3-element Vector{Int64}:
+ 0
+ 1
+ 2
 ```
 """
 function pweight(gt::GTPattern)

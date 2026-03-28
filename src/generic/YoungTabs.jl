@@ -96,14 +96,15 @@ end
     Computes the first ---in lexicographic order---
     Standard Tableaux.
 # Examples:
-```jldoctest; setup = :(using AbstractAlgebra)
-julia> pat = YoungTableau([2,1])
-julia> primero_lexi(pat)
-┌───┬───┬
+```jldoctest; setup = :(using GroupFunctions)
+julia> pat = YoungTableau([2,1]);
+
+julia> first_young_tableau_lexicographic(pat)
+┌───┬───┐
 │ 1 │ 3 │
-├───┼───┼
+├───┼───┘
 │ 2 │
-├───┼
+└───┘
 ```
 """
 function first_young_tableau_lexicographic(pat::AbstractAlgebra.Generic.YoungTableau{Int64})
@@ -125,10 +126,11 @@ end
     StandardYoungTableaux(part::Array{Int64,1}) -> list of YoungTableaux
 > Return a list of Standard YoungTableaux.
 # Examples:
-```jldoctest; setup = :(using AbstractAlgebra)
+```jldoctest; setup = :(using GroupFunctions)
 julia> StandardYoungTableaux([2,1])
-[1 3; 2 0]
-[1 2; 3 0]
+2-element Vector{AbstractAlgebra.Generic.YoungTableau{Int64}}:
+ [1 3; 2 0]
+ [1 2; 3 0]
 ```
 """
 function StandardYoungTableaux(part::Array{Int64,1}) 
@@ -391,24 +393,6 @@ function generate_dictionary(lista::Array{Int64,1})
 end
 
 @doc Markdown.doc"""
-    content(p::Partition, λ::Irrep)
-> Return the size of the vector which represents the partition.
-> WARNING calling content without an irrep λ assumes you are working with SU(d)
-> with d the length of the partition `p`.
-
-# Examples:
-```jldoctest; setup = :(using AbstractAlgebra)
-julia> ss = YoungTableau(GTPattern([[2,1,0,0],[2,1,0],[2,1],[2]]));
-julia> content(ss, [2,1,0,0])
-[2,2,0,0]
-
-julia> ss = YoungTableau(GTPattern([[2,1,0,0],[2,1,0],[2,1],[2]]));
-julia> content(ss, [2,1,0,0])
-[2,2,0]
-```
-"""
-#function content(y::YoungTableau, λ::Irrep)
-@doc Markdown.doc"""
     content_length(fill_values::Vector{Int64}, irrep::Irrep) -> Int
 > Return the length used for content calculations, i.e. `max(length(fill_values), length(irrep))`.
 
@@ -490,23 +474,26 @@ function count_entries(values::Vector{Int64}, len::Int)
     return counts
 end
 
-@doc Markdown.doc"""
-    content(y::YoungTableau, λ::Irrep) -> Vector{Int}
-> Return the content vector sized to `max(length(y.fill), length(λ))`.
-> In simple terms: it counts how many times each label (1, 2, 3, ...) appears
-> in the tableau, padding as needed to match the irrep length.
+"""
+    content(p::YoungTableau, λ::Irrep)
+> Return the size of the vector which represents the partition.
+> WARNING calling content without an irrep λ assumes you are working with SU(d)
+> with d the length of the partition `p`.
 
 # Examples:
-```
-julia> t = YoungTableau([2,1]); fill!(t, [1,2,2]);
-julia> content(t, [2,1,0])
-3-element Vector{Int64}:
- 1
+```jldoctest; setup = :(using GroupFunctions)
+julia> ss = YoungTableau(GTPattern([[2,1,0,0],[2,1,0],[2,1],[2]]));
+
+julia> content(ss, [2,1,0,0])
+4-element Vector{Int64}:
+ 2
  2
  0
+ 0
 
-julia> t = YoungTableau([2,1]); fill!(t, [1,1,2]);
-julia> content(t, [3])
+julia> ss = YoungTableau(GTPattern([[2,1,0,0],[2,1,0],[2,1],[2]]));
+
+julia> content(ss, [2,1,0])
 3-element Vector{Int64}:
  2
  1
