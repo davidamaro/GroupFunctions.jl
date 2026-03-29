@@ -13,7 +13,7 @@ A Julia library to compute D-functions, which are entries of the irreducible rep
 
 ## Highlights
 - Numerical and symbolic D-functions for U(d) irreps
-- Character computation for SU(d) via the Weyl/Schur determinant formula
+- Character computation for SU(d) from traces of representation matrices
 - Gelfand–Tsetlin basis construction via `basis_states`
 - Works with Haar-random unitaries (e.g. using RandomMatrices.jl)
 - Export symbolic results to Mathematica with `julia_to_mma`
@@ -47,6 +47,7 @@ julia> ] add https://github.com/davidamaro/GroupFunctions.jl
 ```julia
 using GroupFunctions
 using RandomMatrices  # Optional: for Haar-random unitaries
+using LinearAlgebra: det, tr
 
 irrep = [2, 1, 0]
 U = rand(Haar(2), 3)  # 3×3 Haar-random unitary matrix
@@ -55,9 +56,10 @@ basis = basis_states(irrep)
 # Numerical D-function entry
 group_function(irrep, basis[1], basis[3], U)
 
-# SU(d) character via Weyl/Schur determinant formula
+# SU(d) character from the representation trace
 U_su = U / det(U)^(1/size(U, 1))  # enforce det=1 for SU(d)
-character_weyl(irrep, U_su)
+rep, _states = group_function(irrep, U_su)
+tr(rep)
 
 # Symbolic D-function entry
 sym = group_function(irrep, basis[1], basis[3])

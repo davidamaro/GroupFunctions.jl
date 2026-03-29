@@ -180,16 +180,6 @@ end
     @test tr(rep) ≈ ideal_character
 end
 
-@testset "comparison of the character (2,1,0) of SU3 with Weyl/Schur" begin
-    mat = rand(Haar(2), 3)
-    nmat = mat / det(mat)^(1/3)
-    lambdas = eigvals(nmat)
-    ideal_character = lambdas[1]/lambdas[2] + lambdas[2]/lambdas[1] +
-                      lambdas[1]/lambdas[3] + lambdas[3]/lambdas[1] +
-                      lambdas[2]/lambdas[3] + lambdas[3]/lambdas[2] + 2
-    @test character_weyl([2,1,0], nmat) ≈ ideal_character
-end
-
 @testset "comparison of the character (2,0)" begin
     mat = rand(Haar(2), 3)
     nmat = mat / det(mat)^(1/3)
@@ -199,16 +189,6 @@ end
                       lambdas[1]*lambdas[2] + lambdas[1]*lambdas[3] +
                       lambdas[2]*lambdas[3]
     @test tr(rep) ≈ ideal_character
-end
-
-@testset "comparison of the character (2,0) with Weyl/Schur" begin
-    mat = rand(Haar(2), 3)
-    nmat = mat / det(mat)^(1/3)
-    lambdas = eigvals(nmat)
-    ideal_character = lambdas[1]^2 + lambdas[2]^2 + lambdas[3]^2 +
-                      lambdas[1]*lambdas[2] + lambdas[1]*lambdas[3] +
-                      lambdas[2]*lambdas[3]
-    @test character_weyl([2,0,0], nmat) ≈ ideal_character
 end
 
 @testset "comparison of the character (3,0)" begin
@@ -222,18 +202,6 @@ end
                       lambdas[3]^2*lambdas[1] + lambdas[3]^2*lambdas[2] +
                       lambdas[1]*lambdas[2]*lambdas[3]
     @test tr(rep) ≈ ideal_character
-end
-
-@testset "comparison of the character (3,0) with Weyl/Schur" begin
-    mat = rand(Haar(2), 3)
-    nmat = mat / det(mat)^(1/3)
-    lambdas = eigvals(nmat)
-    ideal_character = lambdas[1]^3 + lambdas[2]^3 + lambdas[3]^3 +
-                      lambdas[1]^2*lambdas[2] + lambdas[1]^2*lambdas[3] +
-                      lambdas[2]^2*lambdas[1] + lambdas[2]^2*lambdas[3] +
-                      lambdas[3]^2*lambdas[1] + lambdas[3]^2*lambdas[2] +
-                      lambdas[1]*lambdas[2]*lambdas[3]
-    @test character_weyl([3,0,0], nmat) ≈ ideal_character
 end
 
 @testset "irrep 221 de SU(4)" begin

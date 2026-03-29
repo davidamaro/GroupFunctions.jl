@@ -1,11 +1,7 @@
 # Characters
-#todo what are characters. if you know what a character is then compute this. if not then there's this intro. quick intro. then more details. 
-#todo split into tutorial. random computations. and background.
-SU(d) characters can be evaluated with the Weyl/Schur determinant formula.
-
-```@docs
-    character_weyl
-```
+SU(d) characters are traces of irreducible representation matrices. In
+`GroupFunctions.jl`, you can compute the matrix with `group_function(irrep, U)`
+and then take its trace.
 
 ## Example: SU(3) character check
 
@@ -26,12 +22,12 @@ ideal_character = lambdas[1] / lambdas[2] + lambdas[2] / lambdas[1] +
 tr(rep) ≈ ideal_character
 ```
 
-## Example: variance of Weyl character samples
+## Example: variance of sampled character values
 
 ```julia
 using GroupFunctions
 using RandomMatrices
-using LinearAlgebra: det
+using LinearAlgebra: det, tr
 using Statistics: var
 
 nsamples = 1_000
@@ -42,10 +38,10 @@ values = Vector{ComplexF64}(undef, nsamples)
 for i in 1:nsamples
     U = rand(Haar(2), n)
     U_su = U / det(U)^(1 / n)
-    values[i] = character_weyl(irrep, U_su)
+    rep, _states = group_function(irrep, U_su)
+    values[i] = tr(rep)
 end
 
 variance = var(values)
-# Expect variance ≈ 1 for these samples.
 variance
 ```
