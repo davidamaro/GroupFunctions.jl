@@ -8,17 +8,14 @@ module GroupFunctions
   include("generic/YoungTabs.jl")
   include("generic/DF.jl")
   include("generic/Misc.jl")
-  export Perm
-  export YoungTableau, axialdistance, determine_position
-  export GTPattern, basis_states, determine_next_pattern, determine_next_pattern!
-  export first_young_tableau_lexicographic, StandardYoungTableaux, generate_matrix
-  export index_of_semistandard_tableau, indice_tablon_semistandard, content, Θ
+  export YoungTableau
+  export GTPattern, basis_states
+  export StandardYoungTableaux
+  export index_of_semistandard_tableau
   export group_function, group_function_sym, mma_to_julia
   export zweight, pweight
-  export generate_matrix
-  export su2_block, bloquesun, su2_factorization, simplefactorization, simple, sud_from_angles
+  export su2_block, su2_factorization, sud_from_angles
   export su2_block_symbolic
-  export bs_block, swap_block, bs_block_symbolic, swap_block_symbolic
-  export expand
+  export bs_block_symbolic, swap_block_symbolic
   export julia_to_mma
 end # module

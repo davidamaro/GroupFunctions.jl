@@ -31,9 +31,6 @@ Young tableaux are fundamental combinatorial objects used in representation theo
 
 ```@docs
     YoungTableau
-    axialdistance
-    determine_position
-    first_young_tableau_lexicographic
     StandardYoungTableaux
     index_of_semistandard_tableau
 ```
@@ -44,8 +41,6 @@ Functions for generating and iterating through [Gelfand-Tsetlin patterns](tutori
 
 ```@docs
     basis_states
-    determine_next_pattern
-    determine_next_pattern!
 ```
 
 ## Weight Functions
@@ -55,16 +50,6 @@ Weight functions extract different types of weights from [Gelfand-Tsetlin patter
 ```@docs
     zweight
     pweight
-```
-
-## Content and Matrix Generation
-
-Functions for computing content vectors, coefficients, and matrix representations of irreducible representations.
-
-```@docs
-    content
-    Θ
-    generate_matrix
 ```
 
 ## SU(n) Matrix Construction

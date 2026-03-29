@@ -49,16 +49,6 @@ basis = basis_states(λ);
 foreach(gt -> println(pweight(gt)), basis)
 ```
 
-## Step to the next pattern
-
-```@repl states_next
-using GroupFunctions
-
-gt = GTPattern([[2, 1, 0], [2, 1], [2]]);
-
-determine_next_pattern(gt)
-```
-
 ## Pick states for a group-function calculation
 
 ```@repl states_group_function
