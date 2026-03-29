@@ -12,7 +12,7 @@ using Base.Iterators
 ##############################################################################
 
 
-@doc Markdown.doc"""
+@doc """
 
   GTPattern(array_of_arrays)
 Stucture to hold Gelfand-Tsetlin patterns. 
@@ -196,7 +196,7 @@ function determine_next_row(pattern::GTPattern)
     return patterns
 end
 
-@doc Markdown.doc"""
+@doc """
     determine_next_row(patterns::Vector{GTPattern})
 
 Given a collection of GT patterns, extend each by one row in all valid ways.
@@ -226,7 +226,7 @@ function determine_next_row(patterns::Vector{GTPattern})
     return result_patterns
 end
 
-@doc Markdown.doc"""
+@doc """
     basis_states(weight::Row)
     Generate basis states (GTPatterns) of a given representation.
 """

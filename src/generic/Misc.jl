@@ -24,7 +24,7 @@ end
 
 
 
-@doc Markdown.doc"""
+@doc """
     mma_to_julia(s::String)
 
 Convert a Mathematica-style string using `x[i,j]` into a SymEngine expression
@@ -50,7 +50,7 @@ function mma_to_julia(expr_str::String)
 end
 
 
-@doc Markdown.doc"""
+@doc """
     su2_block(size::Int, position::Int, angles::NTuple{3,Float64})
     su2_block(size::Int, indices::NTuple{2,Int}, angles::NTuple{3,Float64})
 
@@ -106,7 +106,7 @@ function su2_block(size::Int, indices::NTuple{2,Int}, angles::NTuple{3,Float64})
     return base
 end
 
-@doc Markdown.doc"""
+@doc """
     su2_block_symbolic(size::Int, position::Int; prefix::String = "v")
     su2_block_symbolic(size::Int, indices::NTuple{2,Int}; prefix::String = "v")
 
@@ -210,7 +210,7 @@ function su2_block_symbolic(size::Int, indices::NTuple{2,Int}; prefix::String = 
     return base
 end
 
-@doc Markdown.doc"""
+@doc """
     bs_block(size::Int, position::Int)
     bs_block(size::Int, indices::NTuple{2,Int})
 
@@ -267,7 +267,7 @@ function bs_block(size::Int, indices::NTuple{2,Int})
     return base
 end
 
-@doc Markdown.doc"""
+@doc """
     bs_block_symbolic(size::Int, position::Int)
     bs_block_symbolic(size::Int, indices::NTuple{2,Int})
 
@@ -315,7 +315,7 @@ function bs_block_symbolic(size::Int, indices::NTuple{2,Int})
     return base
 end
 
-@doc Markdown.doc"""
+@doc """
     swap_block(size::Int, position::Int)
     swap_block(size::Int, indices::NTuple{2,Int})
 
@@ -370,7 +370,7 @@ function swap_block(size::Int, indices::NTuple{2,Int})
     return base
 end
 
-@doc Markdown.doc"""
+@doc """
     swap_block_symbolic(size::Int, position::Int)
     swap_block_symbolic(size::Int, indices::NTuple{2,Int})
 

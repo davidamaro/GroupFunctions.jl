@@ -6,7 +6,7 @@ const Content = Vector{T} where T <: Integer
 const Irrep = Vector{T} where T <: Integer
 const YTableau = YoungTableau
 
-@doc Markdown.doc"""
+@doc """
     axialdistance(Y::YoungTableau, i, j)
 > Return the hook-length of an element in `Y` at position `(i,j)`, i.e the
 > number of cells in the `i`-th row to the right of `(i,j)`-th box, plus the
@@ -42,7 +42,7 @@ function axialdistance(Y::YTableau, u::Int64, v::Int64)
   l - k - (j - i)
 end
 
-@doc Markdown.doc"""
+@doc """
     matrix_repr(Y::YoungTableau)
 > Construct sparse integer matrix representing the tableau.
 
@@ -91,7 +91,7 @@ function determinar_coeficiente_irrep_yamanouchi(Y::YTableau, u::Integer)
   end
 end
 
-@doc Markdown.doc"""
+@doc """
     first_young_tableau_lexicographic(YoungTableau) -> YoungTableau
     Computes the first ---in lexicographic order---
     Standard Tableaux.
@@ -121,7 +121,7 @@ function first_young_tableau_lexicographic(pat::YTableau)
     pat
 end
 
-@doc Markdown.doc"""
+@doc """
     StandardYoungTableaux(part::Array{Int64,1}) -> list of YoungTableaux
 > Return a list of Standard YoungTableaux.
 # Examples:
@@ -146,7 +146,7 @@ end
 
 const GENERATE_MATRIX_CACHE = Dict{Tuple{Perm{Int64},Tuple}, SparseMatrixCSC{Basic,Int64}}()
 
-@doc Markdown.doc"""
+@doc """
     generate_matrix(Y::Array{YoungTableau}, p::Perm, λ::Array{Int64,1}) -> SparseMatrixCSC
 > Return non-zero entries of the orthogonal irrep given by the permutation 'p'
 > The information of the irrep is introduced via 'Y' which is a list of
@@ -209,7 +209,7 @@ function generate_matrix(lista_tablones::Vector{YTableau}, m::Int, irrep::Array{
 end
 
 
-@doc Markdown.doc"""
+@doc """
     reposition_out_of_order!(tab::YoungTableau)
 > Attempt to fix the first out-of-order entry encountered in a Young tableau
 > by bumping it into a corner and renumbering the remaining path.
@@ -258,7 +258,7 @@ function reposition_out_of_order!(tab::YTableau)
 
     tab
 end
-@doc Markdown.doc"""
+@doc """
     determine_corner(list of two-integer tuples, e.g. [(1,2),(3,4)])
     was: encontrar_esquina(lista tuplas)
     TODO: see what it actually expects as an input. vector of tuples is a bit weird.
@@ -278,7 +278,7 @@ function determine_corner(path::Array{Tuple{Int64,Int64},1})
     (corner_row, corner_col)
 end
 
-@doc Markdown.doc"""
+@doc """
     yamanouchi_block!(mat, tableaux, row_idx, col_idx, swap_entry, irrep)
 > Fill the 2×2 Yamanouchi block for the given pair of tableaux when they differ
 > by swapping `swap_entry` and `swap_entry - 1`.
@@ -307,7 +307,7 @@ function yamanouchi_block!(mat::SparseMatrixCSC{Basic,Int64}, tableaux::Vector{Y
     mat
 end
 
-@doc Markdown.doc"""
+@doc """
     swap_adjacent_entries(tableau::YoungTableau, entry::Int64, irrep::Vector{Int})
 > Swap the two occurrences of `entry` and `entry - 1` in a Young tableau, or
 > set the lone occurrence to `entry` if only one is present.
@@ -364,7 +364,7 @@ end
 ##############################################################################
 
 
-@doc Markdown.doc"""
+@doc """
     index_of_semistandard_tableau(p::YoungTableau)
     was: indice_tablon_semistandard
 > Returns the index of the standard YoungTableau such that the function mapping
@@ -391,7 +391,7 @@ function generate_dictionary(lista::Array{Int64,1})
     fvars
 end
 
-@doc Markdown.doc"""
+@doc """
     content_length(fill_values::Vector{Int64}, irrep::Irrep) -> Int
 > Return the length used for content calculations, i.e. `max(length(fill_values), length(irrep))`.
 
@@ -409,7 +409,7 @@ function content_length(fill_values::Vector{Int64}, irrep::Irrep)
     return max(length(fill_values), length(irrep))
 end
 
-@doc Markdown.doc"""
+@doc """
     expanded_fill_values(fill_values::Vector{Int64}, standard_fill::Vector{Int64}, len::Int) -> Vector{Int64}
 > Expand `fill_values` by inserting the most recent seen label for missing indices
 > in `standard_fill`, up to `len`.
@@ -450,7 +450,7 @@ function expanded_fill_values(fill_values::Vector{Int64}, standard_fill::Vector{
     return expanded_fill
 end
 
-@doc Markdown.doc"""
+@doc """
     count_entries(values::Vector{Int64}, len::Int) -> Vector{Int}
 > Count occurrences of integers `1:len` in `values`.
 
@@ -507,7 +507,7 @@ function content(y::YTableau, λ::Irrep)
     return count_entries(expanded, len)
 end
 
-@doc Markdown.doc"""
+@doc """
     content(p::YoungTableau) -> Vector{Int}
 > Return the content vector of the tableau fill (counts of each label).
 > In simple terms: it counts how many times each label (1, 2, 3, ...) appears
@@ -528,7 +528,7 @@ function content(p::YTableau)
     return count_entries(fill_values, len)
 end
 
-@doc Markdown.doc"""
+@doc """
     standard_tableau_from_semistandard(tablon_semistandard::YoungTableau)
 > Returns a YoungTableau corresponding to the standard YoungTableau such that
 > f is non decreasing.
@@ -554,7 +554,7 @@ function standard_tableau_from_semistandard(semistandard_table::YTableau)
     fill!(standard_table, new_standard_tableau)
 end
 
-@doc Markdown.doc"""
+@doc """
     Θ(patron_semi::YoungTableau)
 > Computes coefficient Θ. Returns a Float64
 """
@@ -607,7 +607,7 @@ function Θn(patron_semi::YTableau, _::Array{Int64,1})
     prod
 end
 
-@doc Markdown.doc"""
+@doc """
 expand_frequency_matrix(freq_matrix::AbstractArray{Int64}) -> Vector{Int64}
   Convert a frequency matrix to an expanded filling where each label appears 
   the specified number of times.
@@ -667,7 +667,7 @@ function expand_frequency_matrix(freq_matrix::AbstractArray{Int64})
     vcat(subresult...)
 end
 
-@doc Markdown.doc"""
+@doc """
     standard_to_semistandard_map(semi_tableau::YoungTableau, irrep::Vector{T})
     standard_to_semistandard_map(semi_tableau::YoungTableau)
 > Build a dictionary mapping entries of the associated standard tableau
@@ -727,7 +727,7 @@ function standard_to_semistandard_map(semi_tableau::YTableau, irrep::Array{Int64
     mapping
 end
 
-@doc Markdown.doc"""
+@doc """
     nearest_standard_label(sorted_standard::Vector{Int64}, label::Int) -> Int
 > Return the nearest label in `sorted_standard` to `label` (ties choose the lower neighbor).
 
@@ -768,7 +768,7 @@ end
 @deprecate genera_funcion(semi_tableau::YTableau, irrep::Array{Int64,1}) standard_to_semistandard_map(semi_tableau, irrep)
 @deprecate genera_funcion(semi_tableau::YTableau) standard_to_semistandard_map(semi_tableau)
 
-@doc Markdown.doc"""
+@doc """
     stabilizer_permutations(c::Content)
 > Return the list of permutations that stabilize each content block (product of symmetric groups).
 
@@ -825,7 +825,7 @@ function stabilizer_permutations(tableau::YTableau)
   stabilizer_permutations(content_vec)
 end
 
-@doc Markdown.doc"""
+@doc """
 Construct Young tableau from a given GTPattern."""
 function YoungTableau(tab::GTPattern)
     filas = tab.rows

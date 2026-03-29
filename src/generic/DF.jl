@@ -17,7 +17,7 @@ using .FindTables
 
 
 
-@doc Markdown.doc"""
+@doc """
     adjust_permutation_list(lista::Vector{T}, n::T) where T <: Integer -> Vector{T}
 
 Extend a permutation, represented by a vector if integers, to fit within range [1,n]
@@ -175,7 +175,7 @@ end
 #   Codigo para encontrar tablones
 #
 ###############################################################################
-@doc Markdown.doc"""
+@doc """
 
     monomial(f::MapST2SST, g::MapST2SST, per::Perm, n::Int64) -> Basic
 
@@ -240,7 +240,7 @@ function pad_partition(irrep::Irrep, n::Int)
     return padded
 end
 
-@doc Markdown.doc"""
+@doc """
     character_weyl(λ::Irrep, mat::Array{Complex{Float64},2}) -> ComplexF64
 > Compute the U(n) character using the Weyl/Schur determinant formula, without
 > using the characteristic polynomial.
@@ -382,7 +382,7 @@ function compute_monomial(mapping1::MapST2SST, mapping2::MapST2SST, permutation:
     return monomial
 end
 
-@doc Markdown.doc"""
+@doc """
   double_coset(vector μ, vector ν)
 > Return the double coset representatives
 
@@ -435,7 +435,7 @@ function double_coset(μ::Content, ν::Content)
 end
 
 
-@doc Markdown.doc"""
+@doc """
     group_function(λ::Irrep, tu::YoungTableau, tv::YoungTableau)
 > Returns the _symbolic_ group function corresponding to irrep `λ` and Young tableaux
 > `tu` and `tv`.
@@ -500,7 +500,7 @@ function group_function(λ::Irrep, tab_u::YTableau, tab_v::YTableau; verbose::Bo
     return polynomial * normalization
 end
 
-@doc Markdown.doc"""
+@doc """
     group_function(λ::Irrep, tu::GTPattern, tv::GTPattern)
 > Returns the _symbolic_ group function corresponding to irrep `λ` and GT patterns
 > `tu` and `tv`.
@@ -531,7 +531,7 @@ function group_function(λ::Irrep, pat_u::GTPattern, pat_v::GTPattern; verbose::
     return group_function(λ, YoungTableau(pat_u), YoungTableau(pat_v); verbose = verbose)
 end
 
-@doc Markdown.doc"""
+@doc """
     group_function(λ::Irrep, tu::GTPattern, tv::GTPattern, mat::Array{Complex{Float64},2})
 > Returns the _numeric_ group function, for an SU(n) member `mat`, corresponding to irrep `λ` and a pair of GT patterns
 > `tu` and `tv`.
@@ -629,7 +629,7 @@ function group_function_sym(λ::Irrep, pat_u::GTPattern, pat_v::GTPattern, mat::
     pol * normalization
 end
 
-@doc Markdown.doc"""
+@doc """
     group_function(λ::Irrep, pat_u::GTPattern, pat_v::GTPattern, mat::AbstractMatrix{<:Basic}; verbose::Bool = false) -> Basic
 
 Evaluate a symbolic matrix element of the irrep `λ` using the same symbolic
@@ -639,7 +639,7 @@ function group_function(λ::Irrep, pat_u::GTPattern, pat_v::GTPattern, mat::Abst
     return group_function_sym(λ, pat_u, pat_v, mat; verbose = verbose)
 end
 
-@doc Markdown.doc"""
+@doc """
     group_function(λ::Irrep, tu::GTPattern, tv::GTPattern, mat::Array{Complex{Float64},2})
 > Returns the _numeric_ group function, for an SU(n) member `mat`, corresponding to irrep `λ` and STYT
 > `tu` and `tv`.
@@ -692,7 +692,7 @@ function group_function(λ::Irrep, tab_u::YTableau, tab_v::YTableau, mat::Array{
     pol * normalization
 end
 
-@doc Markdown.doc"""
+@doc """
     group_function(λ::Irrep; verbose::Bool = false) -> Tuple{Matrix{Basic}, Vector{GTPattern}}
 
 Compute all symbolic group functions associated with the partition `λ`.
@@ -722,7 +722,7 @@ function group_function(λ::Irrep; verbose::Bool = false)
     return values, patterns
 end
 
-@doc Markdown.doc"""
+@doc """
     group_function(λ::Irrep, mat::AbstractMatrix{<:Basic}; verbose::Bool = false) -> Tuple{Matrix{Basic}, Vector{GTPattern}}
 
 Compute the full symbolic irrep matrix for `λ` from a symbolic SU(n) matrix.
@@ -743,7 +743,7 @@ function group_function(λ::Irrep, mat::AbstractMatrix{<:Basic}; verbose::Bool =
     return values, patterns
 end
 
-@doc Markdown.doc"""
+@doc """
     group_function(λ::Irrep, mat::Array{Complex{Float64}, 2}; verbose::Bool = false) -> Tuple{Matrix{ComplexF64}, Vector{GTPattern}}
 
 Compute all numeric group functions associated with the partition `λ` and a
@@ -779,7 +779,7 @@ end
 # end
 
 
-@doc Markdown.doc"""
+@doc """
 > Computes _zweight_ of a GTPattern.
 > This array, if applied to each state of the irrep, is commonly known as the _weight diagram_ of an SU(n) irrep.
 
@@ -806,7 +806,7 @@ function zweight(gt::GTPattern)
     total
 end
 
-@doc Markdown.doc"""
+@doc """
     pweight(x::GTPattern)
 
 Compute the `pweight` of a `GTPattern`.

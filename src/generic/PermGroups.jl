@@ -65,7 +65,7 @@ function cycles(g::Perm{T}) where {T<:Integer}
     cycle_list
 end
 
-@doc Markdown.doc"""
+@doc """
     adjacent_transpositions(g::Perm)
 Return the decomposition of `g` into adjacent transpositions.
 """

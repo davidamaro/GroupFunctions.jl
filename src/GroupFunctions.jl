@@ -1,5 +1,4 @@
 module GroupFunctions
-  using Markdown
   using SymEngine
   import SparseArrays: spzeros, SparseMatrixCSC
   import SymEngine: expand 
