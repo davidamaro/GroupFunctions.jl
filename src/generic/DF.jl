@@ -640,15 +640,15 @@ function group_function(λ::Irrep; verbose::Bool = false)
 end
 
 @doc Markdown.doc"""
-    group_function(λ::Irrep, mat::Array{Complex{Float64}, 2}; verbose::Bool = false) -> Tuple{Matrix{ComplexF64}, Vector{GTPattern}}
+    group_function(λ::Irrep, mat::AbstractMatrix{T}; verbose::Bool = false) where T
 
-Compute all numeric group functions associated with the partition `λ` and a
-matrix `mat`. Generates the GT patterns for `λ` and evaluates every pair using
-the provided matrix.
+Compute all group functions associated with the partition `λ` and a matrix `mat`.
+Generates the GT patterns for `λ` and evaluates every pair using the provided matrix.
+For numeric matrices, returns numeric values; for symbolic matrices, returns polynomials.
 
 Arguments:
 - `λ::Irrep`: Partition describing the irrep
-- `mat::Array{Complex{Float64}, 2}`: Matrix representing the SU(n) element
+- `mat::AbstractMatrix{T}`: Matrix representing the SU(n) element
 - `verbose::Bool`: Forwarded to the underlying pairwise `group_function`
 
 Returns:
@@ -656,10 +656,10 @@ Returns:
   `group_function(λ, patterns[i], patterns[j], mat)` and `patterns` is the basis
   returned by `basis_states(λ)`
 """
-function group_function(λ::Irrep, mat::Array{Complex{Float64}, 2}; verbose::Bool = false)
+function group_function(λ::Irrep, mat::AbstractMatrix{T}; verbose::Bool = false) where T
     patterns = basis_states(λ)
     n_states = length(patterns)
-    values = Matrix{ComplexF64}(undef, n_states, n_states)
+    values = Matrix{eltype(mat)}(undef, n_states, n_states)
 
     @inbounds for (i, pat_u) in enumerate(patterns)
         for (j, pat_v) in enumerate(patterns)
