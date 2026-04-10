@@ -176,62 +176,6 @@ end
 #   Codigo para encontrar tablones
 #
 ###############################################################################
-@doc Markdown.doc"""
-
-    monomial(f::MapST2SST, g::MapST2SST, per::Perm, n::Int64) -> Basic
-
-    (was:monomio)
-
-Compute a symbolic monomial by combining mapped indices into SymEngine variables.
-
-Arguments:
-- `f::MapST2SST`: First dict mapping indices to indices, {i => f(i)}
-- `g::MapST2SST`: Second dict mapping indices to indices, {j => g(j)}
-- `per::Perm`: Permutation vector
-- `n::Int64`: Size of the permutation
-
-Returns:
-- `Basic`: SymEngine monomial, product of u_{f(per[k])}_{g(k)}} for k=1:n 
-
-
-Notes:
-- Uses default identity mapping when key is not found in f or g
-- Creates symbolic variables in the form u_i_j where i,j are indices
-
-# Examples:
-```
-julia> f = Dict{Int,Int}(1=>1, 2=>2, 3=>3);
-julia> g = Dict{Int,Int}(1=>1, 2=>2, 3=>3);
-julia> monomial(f,g,Perm([1,2,3]), 3)
-```
-"""
-function monomial(f::MapST2SST, g::MapST2SST, per::Perm, n::Int64)
-    
-    # Pre-allocate arrays with known size
-    mapped_indices1 = Vector{Int}(undef, n)
-    mapped_indices2 = Vector{Int}(undef, n)
-    
-    # Process first mapping with permutation
-    @inbounds for i in 1:n
-        mapped_indices1[i] = get(f, per[i], per[i])
-    end
-    
-    # Process second mapping
-    @inbounds for i in 1:n
-        mapped_indices2[i] = get(g, i, i)
-    end
-    
-    # Initialize monomial product
-    result = one(Basic)
-    
-    # Compute symbolic product
-    @inbounds for i in 1:n
-        result *= SymEngine.symbols("u_$(mapped_indices1[i])_$(mapped_indices2[i])")
-    end
-    
-    return result
-end
-
 function pad_partition(irrep::Irrep, n::Int)
     length(irrep) <= n || error("Partition length $(length(irrep)) exceeds matrix size $n")
     padded = Vector{Int}(irrep)
@@ -295,6 +239,10 @@ function coset_debug_stats(coset_list)
     return length(unique(vcat(coset_list...)))
 end
 
+function symbolic_matrix(n::Int)
+    return [SymEngine.symbols("u_$(i)_$(j)") for i in 1:n, j in 1:n]
+end
+
 struct DoubleCosetSumContext{TG,TC,TM,TT,TTabs,TIrr,P,T}
     gamma_list::TG
     coset_list::TC
@@ -310,18 +258,6 @@ struct DoubleCosetSumContext{TG,TC,TM,TT,TTabs,TIrr,P,T}
     total_zero::T
 end
 
-struct SymbolicDoubleCosetSumContext{TG,TC,TM,TTabs,TIrr}
-    gamma_list::TG
-    coset_list::TC
-    map_u::TM
-    map_v::TM
-    dim::Int
-    standard_tableaux::TTabs
-    row_index::Int
-    col_index::Int
-    irrep::TIrr
-end
-
 function sum_over_double_cosets(ctx::DoubleCosetSumContext{TG,TC,TM,TT,TTabs,TIrr,P,T}) where {TG,TC,TM,TT,TTabs,TIrr,P,T}
     pol::P = ctx.pol_zero
     @inbounds for (gamma, coset) in zip(ctx.gamma_list, ctx.coset_list)
@@ -333,19 +269,6 @@ function sum_over_double_cosets(ctx::DoubleCosetSumContext{TG,TC,TM,TT,TTabs,TIr
         pol += total * mon
     end
     return pol
-end
-
-function sum_over_double_cosets(ctx::SymbolicDoubleCosetSumContext)
-    polynomial::Basic = zero(Basic)
-    @inbounds for (gamma, coset) in zip(ctx.gamma_list, ctx.coset_list)
-        monomial_term = monomial(ctx.map_u, ctx.map_v, inv(gamma), ctx.dim)
-        coset_sum::Basic = zero(Basic)
-        @inbounds for sigma in coset
-            coset_sum += generate_matrix(ctx.standard_tableaux, sigma, ctx.irrep)[ctx.row_index, ctx.col_index]
-        end
-        polynomial += coset_sum * monomial_term
-    end
-    return polynomial
 end
 
 """
@@ -470,40 +393,9 @@ Notes:
 - Involves matrix operations and coset calculations
 """
 function group_function(λ::Irrep, tab_u::YTableau, tab_v::YTableau; verbose::Bool = false)
-    standard_tableaux = standard_tableaux_for_irrep(λ)
-    index_u, index_v = semistandard_indices(tab_u, tab_v)
-    mapping_u, mapping_v = semistandard_maps(tab_u, tab_v, λ)
-    dimension = length(content(tab_u))
-    normalization = normalization_factor(tab_u, tab_v, λ)
-
-    if verbose
-        @show normalization
-    end
-
-    content_u = content(tab_u, λ)
-    content_v = content(tab_v, λ)
-    gamma_list, coset_list = double_coset(content_u, content_v)
-
-    if verbose
-        unique_elements = coset_debug_stats(coset_list)
-        total_gammas = length(gamma_list)
-        @show unique_elements, total_gammas
-    end
-
-    ctx = SymbolicDoubleCosetSumContext(
-        gamma_list,
-        coset_list,
-        mapping_u,
-        mapping_v,
-        dimension,
-        standard_tableaux,
-        index_u,
-        index_v,
-        λ,
-    )
-    polynomial = sum_over_double_cosets(ctx)
-
-    return polynomial * normalization
+    n = length(λ)  # group dimension SU(n), not number of boxes
+    mat = symbolic_matrix(n)
+    return group_function(λ, tab_u, tab_v, mat; verbose = verbose)
 end
 
 @doc Markdown.doc"""
