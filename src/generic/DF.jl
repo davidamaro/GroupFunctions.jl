@@ -282,7 +282,12 @@ function semistandard_maps(tab_u::YTableau, tab_v::YTableau, irrep::Irrep)
     return standard_to_semistandard_map(tab_u, irrep), standard_to_semistandard_map(tab_v, irrep)
 end
 
-function normalization_factor(tab_u::YTableau, tab_v::YTableau, irrep::Irrep)
+function normalization_factor(tab_u::YTableau, tab_v::YTableau, irrep::Irrep,
+                              ::Type{<:Union{AbstractFloat, Complex{<:AbstractFloat}}})
+    return sqrt((1 / Θn(tab_u, irrep)) * (1 / Θn(tab_v, irrep)))
+end
+
+function normalization_factor(tab_u::YTableau, tab_v::YTableau, irrep::Irrep, ::Type=Basic)
     return sqrt((1 / Θ(tab_u, irrep)) * (1 / Θ(tab_v, irrep)))
 end
 
@@ -557,13 +562,7 @@ function group_function(λ::Irrep, pat_u::GTPattern, pat_v::GTPattern, mat::Abst
 
     # probablemente se pueda sustituir con sum(λ)
     dim = tab_u |> content |> length
-    if T <: Union{AbstractFloat, Complex{<:AbstractFloat}} 
-        #we're working with numerical matrix
-        normalization = sqrt((1 / Θn(tab_u, λ)) * (1 / Θn(tab_v, λ)))
-    else 
-        #it's potentially exact, let's have symbolic sqrt coefficients instead of floats
-        normalization = sqrt((1 / Θ(tab_u, λ)) * (1 / Θ(tab_v, λ)))
-    end
+    normalization = normalization_factor(tab_u, tab_v, λ, T)
     if verbose
       @show normalization
     end
