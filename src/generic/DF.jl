@@ -1,4 +1,4 @@
-export group_function, group_function_sym
+export group_function
 export zweight, pweight
 export find_tablaeux_fillings
 export find_double_coset_representative_matrices
@@ -463,14 +463,8 @@ function group_function(λ::Irrep, pat_u::GTPattern, pat_v::GTPattern, mat::Abst
     return group_function(λ, YoungTableau(pat_u), YoungTableau(pat_v), mat; verbose = verbose)
 end
 
-@doc """
-    group_function_sym(λ::Irrep, pat_u::GTPattern, pat_v::GTPattern, mat::AbstractMatrix{T}; verbose::Bool = false) where T
-
-Compatibility wrapper for the symbolic API. It forwards to the generic
-`group_function` implementation so symbolic matrices continue to work through
-the legacy `group_function_sym` entry point.
-"""
 function group_function_sym(λ::Irrep, pat_u::GTPattern, pat_v::GTPattern, mat::AbstractMatrix{T}; verbose::Bool = false) where T
+    Base.depwarn("`group_function_sym` is deprecated; use `group_function` instead.", :group_function_sym)
     return group_function(λ, pat_u, pat_v, mat; verbose = verbose)
 end
 

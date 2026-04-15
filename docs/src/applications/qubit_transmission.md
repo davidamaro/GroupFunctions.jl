@@ -57,10 +57,10 @@ Now compute the transition amplitudes. Since the initial state is a superpositio
 
 ```julia
 # Compute symbolic transition amplitudes
-amp_11 = group_function_sym(λ, final_1, initial_1, U_total)  # |2,0,0,0⟩ → |0,1,0,1⟩
-amp_12 = group_function_sym(λ, final_2, initial_1, U_total)  # |2,0,0,0⟩ → |0,0,1,1⟩
-amp_21 = group_function_sym(λ, final_1, initial_2, U_total)  # |0,0,0,2⟩ → |0,1,0,1⟩
-amp_22 = group_function_sym(λ, final_2, initial_2, U_total)  # |0,0,0,2⟩ → |0,0,1,1⟩
+amp_11 = group_function(λ, final_1, initial_1, U_total)  # |2,0,0,0⟩ → |0,1,0,1⟩
+amp_12 = group_function(λ, final_2, initial_1, U_total)  # |2,0,0,0⟩ → |0,0,1,1⟩
+amp_21 = group_function(λ, final_1, initial_2, U_total)  # |0,0,0,2⟩ → |0,1,0,1⟩
+amp_22 = group_function(λ, final_2, initial_2, U_total)  # |0,0,0,2⟩ → |0,0,1,1⟩
 
 println("α|2,0,0,0⟩ → |0,1,0,1⟩: ", amp_11)
 println("α|2,0,0,0⟩ → |0,0,1,1⟩: ", amp_12)
