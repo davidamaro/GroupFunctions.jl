@@ -145,6 +145,19 @@ end
     @test size(symbolic_values) == (length(patterns), length(patterns))
     @test eltype(symbolic_values) == Basic
     @test symbolic_values[1, 2] == group_function(λ, expected_patterns[1], expected_patterns[2], mat)
+    @test GroupFunctions.character(λ, mat) == sum(symbolic_values[i, i] for i in axes(symbolic_values, 1))
+end
+
+@testset "character helper" begin
+    λ = [2, 0]
+    symbolic_character = GroupFunctions.character(λ)
+    symbolic_rep, symbolic_patterns = group_function(λ)
+    @test symbolic_character == sum(symbolic_rep[i, i] for i in axes(symbolic_rep, 1))
+    @test symbolic_character isa Basic
+
+    numeric_mat = ComplexF64[1 0; 0 1]
+    numeric_rep, _ = group_function(λ, numeric_mat)
+    @test @inferred(GroupFunctions.character(λ, numeric_mat)) ≈ tr(numeric_rep)
 end
 
 @testset "standard_to_semistandard_map is non-decreasing" begin
@@ -176,36 +189,33 @@ end
 @testset "comparison of the character (2,1,0) of SU3" begin
     mat = rand(Haar(2), 3)
     nmat = mat / det(mat)^(1/3)
-    rep, _states = group_function([2,1,0], nmat)
     lambdas = eigvals(nmat)
     ideal_character = lambdas[1]/lambdas[2] + lambdas[2]/lambdas[1] +
                       lambdas[1]/lambdas[3] + lambdas[3]/lambdas[1] +
                       lambdas[2]/lambdas[3] + lambdas[3]/lambdas[2] + 2
-    @test tr(rep) ≈ ideal_character
+    @test @inferred(GroupFunctions.character([2,1,0], nmat)) ≈ ideal_character
 end
 
 @testset "comparison of the character (2,0)" begin
     mat = rand(Haar(2), 3)
     nmat = mat / det(mat)^(1/3)
-    rep, _states = group_function([2,0,0], nmat)
     lambdas = eigvals(nmat)
     ideal_character = lambdas[1]^2 + lambdas[2]^2 + lambdas[3]^2 +
                       lambdas[1]*lambdas[2] + lambdas[1]*lambdas[3] +
                       lambdas[2]*lambdas[3]
-    @test tr(rep) ≈ ideal_character
+    @test @inferred(GroupFunctions.character([2,0,0], nmat)) ≈ ideal_character
 end
 
 @testset "comparison of the character (3,0)" begin
     mat = rand(Haar(2), 3)
     nmat = mat / det(mat)^(1/3)
-    rep, _states = group_function([3,0,0], nmat)
     lambdas = eigvals(nmat)
     ideal_character = lambdas[1]^3 + lambdas[2]^3 + lambdas[3]^3 +
                       lambdas[1]^2*lambdas[2] + lambdas[1]^2*lambdas[3] +
                       lambdas[2]^2*lambdas[1] + lambdas[2]^2*lambdas[3] +
                       lambdas[3]^2*lambdas[1] + lambdas[3]^2*lambdas[2] +
                       lambdas[1]*lambdas[2]*lambdas[3]
-    @test tr(rep) ≈ ideal_character
+    @test @inferred(GroupFunctions.character([3,0,0], nmat)) ≈ ideal_character
 end
 
 @testset "irrep 221 de SU(4)" begin

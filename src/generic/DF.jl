@@ -1,4 +1,4 @@
-export group_function
+export group_function, character
 export zweight, pweight
 export find_tablaeux_fillings
 export find_double_coset_representative_matrices
@@ -576,6 +576,61 @@ function group_function(λ::Irrep, mat::AbstractMatrix{T}) where T
     end
 
     return values, patterns
+end
+
+@doc """
+    character(λ::Irrep) -> Basic
+
+Compute the symbolic character of the irrep `λ` by summing the diagonal group
+functions over the GT basis. This avoids constructing the full representation
+matrix when only the trace is needed.
+
+Arguments:
+- `λ::Irrep`: Partition describing the irrep
+
+Returns:
+- `Basic`: Symbolic character polynomial in the entries of the implicit
+  symbolic SU(n) matrix
+"""
+function character(λ::Irrep)
+    patterns = basis_states(λ)
+    first_pattern = patterns[1]
+    out = group_function(λ, first_pattern, first_pattern)
+
+    @inbounds for idx in 2:length(patterns)
+        pat_u = patterns[idx]
+        out += group_function(λ, pat_u, pat_u)
+    end
+
+    return out
+end
+
+@doc """
+    character(λ::Irrep, mat::AbstractMatrix{T}) where T
+
+Compute the character of the irrep `λ` evaluated on `mat` by summing only the
+diagonal group functions over the GT basis. For numeric matrices, the result is
+numeric; for symbolic matrices, the result is a symbolic polynomial.
+
+Arguments:
+- `λ::Irrep`: Partition describing the irrep
+- `mat::AbstractMatrix{T}`: Matrix representing the SU(n) element
+
+Returns:
+- The character value with the same inferred type as the diagonal group
+  functions for the provided matrix
+"""
+function character(λ::Irrep, mat::AbstractMatrix{T}) where T
+    patterns = basis_states(λ)
+    first_pattern = patterns[1]
+    out = group_function(λ, first_pattern, first_pattern, mat)
+
+    @inbounds for idx in 2:length(patterns)
+        pat_u = patterns[idx]
+        out += group_function(λ, pat_u, pat_u, mat)
+    end
+
+    return out
 end
 
 # macro mma_str(s)

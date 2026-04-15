@@ -47,7 +47,7 @@ julia> ] add https://github.com/davidamaro/GroupFunctions.jl
 ```julia
 using GroupFunctions
 using RandomMatrices  # Optional: for Haar-random unitaries
-using LinearAlgebra: det, tr
+using LinearAlgebra: det
 
 irrep = [2, 1, 0]
 U = rand(Haar(2), 3)  # 3×3 Haar-random unitary matrix
@@ -56,10 +56,9 @@ basis = basis_states(irrep)
 # Numerical D-function entry
 group_function(irrep, basis[1], basis[3], U)
 
-# SU(d) character from the representation trace
+# SU(d) character
 U_su = U / det(U)^(1/size(U, 1))  # enforce det=1 for SU(d)
-rep, _states = group_function(irrep, U_su)
-tr(rep)
+character(irrep, U_su)
 
 # Symbolic D-function entry
 sym = group_function(irrep, basis[1], basis[3])

@@ -7,6 +7,7 @@
 
 ```@docs
     group_function
+    character
 ```
 
 ## [Gelfand-Tsetlin patterns](tutorial/states.md)
