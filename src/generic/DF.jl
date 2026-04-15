@@ -392,7 +392,7 @@ julia> t = YoungTableau([2,1]); fill!(t, [1,2,3]);
 julia> group_function([2,1,0], t, t)
 ```
 
-    group_function(λ::Irrep, tab_u::YTableau, tab_v::YTableau; verbose::Bool = false) -> Basic
+    group_function(λ::Irrep, tab_u::YTableau, tab_v::YTableau) -> Basic
 
 Compute group theoretical function based on Young tableaux and irreducible representations.
 
@@ -400,7 +400,6 @@ Arguments:
 - `λ::Irrep`: Irreducible representation
 - `tab_u::YTableau`: First Young tableau
 - `tab_v::YTableau`: Second Young tableau
-- `verbose::Bool`: Flag for detailed output (default: false)
 
 Returns:
 - `Complex`: Group function evaluated
@@ -409,10 +408,10 @@ Notes:
 - Uses SymEngine for symbolic computation
 - Involves matrix operations and coset calculations
 """
-function group_function(λ::Irrep, tab_u::YTableau, tab_v::YTableau; verbose::Bool = false)
+function group_function(λ::Irrep, tab_u::YTableau, tab_v::YTableau)
     n = length(λ)  # group dimension SU(n), not number of boxes
     mat = symbolic_matrix(n)
-    return group_function(λ, tab_u, tab_v, mat; verbose = verbose)
+    return group_function(λ, tab_u, tab_v, mat)
 end
 
 @doc """
@@ -425,7 +424,7 @@ end
 julia> t = GTPattern([[2,1,0],[2,1],[2]],[2]);
 julia> group_function([2,1,0], t, t)
 ```
-    group_function(λ::Irrep, pat_u::GTPattern, pat_v::GTPattern; verbose::Bool = false) -> Basic
+    group_function(λ::Irrep, pat_u::GTPattern, pat_v::GTPattern) -> Basic
 
 Compute group theoretical function based on Gelfand-Tsetlin patterns and irreducible representations.
 
@@ -433,7 +432,6 @@ Arguments:
 - `λ::Irrep`: Irreducible representation
 - `pat_u::GTPattern`: First Gelfand-Tsetlin pattern
 - `pat_v::GTPattern`: Second Gelfand-Tsetlin pattern
-- `verbose::Bool`: Flag for detailed output (default: false)
 
 Returns:
 - `Basic`: Computed polynomial expression in SymEngine format
@@ -442,12 +440,12 @@ Notes:
 - Converts GT patterns to Young tableaux for calculations
 - Uses SymEngine for symbolic computation
 """
-function group_function(λ::Irrep, pat_u::GTPattern, pat_v::GTPattern; verbose::Bool = false)
-    return group_function(λ, YoungTableau(pat_u), YoungTableau(pat_v); verbose = verbose)
+function group_function(λ::Irrep, pat_u::GTPattern, pat_v::GTPattern)
+    return group_function(λ, YoungTableau(pat_u), YoungTableau(pat_v))
 end
 
 @doc """
-    group_function(λ::Irrep, pat_u::GTPattern, pat_v::GTPattern, mat::AbstractMatrix{T}; verbose=false) where T
+    group_function(λ::Irrep, pat_u::GTPattern, pat_v::GTPattern, mat::AbstractMatrix{T}) where T
 
 Returns the group function for an SU(n) element `mat`, corresponding to irrep `λ` and a pair of GT patterns
 `pat_u` and `pat_v`. Converts GT patterns to Young tableaux and delegates to the main implementation.
@@ -459,17 +457,17 @@ julia> t = GTPattern([[2,1,0],[2,1],[2]],[2]);
 julia> group_function([2,1,0], t, t, mat)
 ```
 """
-function group_function(λ::Irrep, pat_u::GTPattern, pat_v::GTPattern, mat::AbstractMatrix{T}; verbose = false) where T
-    return group_function(λ, YoungTableau(pat_u), YoungTableau(pat_v), mat; verbose = verbose)
+function group_function(λ::Irrep, pat_u::GTPattern, pat_v::GTPattern, mat::AbstractMatrix{T}) where T
+    return group_function(λ, YoungTableau(pat_u), YoungTableau(pat_v), mat)
 end
 
-function group_function_sym(λ::Irrep, pat_u::GTPattern, pat_v::GTPattern, mat::AbstractMatrix{T}; verbose::Bool = false) where T
+function group_function_sym(λ::Irrep, pat_u::GTPattern, pat_v::GTPattern, mat::AbstractMatrix{T}) where T
     Base.depwarn("`group_function_sym` is deprecated; use `group_function` instead.", :group_function_sym)
-    return group_function(λ, pat_u, pat_v, mat; verbose = verbose)
+    return group_function(λ, pat_u, pat_v, mat)
 end
 
 @doc """
-    group_function(λ::Irrep, tab_u::YTableau, tab_v::YTableau, mat::AbstractMatrix{T}; verbose=false) where T
+    group_function(λ::Irrep, tab_u::YTableau, tab_v::YTableau, mat::AbstractMatrix{T}) where T
 
 Returns the group function for an SU(n) element `mat`, corresponding to irrep `λ` and
 Young tableaux `tab_u` and `tab_v`. For numeric `mat` (real or complex floating point),
@@ -484,7 +482,7 @@ julia> t = YoungTableau([2,1]); fill!(t, [1,2,3]);
 julia> group_function([2,1,0], t, t, mat)
 ```
 """
-function group_function(λ::Irrep, tab_u::YTableau, tab_v::YTableau, mat::AbstractMatrix{T}; verbose = false) where T
+function group_function(λ::Irrep, tab_u::YTableau, tab_v::YTableau, mat::AbstractMatrix{T}) where T
     standard_tableaux = standard_tableaux_for_irrep(λ)
     row_index = index_of_semistandard_tableau(tab_u)
     col_index = index_of_semistandard_tableau(tab_v)
@@ -494,15 +492,8 @@ function group_function(λ::Irrep, tab_u::YTableau, tab_v::YTableau, mat::Abstra
     # probablemente se pueda sustituir con sum(λ)
     dim = tab_u |> content |> length
     normalization = normalization_factor(tab_u, tab_v, λ, T)
-    if verbose
-      @show normalization
-    end
 
     (gamma_list, coset_list) = double_coset(content(tab_u, λ), content(tab_v, λ))
-
-    if verbose
-      @show length(vcat(coset_list...) |> unique), length(gamma_list)
-    end
 
     ctx = DoubleCosetSumContext(
         gamma_list,
@@ -524,7 +515,7 @@ function group_function(λ::Irrep, tab_u::YTableau, tab_v::YTableau, mat::Abstra
 end
 
 @doc """
-    group_function(λ::Irrep; verbose::Bool = false) -> Tuple{Matrix{Basic}, Vector{GTPattern}}
+    group_function(λ::Irrep) -> Tuple{Matrix{Basic}, Vector{GTPattern}}
 
 Compute all symbolic group functions associated with the partition `λ`.
 The routine builds every valid GT pattern for `λ` and evaluates the group
@@ -532,21 +523,20 @@ function for each pair.
 
 Arguments:
 - `λ::Irrep`: Partition describing the irrep
-- `verbose::Bool`: Forwarded to the underlying pairwise `group_function`
 
 Returns:
 - `Tuple`: `(values, patterns)` where `values[i,j]` corresponds to
   `group_function(λ, patterns[i], patterns[j])` and `patterns` is the basis
   returned by `basis_states(λ)`
 """
-function group_function(λ::Irrep; verbose::Bool = false)
+function group_function(λ::Irrep)
     patterns = basis_states(λ)
     n_states = length(patterns)
     values = Matrix{Basic}(undef, n_states, n_states)
 
     @inbounds for (i, pat_u) in enumerate(patterns)
         for (j, pat_v) in enumerate(patterns)
-            values[i, j] = group_function(λ, pat_u, pat_v; verbose = verbose)
+            values[i, j] = group_function(λ, pat_u, pat_v)
         end
     end
 
@@ -554,7 +544,7 @@ function group_function(λ::Irrep; verbose::Bool = false)
 end
 
 @doc """
-    group_function(λ::Irrep, mat::AbstractMatrix{T}; verbose::Bool = false) where T
+    group_function(λ::Irrep, mat::AbstractMatrix{T}) where T
 
 Compute all group functions associated with the partition `λ` and a matrix `mat`.
 Generates the GT patterns for `λ` and evaluates every pair using the provided matrix.
@@ -563,17 +553,16 @@ For numeric matrices, returns numeric values; for symbolic matrices, returns pol
 Arguments:
 - `λ::Irrep`: Partition describing the irrep
 - `mat::AbstractMatrix{T}`: Matrix representing the SU(n) element
-- `verbose::Bool`: Forwarded to the underlying pairwise `group_function`
 
 Returns:
 - `Tuple`: `(values, patterns)` where `values[i,j]` corresponds to
   `group_function(λ, patterns[i], patterns[j], mat)` and `patterns` is the basis
   returned by `basis_states(λ)`
 """
-function group_function(λ::Irrep, mat::AbstractMatrix{T}; verbose::Bool = false) where T
+function group_function(λ::Irrep, mat::AbstractMatrix{T}) where T
     patterns = basis_states(λ)
     n_states = length(patterns)
-    first_value = group_function(λ, patterns[1], patterns[1], mat; verbose = verbose)
+    first_value = group_function(λ, patterns[1], patterns[1], mat)
     values = Matrix{typeof(first_value)}(undef, n_states, n_states)
 
     values[1, 1] = first_value
@@ -582,7 +571,7 @@ function group_function(λ::Irrep, mat::AbstractMatrix{T}; verbose::Bool = false
             if i == 1 && j == 1
                 continue
             end
-            values[i, j] = group_function(λ, pat_u, pat_v, mat; verbose = verbose)
+            values[i, j] = group_function(λ, pat_u, pat_v, mat)
         end
     end
 
