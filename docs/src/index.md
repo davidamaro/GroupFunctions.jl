@@ -13,6 +13,7 @@ group_function([2,0], U)[1]
 ```
 
 This computes the SU(2) irreps for symbolic matrices.
+For symmetric irreps, `occupation_number` translates basis patterns into the corresponding Fock occupations; see the quantum-optics example for a full workflow.
 
 ## Installation
 

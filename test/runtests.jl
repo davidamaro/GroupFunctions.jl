@@ -696,3 +696,73 @@ end
   kak = basis_states(irrep)
   @test all(isapprox.(0, [group_function(irrep, x, y, mat) - conj(group_function(irrep, y, x, invmat)) for (i,x) in enumerate(kak), (j,y) in enumerate(kak)], atol=1e-10))
 end
+
+@testset "group_function variant consistency" begin
+    # Test 1: All entry points produce same symbolic result
+    @testset "Symbolic variants consistency" begin
+        λ = [2, 1, 0]  # 8-dim irrep of SU(3)
+        patterns = basis_states(λ)
+        pat_u, pat_v = patterns[1], patterns[2]
+        tab_u, tab_v = YoungTableau(pat_u), YoungTableau(pat_v)
+
+        # All symbolic variants should give same polynomial
+        result_tab = group_function(λ, tab_u, tab_v)           # YTableau, no mat
+        result_pat = group_function(λ, pat_u, pat_v)           # GTPattern, no mat
+
+        @test es_cero(expand(result_tab - result_pat))
+    end
+
+    # Test 2: Symbolic with explicit symbolic_matrix equals no-matrix version
+    @testset "Symbolic matrix vs implicit symbolic" begin
+        λ = [1, 1, 0]  # 3-dim irrep of SU(3)
+        patterns = basis_states(λ)
+        pat_u, pat_v = patterns[1], patterns[2]
+        tab_u, tab_v = YoungTableau(pat_u), YoungTableau(pat_v)
+
+        sym_mat = GroupFunctions.symbolic_matrix(3)
+        result_implicit = group_function(λ, tab_u, tab_v)
+        result_explicit = group_function(λ, tab_u, tab_v, sym_mat)
+
+        @test es_cero(expand(result_implicit - result_explicit))
+    end
+
+    # Test 3: Numeric evaluation matches symbolic substituted
+    @testset "Numeric vs substituted symbolic" begin
+        λ = [2, 0]  # 3-dim irrep of SU(2)
+        mat = rand(Haar(2), 2)
+        mat = mat / det(mat)^(1/2)
+
+        patterns = basis_states(λ)
+        pat_u, pat_v = patterns[1], patterns[2]
+
+        # Numeric directly
+        numeric_result = group_function(λ, pat_u, pat_v, mat)
+
+        # Symbolic then substitute
+        symbolic_result = group_function(λ, pat_u, pat_v)
+        substituted = symbolic_result
+        for i in 1:2, j in 1:2
+            substituted = SymEngine.subs(substituted,
+                SymEngine.symbols("u_$(i)_$(j)"), mat[i,j])
+        end
+        #@show numeric_result
+        #@show ComplexF64(N(substituted))
+        @test numeric_result ≈ convert(ComplexF64,substituted)
+    end
+
+    # Test 4: Batch vs individual calls
+    @testset "Batch vs individual consistency" begin
+        λ = [2, 1, 0]
+        mat = rand(Haar(2), 3)
+        mat = mat / det(mat)^(1/3)
+
+        batch_result, patterns = group_function(λ, mat)
+
+        for (i, pat_u) in enumerate(patterns)
+            for (j, pat_v) in enumerate(patterns)
+                individual = group_function(λ, pat_u, pat_v, mat)
+                @test batch_result[i, j] ≈ individual
+            end
+        end
+    end
+end

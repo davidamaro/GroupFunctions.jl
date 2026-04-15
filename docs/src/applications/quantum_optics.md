@@ -8,12 +8,12 @@ Consider $N$ photons distributed across $n$ modes. The Fock state $|m_1, m_2, \l
 $$|m_1, \ldots, m_n\rangle \xrightarrow{U} \sum_{m'} c_{m,m'}(U) |m'_1, \ldots, m'_n\rangle$$
 where $U \in \mathrm{SU}(n)$ mixes the mode creation operators: $a^\dagger_i \mapsto \sum_j U_{ij} a^\dagger_j$.
 
-The amplitudes $c_{m,m'}(U)$ are matrix elements of SU($n$) irreducible representations, specifically, the **symmetric irrep** $\lambda = [N, 0, \ldots, 0]$, corresponding to a single-row Young tableau. This is because bosonic states are symmetric under particle exchange. Importantly, for symmetric irreps, the p-weight of a [Gelfand-Tsetlin pattern](../tutorial/states.md) (used internally by this library) directly gives the occupation numbers, more natural in quantum optics.  
+The amplitudes $c_{m,m'}(U)$ are matrix elements of SU($n$) irreducible representations, specifically, the **symmetric irrep** $\lambda = [N, 0, \ldots, 0]$, corresponding to a single-row Young tableau. This is because bosonic states are symmetric under particle exchange. For symmetric irreps, `occupation_number(pattern)` converts a [Gelfand-Tsetlin pattern](../tutorial/states.md) to the corresponding Fock occupation list.
 
 The basic items to translate between quantum optics and [GT pattern](../tutorial/states.md) language are thus the following:
 1. Define photon number subspace  `λ = [N, 0, ..., 0]` 
 2. Enumerate the basis of the above subspace using [GT patterns](../tutorial/states.md)  `basis = basis_states(λ)` 
-3. Each of the basis elements corresponds to the Fock state with occupation number provided by  `pweight(pattern)` 
+3. Each basis element corresponds to the Fock state with occupation numbers given by `occupation_number(pattern)` 
 4. Transition amplitude is read out by `group_function(λ, final, initial, U)`, where $U$ is the $SU(n)$ unitary in previous paragraphs (e.g. provided by `su2_block(n, i, (α, β, γ))`), `final` and `initial` are the final and initial states (written as [GT patterns](../tutorial/states.md)).
 
 
@@ -30,9 +30,9 @@ using GroupFunctions
 λ = [2, 0, 0]
 basis = basis_states(λ)
 
-# Each basis element corresponds to a Fock state via pweight
+# Each GT pattern corresponds to a Fock state
 for b in basis
-    occ = pweight(b)
+    occ = occupation_number(b)
     println("|", join(occ, ","), "⟩")
 end
 ```
@@ -74,10 +74,10 @@ The amplitude $\langle m' | U | m \rangle$ is computed via `group_function`:
 basis = basis_states(λ)
 
 # Initial state: |2,0,0⟩
-initial = basis[findfirst(b -> pweight(b) == [2,0,0], basis)]
+initial = basis[findfirst(b -> occupation_number(b) == [2,0,0], basis)]
 
 # Final state: |1,1,0⟩
-final = basis[findfirst(b -> pweight(b) == [1,1,0], basis)]
+final = basis[findfirst(b -> occupation_number(b) == [1,1,0], basis)]
 
 # Amplitude
 amp = group_function(λ, final, initial, U)
@@ -94,18 +94,17 @@ Two photons entering a 50:50 beamsplitter from different input ports:
 λ = [2, 0]
 basis = basis_states(λ)
 
-initial = basis[findfirst(b -> pweight(b) == [1,1], basis)]
+initial = basis[findfirst(b -> occupation_number(b) == [1,1], basis)]
 
 θ = float(π)/2
 BS = su2_block(2, 1, (0., θ, 0.))
 
 for final in basis
     amp = group_function(λ, final, initial, BS)
-    println("|", join(pweight(final), ","), "⟩: ", round(abs2(amp), digits=4))
+    println("|", join(occupation_number(final), ","), "⟩: ", round(abs2(amp), digits=4))
 end
 ```
 
 Expected (HOM effect): The $|1,1\rangle \to |1,1\rangle$ amplitude vanishes due to destructive interference. Output is $\frac{1}{\sqrt{2}}(|2,0\rangle + |0,2\rangle)$.
 
 TODO: Verify output matches expected HOM signature. Check if beamsplitter convention gives the correct phases.
-

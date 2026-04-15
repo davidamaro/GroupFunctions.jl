@@ -1,7 +1,9 @@
+import LinearAlgebra: transpose, det, eigvals
 export group_function, group_function_sym
 export zweight, pweight
 export find_tablaeux_fillings
 export find_double_coset_representative_matrices
+export occupation_number 
 
 const Irrep = Array{T,1} where T <: Integer
 const YTableau = YoungTableau
@@ -230,6 +232,44 @@ function monomial(f::MapST2SST, g::MapST2SST, per::Perm, n::Int64)
     return result
 end
 
+function pad_partition(irrep::Irrep, n::Int)
+    length(irrep) <= n || error("Partition length $(length(irrep)) exceeds matrix size $n")
+    padded = Vector{Int}(irrep)
+    if length(padded) < n
+        append!(padded, zeros(Int, n - length(padded)))
+    end
+    return padded
+end
+
+@doc """
+    character_weyl(λ::Irrep, mat::Array{Complex{Float64},2}) -> ComplexF64
+> Compute the U(n) character using the Weyl/Schur determinant formula, without
+> using the characteristic polynomial.
+
+# Notes
+- `mat` must be square; the length of `λ` must not exceed `size(mat,1)`.
+- The formula evaluates the Schur polynomial at the eigenvalues of `mat`:
+  `det(z_i^(λ_j+n-j)) / det(z_i^(n-j))`.
+"""
+function character_weyl(λ::Irrep, mat::Array{Complex{Float64},2})
+    n = size(mat, 1)
+    size(mat, 2) == n || error("Matrix must be square; got $(size(mat))")
+    padded = pad_partition(λ, n)
+    eigenvalues = eigvals(mat)
+
+    numer = Matrix{ComplexF64}(undef, n, n)
+    denom = Matrix{ComplexF64}(undef, n, n)
+    @inbounds for i in 1:n
+        z = eigenvalues[i]
+        for j in 1:n
+            numer[i, j] = z^(padded[j] + n - j)
+            denom[i, j] = z^(n - j)
+        end
+    end
+
+    return det(numer) / det(denom)
+end
+
 function standard_tableaux_for_irrep(irrep::Irrep)
     return StandardYoungTableaux(filter(x -> x > 0, irrep))
 end
@@ -242,12 +282,21 @@ function semistandard_maps(tab_u::YTableau, tab_v::YTableau, irrep::Irrep)
     return standard_to_semistandard_map(tab_u, irrep), standard_to_semistandard_map(tab_v, irrep)
 end
 
-function normalization_factor(tab_u::YTableau, tab_v::YTableau, irrep::Irrep)
+function normalization_factor(tab_u::YTableau, tab_v::YTableau, irrep::Irrep,
+                              ::Type{<:Union{AbstractFloat, Complex{<:AbstractFloat}}})
+    return sqrt((1 / Θn(tab_u, irrep)) * (1 / Θn(tab_v, irrep)))
+end
+
+function normalization_factor(tab_u::YTableau, tab_v::YTableau, irrep::Irrep, ::Type=Basic)
     return sqrt((1 / Θ(tab_u, irrep)) * (1 / Θ(tab_v, irrep)))
 end
 
 function coset_debug_stats(coset_list)
     return length(unique(vcat(coset_list...)))
+end
+
+function symbolic_matrix(n::Int)
+    return [SymEngine.symbols("u_$(i)_$(j)") for i in 1:n, j in 1:n]
 end
 
 struct DoubleCosetSumContext{TG,TC,TM,TT,TTabs,TIrr,P,T}
@@ -265,18 +314,6 @@ struct DoubleCosetSumContext{TG,TC,TM,TT,TTabs,TIrr,P,T}
     total_zero::T
 end
 
-struct SymbolicDoubleCosetSumContext{TG,TC,TM,TTabs,TIrr}
-    gamma_list::TG
-    coset_list::TC
-    map_u::TM
-    map_v::TM
-    dim::Int
-    standard_tableaux::TTabs
-    row_index::Int
-    col_index::Int
-    irrep::TIrr
-end
-
 function sum_over_double_cosets(ctx::DoubleCosetSumContext{TG,TC,TM,TT,TTabs,TIrr,P,T}) where {TG,TC,TM,TT,TTabs,TIrr,P,T}
     pol::P = ctx.pol_zero
     @inbounds for (gamma, coset) in zip(ctx.gamma_list, ctx.coset_list)
@@ -288,19 +325,6 @@ function sum_over_double_cosets(ctx::DoubleCosetSumContext{TG,TC,TM,TT,TTabs,TIr
         pol += total * mon
     end
     return pol
-end
-
-function sum_over_double_cosets(ctx::SymbolicDoubleCosetSumContext)
-    polynomial::Basic = zero(Basic)
-    @inbounds for (gamma, coset) in zip(ctx.gamma_list, ctx.coset_list)
-        monomial_term = monomial(ctx.map_u, ctx.map_v, inv(gamma), ctx.dim)
-        coset_sum::Basic = zero(Basic)
-        @inbounds for sigma in coset
-            coset_sum += generate_matrix(ctx.standard_tableaux, sigma, ctx.irrep)[ctx.row_index, ctx.col_index]
-        end
-        polynomial += coset_sum * monomial_term
-    end
-    return polynomial
 end
 
 """
@@ -425,40 +449,9 @@ Notes:
 - Involves matrix operations and coset calculations
 """
 function group_function(λ::Irrep, tab_u::YTableau, tab_v::YTableau; verbose::Bool = false)
-    standard_tableaux = standard_tableaux_for_irrep(λ)
-    index_u, index_v = semistandard_indices(tab_u, tab_v)
-    mapping_u, mapping_v = semistandard_maps(tab_u, tab_v, λ)
-    dimension = length(content(tab_u))
-    normalization = normalization_factor(tab_u, tab_v, λ)
-
-    if verbose
-        @show normalization
-    end
-
-    content_u = content(tab_u, λ)
-    content_v = content(tab_v, λ)
-    gamma_list, coset_list = double_coset(content_u, content_v)
-
-    if verbose
-        unique_elements = coset_debug_stats(coset_list)
-        total_gammas = length(gamma_list)
-        @show unique_elements, total_gammas
-    end
-
-    ctx = SymbolicDoubleCosetSumContext(
-        gamma_list,
-        coset_list,
-        mapping_u,
-        mapping_v,
-        dimension,
-        standard_tableaux,
-        index_u,
-        index_v,
-        λ,
-    )
-    polynomial = sum_over_double_cosets(ctx)
-
-    return polynomial * normalization
+    n = length(λ)  # group dimension SU(n), not number of boxes
+    mat = symbolic_matrix(n)
+    return group_function(λ, tab_u, tab_v, mat; verbose = verbose)
 end
 
 @doc """
@@ -493,9 +486,10 @@ function group_function(λ::Irrep, pat_u::GTPattern, pat_v::GTPattern; verbose::
 end
 
 @doc """
-    group_function(λ::Irrep, tu::GTPattern, tv::GTPattern, mat::Array{Complex{Float64},2})
-> Returns the _numeric_ group function, for an SU(n) member `mat`, corresponding to irrep `λ` and a pair of GT patterns
-> `tu` and `tv`.
+    group_function(λ::Irrep, pat_u::GTPattern, pat_v::GTPattern, mat::AbstractMatrix{T}; verbose=false) where T
+
+Returns the group function for an SU(n) element `mat`, corresponding to irrep `λ` and a pair of GT patterns
+`pat_u` and `pat_v`. Converts GT patterns to Young tableaux and delegates to the main implementation.
 
 ```julia
 julia> using RandomMatrices
@@ -504,106 +498,28 @@ julia> t = GTPattern([[2,1,0],[2,1],[2]],[2]);
 julia> group_function([2,1,0], t, t, mat)
 ```
 """
-function group_function(λ::Irrep, pat_u::GTPattern, pat_v::GTPattern, mat::Array{Complex{Float64}, 2}; verbose = false) 
-    tab_u = pat_u |> YoungTableau
-    tab_v = pat_v |> YoungTableau
-    standard_tableaux = standard_tableaux_for_irrep(λ)
-    row_index = index_of_semistandard_tableau(tab_u)
-    col_index = index_of_semistandard_tableau(tab_v)
-    map_u = standard_to_semistandard_map(tab_u, λ)
-    map_v = standard_to_semistandard_map(tab_v, λ)
-    
-    # probablemente se pueda sustituir con sum(λ)
-    dim = tab_u |> content |> length
-    
-    normalization = sqrt((1 / Θn(tab_u, λ)) * (1 / Θn(tab_v, λ)))
-    if verbose 
-      @show normalization
-    end
-
-    (gamma_list, coset_list) = double_coset(content(tab_u, λ), content(tab_v, λ))
-
-    if verbose
-      @show length(vcat(coset_list...) |> unique), length(gamma_list)
-    end
-    
-    ctx = DoubleCosetSumContext(
-        gamma_list,
-        coset_list,
-        map_u,
-        map_v,
-        dim,
-        mat,
-        standard_tableaux,
-        row_index,
-        col_index,
-        λ,
-        zero(ComplexF64),
-        zero(Float64),
-    )
-    pol = sum_over_double_cosets(ctx)
-    
-    pol * normalization
-end
-
-
-
-function group_function_sym(λ::Irrep, pat_u::GTPattern, pat_v::GTPattern, mat::AbstractMatrix{T}; verbose = false) where T
-    tab_u = pat_u |> YoungTableau
-    tab_v = pat_v |> YoungTableau
-    standard_tableaux = standard_tableaux_for_irrep(λ)
-    row_index = index_of_semistandard_tableau(tab_u)
-    col_index = index_of_semistandard_tableau(tab_v)
-    map_u = standard_to_semistandard_map(tab_u, λ)
-    map_v = standard_to_semistandard_map(tab_v, λ)
-
-    # probablemente se pueda sustituir con sum(λ)
-    dim = tab_u |> content |> length
-
-    normalization = sqrt((1 / Θ(tab_u, λ)) * (1 / Θ(tab_v, λ)))
-    if verbose
-      @show normalization
-    end
-
-    (gamma_list, coset_list) = double_coset(content(tab_u, λ), content(tab_v, λ))
-
-    if verbose
-      @show length(vcat(coset_list...) |> unique), length(gamma_list)
-    end
-
-    ctx = DoubleCosetSumContext(
-        gamma_list,
-        coset_list,
-        map_u,
-        map_v,
-        dim,
-        mat,
-        standard_tableaux,
-        row_index,
-        col_index,
-        λ,
-        zero(eltype(mat)),
-        zero(eltype(mat)),
-    )
-    pol = sum_over_double_cosets(ctx)
-
-    pol * normalization
+function group_function(λ::Irrep, pat_u::GTPattern, pat_v::GTPattern, mat::AbstractMatrix{T}; verbose = false) where T
+    return group_function(λ, YoungTableau(pat_u), YoungTableau(pat_v), mat; verbose = verbose)
 end
 
 @doc """
-    group_function(λ::Irrep, pat_u::GTPattern, pat_v::GTPattern, mat::AbstractMatrix{<:Basic}; verbose::Bool = false) -> Basic
+    group_function_sym(λ::Irrep, pat_u::GTPattern, pat_v::GTPattern, mat::AbstractMatrix{T}; verbose::Bool = false) where T
 
-Evaluate a symbolic matrix element of the irrep `λ` using the same symbolic
-matrix path as `group_function_sym`, but through the main `group_function` API.
+Compatibility wrapper for the symbolic API. It forwards to the generic
+`group_function` implementation so symbolic matrices continue to work through
+the legacy `group_function_sym` entry point.
 """
-function group_function(λ::Irrep, pat_u::GTPattern, pat_v::GTPattern, mat::AbstractMatrix{<:Basic}; verbose::Bool = false)
-    return group_function_sym(λ, pat_u, pat_v, mat; verbose = verbose)
+function group_function_sym(λ::Irrep, pat_u::GTPattern, pat_v::GTPattern, mat::AbstractMatrix{T}; verbose::Bool = false) where T
+    return group_function(λ, pat_u, pat_v, mat; verbose = verbose)
 end
 
 @doc """
-    group_function(λ::Irrep, tu::GTPattern, tv::GTPattern, mat::Array{Complex{Float64},2})
-> Returns the _numeric_ group function, for an SU(n) member `mat`, corresponding to irrep `λ` and STYT
-> `tu` and `tv`.
+    group_function(λ::Irrep, tab_u::YTableau, tab_v::YTableau, mat::AbstractMatrix{T}; verbose=false) where T
+
+Returns the group function for an SU(n) element `mat`, corresponding to irrep `λ` and
+Young tableaux `tab_u` and `tab_v`. For numeric `mat` (real or complex floating point),
+computes the group function numerically. Otherwise, uses exact coefficients internally,
+and the result is a polynomial in the entries of `mat`.
 
 # Example:
 ```julia
@@ -613,18 +529,17 @@ julia> t = YoungTableau([2,1]); fill!(t, [1,2,3]);
 julia> group_function([2,1,0], t, t, mat)
 ```
 """
-function group_function(λ::Irrep, tab_u::YTableau, tab_v::YTableau, mat::Array{Complex{Float64}, 2}; verbose = false) 
+function group_function(λ::Irrep, tab_u::YTableau, tab_v::YTableau, mat::AbstractMatrix{T}; verbose = false) where T
     standard_tableaux = standard_tableaux_for_irrep(λ)
     row_index = index_of_semistandard_tableau(tab_u)
     col_index = index_of_semistandard_tableau(tab_v)
     map_u = standard_to_semistandard_map(tab_u, λ)
     map_v = standard_to_semistandard_map(tab_v, λ)
-    
+
     # probablemente se pueda sustituir con sum(λ)
     dim = tab_u |> content |> length
-    
-    normalization = sqrt((1 / Θn(tab_u, λ)) * (1 / Θn(tab_v, λ)))
-    if verbose 
+    normalization = normalization_factor(tab_u, tab_v, λ, T)
+    if verbose
       @show normalization
     end
 
@@ -633,7 +548,7 @@ function group_function(λ::Irrep, tab_u::YTableau, tab_v::YTableau, mat::Array{
     if verbose
       @show length(vcat(coset_list...) |> unique), length(gamma_list)
     end
-    
+
     ctx = DoubleCosetSumContext(
         gamma_list,
         coset_list,
@@ -645,11 +560,11 @@ function group_function(λ::Irrep, tab_u::YTableau, tab_v::YTableau, mat::Array{
         row_index,
         col_index,
         λ,
-        zero(ComplexF64),
-        zero(Float64),
+        zero(eltype(mat)),
+        zero(eltype(mat)),
     )
     pol = sum_over_double_cosets(ctx)
-    
+
     pol * normalization
 end
 
@@ -684,36 +599,15 @@ function group_function(λ::Irrep; verbose::Bool = false)
 end
 
 @doc """
-    group_function(λ::Irrep, mat::AbstractMatrix{<:Basic}; verbose::Bool = false) -> Tuple{Matrix{Basic}, Vector{GTPattern}}
+    group_function(λ::Irrep, mat::AbstractMatrix{T}; verbose::Bool = false) where T
 
-Compute the full symbolic irrep matrix for `λ` from a symbolic SU(n) matrix.
-This is the symbolic-matrix analog of the numeric `group_function(λ, mat)`
-overload.
-"""
-function group_function(λ::Irrep, mat::AbstractMatrix{<:Basic}; verbose::Bool = false)
-    patterns = basis_states(λ)
-    n_states = length(patterns)
-    values = Matrix{Basic}(undef, n_states, n_states)
-
-    @inbounds for (i, pat_u) in enumerate(patterns)
-        for (j, pat_v) in enumerate(patterns)
-            values[i, j] = group_function(λ, pat_u, pat_v, mat; verbose = verbose)
-        end
-    end
-
-    return values, patterns
-end
-
-@doc """
-    group_function(λ::Irrep, mat::Array{Complex{Float64}, 2}; verbose::Bool = false) -> Tuple{Matrix{ComplexF64}, Vector{GTPattern}}
-
-Compute all numeric group functions associated with the partition `λ` and a
-matrix `mat`. Generates the GT patterns for `λ` and evaluates every pair using
-the provided matrix.
+Compute all group functions associated with the partition `λ` and a matrix `mat`.
+Generates the GT patterns for `λ` and evaluates every pair using the provided matrix.
+For numeric matrices, returns numeric values; for symbolic matrices, returns polynomials.
 
 Arguments:
 - `λ::Irrep`: Partition describing the irrep
-- `mat::Array{Complex{Float64}, 2}`: Matrix representing the SU(n) element
+- `mat::AbstractMatrix{T}`: Matrix representing the SU(n) element
 - `verbose::Bool`: Forwarded to the underlying pairwise `group_function`
 
 Returns:
@@ -721,13 +615,18 @@ Returns:
   `group_function(λ, patterns[i], patterns[j], mat)` and `patterns` is the basis
   returned by `basis_states(λ)`
 """
-function group_function(λ::Irrep, mat::Array{Complex{Float64}, 2}; verbose::Bool = false)
+function group_function(λ::Irrep, mat::AbstractMatrix{T}; verbose::Bool = false) where T
     patterns = basis_states(λ)
     n_states = length(patterns)
-    values = Matrix{ComplexF64}(undef, n_states, n_states)
+    first_value = group_function(λ, patterns[1], patterns[1], mat; verbose = verbose)
+    values = Matrix{typeof(first_value)}(undef, n_states, n_states)
 
+    values[1, 1] = first_value
     @inbounds for (i, pat_u) in enumerate(patterns)
         for (j, pat_v) in enumerate(patterns)
+            if i == 1 && j == 1
+                continue
+            end
             values[i, j] = group_function(λ, pat_u, pat_v, mat; verbose = verbose)
         end
     end
@@ -799,4 +698,7 @@ function pweight(gt::GTPattern)
     end
     total
 end
+
+
+occupation_number = reverse ∘ pweight
 import Combinatorics: permutations

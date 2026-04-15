@@ -103,7 +103,7 @@ The *symmetric irrep* $\lambda = [N, 0, \ldots, 0]$ (single-row Young diagram) d
 basis = basis_states(λ)
 
 for b in basis
-    println(b, " → occupation ", pweight(b)) # will output all Fock states of 3 modes with total number of particles = 2
+    println(b, " → occupation ", occupation_number(b)) # will output all Fock states of 3 modes with total number of particles = 2
 end
 ```
 
@@ -119,7 +119,7 @@ basis = basis_states(λ)
 println("Dimension: ", length(basis))  # Should be 3
 
 for b in basis
-    println(b, " → occupation ", pweight(b)) # will output all fermionic states -- in Fock space, permutations of [1,1,0] 
+    println(b, " → occupation ", occupation_number(b)) # will output all fermionic states -- in Fock space, permutations of [1,1,0] 
 end
 ```
 
@@ -136,7 +136,7 @@ The simpler case of two photons with partial overlap similarly involves both $[2
 basis = basis_states(λ)
 
 for b in basis
-    println(pweight(b))
+    println(occupation_number(b))
 end
 # Notice: p-weight (1,1,1) appears twice — inner multiplicity!
 ```
