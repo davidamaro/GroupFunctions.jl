@@ -1,3 +1,9 @@
+```@meta
+CurrentModule = GroupFunctions
+CollapsedDocStrings = true
+DocTestSetup = GroupFunctions.doctestsetup()
+```
+
 # Example: SU(2)-invariant qubit transmission
 
 This example demonstrates encoding a qubit in four optical modes such that arbitrary polarization mixing during fiber transmission does not affect the logical state. The protocol uses two photons distributed across four modes, where modes 1–2 and 3–4 each experience the same unknown unitary $U$.

@@ -1,3 +1,9 @@
+```@meta
+CurrentModule = GroupFunctions
+CollapsedDocStrings = true
+DocTestSetup = GroupFunctions.doctestsetup()
+```
+
 # Immanants
 
 Immanants generalize both permanents and determinants, and they appear naturally in multiphoton interference when exchange symmetry is not purely bosonic or purely fermionic. In `GroupFunctions.jl`, these quantities are recovered from sums of matrix elements computed by `group_function`.

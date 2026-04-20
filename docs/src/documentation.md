@@ -1,74 +1,84 @@
+```@meta
+CurrentModule = GroupFunctions
+CollapsedDocStrings = true
+DocTestSetup = GroupFunctions.doctestsetup()
+```
+
+# API reference
+
+```@docs
+GroupFunctions
+```
 
 ```@index
 ```
 
-
-## Functions
+## Group functions
 
 ```@docs
-    group_function
-    character
+group_function
+character
+find_tablaeux_fillings
+find_double_coset_representative_matrices
 ```
 
-## [Gelfand-Tsetlin patterns](tutorial/states.md)
-
-[GT patterns](tutorial/states.md) are used to denote the basis states.
+## Gelfand-Tsetlin patterns
 
 ```@docs
-    GTPattern
+GTPattern
+basis_states
+determine_next_pattern
+determine_next_pattern!
+zweight
+pweight
+occupation_number
 ```
 
-## Construction of matrices
-
-SU(2) blocks are used to construct unitary matrices.
+## Young tableaux
 
 ```@docs
-    su2_block
+YoungTableau
+axialdistance
+determine_position
+first_young_tableau_lexicographic
+StandardYoungTableaux
+generate_matrix
+index_of_semistandard_tableau
+content
+Θ
 ```
 
-## Young Tableaux Operations
-
-Young tableaux are fundamental combinatorial objects used in representation theory. These functions provide tools for constructing and manipulating Young tableaux.
+## Matrix constructors and symbolic utilities
 
 ```@docs
-    YoungTableau
-    StandardYoungTableaux
-    index_of_semistandard_tableau
+su2_block
+su2_block_symbolic
+bs_block
+bs_block_symbolic
+swap_block
+swap_block_symbolic
+su2_factorization
+sud_from_angles
+julia_to_mma
+mma_to_julia
+expand
 ```
 
-## [GT Pattern Generation](tutorial/states.md)
+## Backwards compatibility
 
-Functions for generating and iterating through [Gelfand-Tsetlin patterns](tutorial/states.md), which form a basis for irreducible representations.
+These names remain available for older callers, but the newer names above are
+preferred in new code.
 
 ```@docs
-    basis_states
+bloquesun
+simple
+simplefactorization
+indice_tablon_semistandard
+genera_funcion
 ```
 
-## Weight Functions
-
-Weight functions extract different types of weights from [Gelfand-Tsetlin patterns](tutorial/states.md), useful for quantum optics and physical applications.
+## Internal enumeration helpers
 
 ```@docs
-    zweight
-    pweight
-```
-
-## SU(n) Matrix Construction
-
-Advanced functions for constructing special unitary matrices using various factorization methods and Euler angle parametrizations.
-
-```@docs
-    su2_factorization
-    sud_from_angles
-    su2_block_symbolic
-```
-
-
-## Utility Functions
-
-Conversion utilities for interfacing with other symbolic computation systems.
-
-```@docs
-    julia_to_mma
-    mma_to_julia
+GroupFunctions.AllSolutionsMatrix.enumerate_matrices
 ```

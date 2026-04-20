@@ -1,6 +1,25 @@
+```@meta
+CurrentModule = GroupFunctions
+CollapsedDocStrings = true
+DocTestSetup = GroupFunctions.doctestsetup()
+```
+
 # Basis states and GT patterns
 
 GT patterns are the basis states used by `GroupFunctions.jl`.
+
+```jldoctest
+julia> basis = basis_states([2, 1, 0]);
+
+julia> length(basis)
+8
+
+julia> pweight(GTPattern([[2, 1, 0], [2, 1], [2]]))
+3-element Vector{Int64}:
+ 0
+ 1
+ 2
+```
 
 ## Build one directly
 

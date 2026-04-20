@@ -1,3 +1,9 @@
+```@meta
+CurrentModule = GroupFunctions
+CollapsedDocStrings = true
+DocTestSetup = GroupFunctions.doctestsetup()
+```
+
 # Group Functions
 #todo this looks more like a background than to a result. too technical. maybe intermix with the actual function calls. 
 

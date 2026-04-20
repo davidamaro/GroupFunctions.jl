@@ -382,6 +382,12 @@ end
 
 
 @deprecate indice_tablon_semistandard(semistandard_tableau::YTableau) index_of_semistandard_tableau(semistandard_tableau)
+@doc """
+    indice_tablon_semistandard(semistandard_tableau::YoungTableau)
+
+Deprecated alias for `index_of_semistandard_tableau`.
+"""
+indice_tablon_semistandard
 
 function generate_dictionary(lista::Array{Int64,1})
     fvars = Dict{Int64,Int64}()
@@ -767,6 +773,13 @@ end
 
 @deprecate genera_funcion(semi_tableau::YTableau, irrep::Array{Int64,1}) standard_to_semistandard_map(semi_tableau, irrep)
 @deprecate genera_funcion(semi_tableau::YTableau) standard_to_semistandard_map(semi_tableau)
+@doc """
+    genera_funcion(semi_tableau::YoungTableau, irrep)
+    genera_funcion(semi_tableau::YoungTableau)
+
+Deprecated alias for `standard_to_semistandard_map`.
+"""
+genera_funcion
 
 @doc """
     stabilizer_permutations(c::Content)

@@ -1,5 +1,18 @@
+```@meta
+CurrentModule = GroupFunctions
+CollapsedDocStrings = true
+DocTestSetup = GroupFunctions.doctestsetup()
+```
+
 # Characters
 SU(d) characters can be evaluated directly with `character(irrep, U)`.
+
+```jldoctest
+julia> U = ComplexF64[1 0 0; 0 -1 0; 0 0 -1];
+
+julia> iszero(character([2, 1, 0], U))
+true
+```
 
 ## Example: SU(3) character check
 Here we present an example with a known formula for the character in the irrep

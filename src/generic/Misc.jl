@@ -1,10 +1,5 @@
 using LinearAlgebra: I, mul!
 
-export su2_block, bloquesun, su2_factorization, simplefactorization, simple, sud_from_angles
-export su2_block_symbolic
-export bs_block, swap_block, bs_block_symbolic, swap_block_symbolic
-export julia_to_mma, mma_to_julia
-
 """
     julia_to_mma(expr::SymEngine.Basic)
 
@@ -448,6 +443,15 @@ end
 simplefactorization(size::Int, quotient::Int) = su2_factorization(size; skip_tail = quotient)
 simplefactorization(size::Int) = su2_factorization(size)
 
+@doc """
+    simplefactorization(size::Int, quotient::Int)
+    simplefactorization(size::Int)
+
+Deprecated compatibility wrapper for `su2_factorization`.
+Prefer `su2_factorization(size; skip_tail = quotient)`.
+"""
+simplefactorization
+
 """
     sud_from_angles(angles::Vector{Float64}, size::Int; quotient::Bool = false)
 
@@ -488,5 +492,18 @@ function sud_from_angles(angles::Vector{Float64}, size::Int; quotient::Bool = fa
 end
 
 const simple = sud_from_angles
+@doc """
+    simple(args...; kwargs...)
+
+Deprecated compatibility alias for `sud_from_angles`.
+"""
+simple
+
 # Backward compatibility for older callers
 const bloquesun = su2_block
+@doc """
+    bloquesun(args...; kwargs...)
+
+Deprecated compatibility alias for `su2_block`.
+"""
+bloquesun

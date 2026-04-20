@@ -1,23 +1,63 @@
+@doc raw"""
+GroupFunctions.jl computes symbolic and numeric matrix elements of irreducible
+representations of `U(d)` and `SU(d)` using Gelfand-Tsetlin patterns and Young
+tableaux.
+
+Repository: <https://github.com/davidamaro/GroupFunctions.jl>
+
+Documentation: <https://davidamaro.github.io/GroupFunctions.jl>
+"""
 module GroupFunctions
-  using SymEngine
-  import SparseArrays: spzeros, SparseMatrixCSC
-  import SymEngine: expand 
-  include("generic/GTPatterns.jl")
-  include("generic/Tableaux.jl")
-  include("generic/PermGroups.jl")
-  include("generic/YoungTabs.jl")
-  include("generic/DF.jl")
-  include("generic/Misc.jl")
-  export YoungTableau, axialdistance, determine_position
-  export GTPattern, basis_states, determine_next_pattern, determine_next_pattern!
-  export first_young_tableau_lexicographic, StandardYoungTableaux, generate_matrix
-  export index_of_semistandard_tableau, indice_tablon_semistandard, content, Θ
-  export group_function, character, mma_to_julia
-  export zweight, pweight
-  export su2_block, bloquesun, su2_factorization, simplefactorization, simple, sud_from_angles
-  export su2_block_symbolic
-  export bs_block, swap_block, bs_block_symbolic, swap_block_symbolic
-  export expand
-  export julia_to_mma
-  export occupation_number
+
+using SymEngine
+
+import SparseArrays: SparseMatrixCSC, spzeros
+import SymEngine: expand
+
+include("exports.jl")
+
+@doc raw"""
+    expand(expr)
+
+Re-export `SymEngine.expand` through `GroupFunctions` so symbolic group
+functions can be expanded without importing `SymEngine` explicitly.
+"""
+expand
+
+################################################################################
+#
+# Combinatorial data structures
+#
+################################################################################
+
+include("generic/GTPatterns.jl")
+include("generic/Tableaux.jl")
+include("generic/PermGroups.jl")
+include("generic/YoungTabs.jl")
+
+################################################################################
+#
+# Group-function algorithms
+#
+################################################################################
+
+include("generic/DF.jl")
+
+################################################################################
+#
+# Matrix constructors and conversion utilities
+#
+################################################################################
+
+include("generic/Misc.jl")
+
+"""
+    doctestsetup()
+
+Return the setup expression shared by the package documentation doctests.
+"""
+function doctestsetup()
+    return :(using GroupFunctions)
+end
+
 end # module

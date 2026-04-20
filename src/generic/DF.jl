@@ -1,9 +1,3 @@
-export group_function, character
-export zweight, pweight
-export find_tablaeux_fillings
-export find_double_coset_representative_matrices
-export occupation_number 
-
 const Irrep = Array{T,1} where T <: Integer
 const YTableau = YoungTableau
 const Content = Array{T,1} where T <: Integer
@@ -700,4 +694,13 @@ end
 
 
 occupation_number = reverse ∘ pweight
+
+@doc """
+    occupation_number(x::GTPattern)
+
+Return the bosonic occupation-number vector associated with `x`.
+This is equivalent to `reverse(pweight(x))`.
+"""
+occupation_number
+
 import Combinatorics: permutations

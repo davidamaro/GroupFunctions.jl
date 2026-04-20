@@ -1,6 +1,14 @@
-push!(LOAD_PATH, "../src/")
-using Documenter, GroupFunctions
-makedocs(sitename="GroupFunctions documentation",
+using Documenter
+using GroupFunctions
+
+const run_doctests = !("--nodoctests" in ARGS)
+
+makedocs(
+    sitename = "GroupFunctions.jl",
+    modules = [GroupFunctions],
+    clean = true,
+    doctest = run_doctests,
+    checkdocs = :exports,
     pages = [
         "Getting started" => "index.md",
         "Tutorial" => [
@@ -21,13 +29,19 @@ makedocs(sitename="GroupFunctions documentation",
             "Calculation of group functions" => "background/group_functions.md",
             "Immanants" => "background/immanants.md",
         ],
-        "Documentation" => "documentation.md",
+        "API reference" => "documentation.md",
     ],
     format = Documenter.HTML(
-                             assets = ["assets/favicon.ico"],
-                             sidebar_sitename=false
+        assets = ["assets/favicon.ico"],
+        sidebar_sitename = false,
+        size_threshold_warn = 204800,
+        size_threshold = 409600,
     ),
-        )
-deploydocs(
-    repo = "github.com/davidamaro/GroupFunctions.jl.git"
 )
+
+if get(ENV, "CI", "false") == "true"
+    deploydocs(
+        repo = "github.com/davidamaro/GroupFunctions.jl.git",
+        target = "build",
+    )
+end

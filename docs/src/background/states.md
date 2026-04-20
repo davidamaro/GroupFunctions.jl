@@ -1,3 +1,9 @@
+```@meta
+CurrentModule = GroupFunctions
+CollapsedDocStrings = true
+DocTestSetup = GroupFunctions.doctestsetup()
+```
+
 # Basis states and GT patterns
 
 This library computes matrix elements of SU(N) irreducible representations -- objects that appear, for instance, in quantum optics when describing how multi-photon states transform under passive linear networks. But matrix elements between which states? The answer involves Gelfand-Tsetlin (GT) patterns, an abstract scheme for labeling quantum states that in some cases allows for a physical interpretation.

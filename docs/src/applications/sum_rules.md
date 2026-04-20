@@ -1,3 +1,9 @@
+```@meta
+CurrentModule = GroupFunctions
+CollapsedDocStrings = true
+DocTestSetup = GroupFunctions.doctestsetup()
+```
+
 # Sum rules
 
 #todo needs an overhaul. 

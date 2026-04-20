@@ -1,3 +1,9 @@
+```@meta
+CurrentModule = GroupFunctions
+CollapsedDocStrings = true
+DocTestSetup = GroupFunctions.doctestsetup()
+```
+
 # Characters
 SU(d) characters are traces of irreducible representation matrices. In
 `GroupFunctions.jl`, you can compute them directly with `character(irrep, U)`.

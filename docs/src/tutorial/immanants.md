@@ -1,3 +1,9 @@
+```@meta
+CurrentModule = GroupFunctions
+CollapsedDocStrings = true
+DocTestSetup = GroupFunctions.doctestsetup()
+```
+
 # Immanants
 
 Zero-weight example for `λ = [2,1,0]`. Theory: [background page](../background/immanants.md).

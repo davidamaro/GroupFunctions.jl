@@ -1,3 +1,9 @@
+```@meta
+CurrentModule = GroupFunctions
+CollapsedDocStrings = true
+DocTestSetup = GroupFunctions.doctestsetup()
+```
+
 # Group Functions
 
 `group_function` computes matrix elements between [basis states](states.md). Theory: [background page](../background/group_functions.md).
