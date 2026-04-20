@@ -87,4 +87,4 @@ GroupFunctions.jl is distributed under the MIT License (see `LICENSE`). While th
 
 ## Citation
 
-Citation information is pending. In the meantime, please cite the repository URL and version tag (e.g., “GroupFunctions.jl v0.2.2, 2026, https://github.com/davidamaro/GroupFunctions.jl”).
+Citation information is pending. In the meantime, please cite the repository URL and version tag (e.g., “GroupFunctions.jl v0.3.0, 2026, https://github.com/davidamaro/GroupFunctions.jl”).
