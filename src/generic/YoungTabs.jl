@@ -77,7 +77,7 @@ function determine_position(tableau::YTableau, entry::Int64)
 end
 
 #TODO: reference? Is it somehow related to Yamanouchi basis?
-function determinar_coeficiente_irrep_yamanouchi(Y::YTableau, u::Integer)
+function calculate_yamanouchi_irrep_coefficient(Y::YTableau, u::Integer)
   v = u - 1
   i,j = determine_position(Y, u)
   k,l = determine_position(Y, v)
@@ -174,33 +174,33 @@ julia> generate_matrix(guilty, Perm([1,3,2,4,5]), [3,2])
 [5, 5]  =  1.0
 ```
 """
-function generate_matrix(patrones::Vector{YTableau}, p::Perm{Int64}, irrep::Array{Int64,1})
+function generate_matrix(young_tableaux_list::Vector{YTableau}, p::Perm{Int64}, irrep::Array{Int64,1})
     cache_key = (p, Tuple(irrep))
     if haskey(GENERATE_MATRIX_CACHE, cache_key)
         return GENERATE_MATRIX_CACHE[cache_key]
     end
 
-    transposition_factors = descomp_total(p)
-    len::Int64 = length(patrones)
+    transposition_factors = adjacent_transpositions(p)
+    len::Int64 = length(young_tableaux_list)
     mat::SparseMatrixCSC{Basic,Int64} = spzeros(Basic, len, len)
     @simd for i in 1:len
       @inbounds mat[i,i] = Basic(1)
     end
     for (_, transposition) in transposition_factors # a + 1 = b
-        mat = generate_matrix(patrones, transposition, irrep) * mat
+        mat = generate_matrix(young_tableaux_list, transposition, irrep) * mat
     end
 
     GENERATE_MATRIX_CACHE[cache_key] = mat
     mat
 end
-function generate_matrix(lista_tablones::Vector{YTableau}, m::Int, irrep::Array{Int64,1})
-    mat = spzeros(Basic,length(lista_tablones), length(lista_tablones))
+function generate_matrix(young_tableaux_list::Vector{YTableau}, m::Int, irrep::Array{Int64,1})
+    mat = spzeros(Basic,length(young_tableaux_list), length(young_tableaux_list))
 
-    for row_idx in 1:length(lista_tablones), col_idx in 1:length(lista_tablones)
+    for row_idx in 1:length(young_tableaux_list), col_idx in 1:length(young_tableaux_list)
         if row_idx == col_idx && mat[row_idx,row_idx] == 0
-            mat[row_idx,row_idx] = determinar_coeficiente_irrep_yamanouchi(lista_tablones[row_idx], m)
+            mat[row_idx,row_idx] = calculate_yamanouchi_irrep_coefficient(young_tableaux_list[row_idx], m)
         elseif row_idx < col_idx
-            yamanouchi_block!(mat, lista_tablones, row_idx, col_idx, m, irrep)
+            yamanouchi_block!(mat, young_tableaux_list, row_idx, col_idx, m, irrep)
         end
     end
 
@@ -389,9 +389,9 @@ Deprecated alias for `index_of_semistandard_tableau`.
 """
 indice_tablon_semistandard
 
-function generate_dictionary(lista::Array{Int64,1})
+function generate_dictionary(list::Array{Int64,1})
     fvars = Dict{Int64,Int64}()
-    for (n, f) in enumerate(lista)
+    for (n, f) in enumerate(list)
         fvars[f] = n
     end
     fvars
@@ -561,52 +561,52 @@ function standard_tableau_from_semistandard(semistandard_table::YTableau)
 end
 
 @doc """
-    Θ(patron_semi::YoungTableau)
+    Θ(semistandard_table::YoungTableau)
 > Computes coefficient Θ. Returns a Float64
 """
-function Θ(patron_semi::YTableau, _::Array{Int64,1})
-    tablon_standard = standard_tableau_from_semistandard(patron_semi)
-    relleno_standard = tablon_standard.fill
-    relleno_semi = patron_semi.fill
+function Θ(semistandard_table::YTableau, _::Array{Int64,1})
+    standard_table = standard_tableau_from_semistandard(semistandard_table)
+    fill_standard = standard_table.fill
+    fill_semistandard = semistandard_table.fill
 
     # group positions in the standard filling by their semistandard label
-    grupos = Dict{Int64,Vector{Int64}}()
-    @inbounds for (std, semi) in zip(relleno_standard, relleno_semi)
-        push!(get!(grupos, semi, Int[]), std)
+    group_positions = Dict{Int64,Vector{Int64}}()
+    @inbounds for (std, semi) in zip(fill_standard, fill_semistandard)
+        push!(get!(group_positions, semi, Int[]), std)
     end
 
     prod = one(Basic)
-    for posiciones in values(grupos)
-        lenp = length(posiciones)
+    for positions in values(group_positions)
+        lenp = length(positions)
         lenp <= 1 && continue
         @inbounds for a in 1:lenp-1, b in a+1:lenp
-            u = posiciones[a]; v = posiciones[b]
+            u = positions[a]; v = positions[b]
             u, v = u < v ? (u, v) : (v, u)
-            dist = axialdistance(tablon_standard, u, v)
+            dist = axialdistance(standard_table, u, v)
             prod *= (one(Basic) + inv(Basic(dist)))
         end
     end
     prod
 end
 
-function Θn(patron_semi::YTableau, _::Array{Int64,1})
-    tablon_standard = standard_tableau_from_semistandard(patron_semi)
-    relleno_standard = tablon_standard.fill
-    relleno_semi = patron_semi.fill
+function Θn(semistandard_table::YTableau, _::Array{Int64,1})
+    standard_table = standard_tableau_from_semistandard(semistandard_table)
+    standard_fill = standard_table.fill
+    semistandard_fill = semistandard_table.fill
 
-    grupos = Dict{Int64,Vector{Int64}}()
-    @inbounds for (std, semi) in zip(relleno_standard, relleno_semi)
-        push!(get!(grupos, semi, Int[]), std)
+    group_positions = Dict{Int64,Vector{Int64}}()
+    @inbounds for (std, semi) in zip(standard_fill, semistandard_fill)
+        push!(get!(group_positions, semi, Int[]), std)
     end
 
     prod = one(Float64)
-    for posiciones in values(grupos)
-        lenp = length(posiciones)
+    for positions in values(group_positions)
+        lenp = length(positions)
         lenp <= 1 && continue
         @inbounds for a in 1:lenp-1, b in a+1:lenp
-            u = posiciones[a]; v = posiciones[b]
+            u = positions[a]; v = positions[b]
             u, v = u < v ? (u, v) : (v, u)
-            dist = axialdistance(tablon_standard, u, v)
+            dist = axialdistance(standard_table, u, v)
             prod *= (1.0 + 1.0 / dist)
         end
     end
@@ -841,8 +841,8 @@ end
 @doc """
 Construct Young tableau from a given GTPattern."""
 function YoungTableau(tab::GTPattern)
-    filas = tab.rows
-    len = filas[1] |> length
-    conjunto_contenido = [calculate_pattern_differences(tab, x) for x in 1:len]
-    YoungTableau(filter(x -> x > 0, filas[1]), vcat(conjunto_contenido...))
+    rows = tab.rows
+    len = rows[1] |> length
+    content = [calculate_pattern_differences(tab, x) for x in 1:len]
+    YoungTableau(filter(x -> x > 0, rows[1]), vcat(content...))
 end

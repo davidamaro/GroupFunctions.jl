@@ -294,32 +294,62 @@ function gen_bounded_compositions(
     caps::AbstractVector{T},
 ) where {T<:Integer}
     s = length(caps)
-    if s == 0
+    if s == 0 
+        # we have for whatever reason, a matrix of zero column. 
+        #dont know when it might happen. not in normal usage i think
+        #but anyway if the target is zero, there exists a single solution: empty row, so we return {empty row}
+        #if it's not, no solution exists, and we return {} (empty)
         return target == zero(T) ? Vector{Vector{T}}([T[]]) : empty_rows(T)
     end
 
-    function go(col::Int, remaining::T)
-        if col == s
+    function distribute_remaining(col::Int, remaining::T)
+        if col == s #we're at the last index. only one solution, if it's consistent with constraints
             return within_bounds(remaining, caps[s]) ? Vector{Vector{T}}([T[remaining]]) :
                    Vector{Vector{T}}()
         end
 
-        out = Vector{Vector{T}}()
-        maxval = min(remaining, caps[col])
-        if maxval < zero(T)
+        out = Vector{Vector{T}}() # variable holding possible extensions
+        maxval = min(remaining, caps[col]) # remaining value to distribute among s-col indices of the vectors
+        if maxval < zero(T) # don't know when it might happen! i'm adding an error ... might also replace it with @assert
+            error("Unexp. negative maxval. col=$col: remaining=$remaining, cap=$(caps[col])")
             return out
         end
         for val in zero(T):maxval
-            tails = go(col + 1, remaining - val)
-            for t in tails
-                push!(out, prepend_value(val, t))
+            #so we try all of the possible values here, greedily. first index has the value `val`
+            tails = distribute_remaining(col + 1, remaining - val) #... and we get all possible extensions
+            for tail in tails
+                extension=prepend_value(val, tail) #so, the first index is `val`, the rest is the tail we got
+                push!(out, extension)
             end
         end
         return out
     end
 
-    return go(1, target)
+    return distribute_remaining(1, target)
 end
+
+#Lemma 1:
+#`gen_bounded_compositions(target, caps)` produces every vector $\vec m \in \mathbb{N}^s$, 
+# such that $0 \le m_j ≤$ `caps[j]`  and $\sum_j m_j=$`target`.
+#The important structure is the internal function `distribute_remaining`.
+# We wish to show that any $\vec m=(m_1, \vec m')$ obeying the constraints is contained in the results of this function.
+#*Proof:* Induction on $s$, the length of $\vec m$.
+#*Base*: $s=1$, the solution either either exists and is unique or no solution exists.
+#*Step*:
+#1. $m_1$ is contained in `zero(T):maxval`, if $m_1 \le$ `caps[1]`  and $m_1 \le$ `target`
+#2. by the inductive hypothesis, $\vec m'$ must be contained in the recursive call to `go`.
+#3. Therefore, any valid $\vec m$ is produced.
+
+#Corollary 2:
+#When a single row remains with `sum(caps) = lambda[r]`, the unique valid row is `caps` itself.
+#*Proof:* (by contradiction) $\vec m=$`caps` is obviously a solution.
+# Assume another $\vec m'$ is distinct solution. 
+#Then, $\sum_j (m_j -m'_j)$ must be equal to zero, and since $\vec m'$ is distinct from $\vec m$,
+# for the sum to be equal to zero, at some index $j$, $m_j < m'_j$, and at another $k$, $m_k>m'_k$.
+# Otherwise either the sum couldn't be zero (having only zero and positive/negative terms), or $\vec m=\vec m'$.
+# So, at some index $m_j < m'_j$, which violates the constraints $m'_j\le$ `caps[j]`. 
+
+
 
 """
     finish_last_row(partial_rows, last_row, required_sum)
@@ -340,12 +370,14 @@ julia> finish_last_row([[1, 1]], [2, 0], 2)
 function finish_last_row(
     partial_rows::Vector{Vector{T}},
     last_row::Vector{T},
-    required_sum::T,
+    required_sum::T, 
 ) where {T<:Integer}
-    if sum_ints(last_row) == required_sum
+    if sum_ints(last_row) == required_sum # candidate matches the constraints?
+        #could be checked with is_pruned maybe…
         return Vector{Vector{Vector{T}}}([append_row(partial_rows, last_row)])
     end
-    return empty_matrices(T)
+    error("Unexp. mismatch of last row sum and capacity: partial_rows=$partial_rows, last_row=$last_row, required_sum=$required_sum")
+    return empty_matrices(T) #candidate doesn't follow constraints
 end
 
 """
@@ -376,22 +408,49 @@ function extend_partial(
 ) where {T<:Integer}
     r = length(lambda)
     if is_pruned(capacities, suffix, i)
+        #remaining capacities do not match row sum suffixes
+        #in human language: we started with `capacities`, being column sums.
+        #so we start with empty matrix M \in naturals^{r×s},
+        #capacities are given \in naturals^s,
+        #row sums  are given lambda \in naturals^r,
+        #we fill M with rows from index 1, such that sum_j M_ij = lambda_i
+        #(*) and capacities → capacities - i-th row of newly filled M
+        #at some point we realize (this is the point of this if) that we still have (sum(capacities)) to distribute…
+        #but at the same time it should be (\sum_{j>=i} lambda_j) == suffix[some index], and it's not
+        #shouldn't happen in practice. i'm adding an error
+        error("Unexp. pruning: capacities=$capacities, lambda=$lambda, suffix=$suffix, partial_rows=$partial_rows, i=$i")
         return empty_matrices(T)
     end
 
-    if i == r
+    if i == r # we don't have that much to play with, everything is fully constrained
         return finish_last_row(partial_rows, capacities, lambda[r])
     end
 
-    row_choices = gen_bounded_compositions(lambda[i], capacities)
-    out = Vector{Vector{Vector{T}}}()
-    for row in row_choices
-        next_capacities = vector_subtract(capacities, row)
-        next_rows = append_row(partial_rows, row)
-        append!(out, extend_partial(i + 1, next_rows, next_capacities, lambda, suffix))
+    row_choices = gen_bounded_compositions(lambda[i], capacities) #what are possible rows consistent with the constraints?
+    out = Vector{Vector{Vector{T}}}() #initialization of the output
+    for row in row_choices 
+        next_capacities = vector_subtract(capacities, row) #see (*)
+        next_rows = append_row(partial_rows, row) # appended row
+        extension = extend_partial(i + 1, next_rows, next_capacities, lambda, suffix) 
+        # ↑ and we get all the possibilities of extension here
+        append!(out, extension) #which we return ...
     end
-    return out
+    return out #eventually
 end
+
+# Theorem 3:
+#`extend_partial` returns all valid completions.
+#*Proof.* Induction on $r$, the number of rows.
+#*Base:* $r=1$, follows by corollary 2: the first row is the last row.
+#*Step:* Let  $$M = \begin{pmatrix} m_1 \ldots m_s \\ M'\end{pmatrix},$$
+#and let's call $\vec m=(m_1 \ldots m_s)$. The goal is to show that any valid $M$ is contained in the output.
+#If the column/row sums of $M'$ are $\vec \mu', \vec \lambda'$, the column/row sums of $M$ are 
+# $\vec \mu = \vec \mu'+\vec m$ and $\vec \lambda = (\sum_i m_i,  \vec \lambda')$. 
+#1. By Lemma 1, $\vec m$ appears in the output of `gen_bounded_compositions`. 
+#2. By inductive hypothesis, $M'$ appears in the output of `extend_partial` with `capacities`= $\vec\mu-\vec m$ and `lambda`=$(\vec \lambda')$ (the other relevant argument `suffix` is inferred from it).
+#3. Therefore $M$ is produced. (qed)
+
+
 
 """
     enumerate_matrices(lambda, mu)

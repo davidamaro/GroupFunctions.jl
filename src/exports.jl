@@ -17,6 +17,7 @@ export determine_position
 export expand
 export find_double_coset_representative_matrices
 export find_tablaeux_fillings
+export find_tableaux_fillings
 export first_young_tableau_lexicographic
 export genera_funcion
 export generate_matrix
