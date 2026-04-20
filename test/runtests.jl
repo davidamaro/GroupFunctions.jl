@@ -111,9 +111,9 @@ include("mathematica_additional_su3_irreps.jl")
 include("mathematica_even_more_su3_irreps.jl")
 
 @testset "Number of zero weight states." begin
-  solutions = find_tablaeux_fillings([1, 1, 2, 1, 0], [1, 1, 2, 1, 0])
+  solutions = find_tableaux_fillings([1, 1, 2, 1, 0], [1, 1, 2, 1, 0])
   @test length(solutions) == 33
-  solutions = find_tablaeux_fillings([2,2,2,0,0,0], [2,2,2,0,0,0])
+  solutions = find_tableaux_fillings([2,2,2,0,0,0], [2,2,2,0,0,0])
   @test length(solutions) == 21
 end
 

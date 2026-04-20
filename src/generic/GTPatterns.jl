@@ -68,7 +68,7 @@ function Base.show(io::IO, ::MIME"text/plain", G::GTPattern)
     conn_middle = '〉'
     conn_lower = '╱'
 
-    mitad = n ÷ 2
+    half_of_n = n ÷ 2
     between = isodd(n)
     cont = 1
     i = 1
@@ -86,14 +86,14 @@ function Base.show(io::IO, ::MIME"text/plain", G::GTPattern)
         end
 
         print(buffer, repeat(" ", padding + 1))
-        if i <= mitad
+        if i <= half_of_n
             print(buffer, repeat(" ", cont - 1), conn_upper, "\n")
             cont += 1
         elseif between
             print(buffer, repeat(" ", cont - 1), conn_middle, "\n")
             between = false
         else
-            cont > mitad && (cont -= 1)
+            cont > half_of_n && (cont -= 1)
             print(buffer, repeat(" ", cont - 1), conn_lower, "\n")
             cont -= 1
         end

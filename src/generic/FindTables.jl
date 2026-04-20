@@ -1,6 +1,6 @@
 module FindTables
 
-export find_tablaeux_fillings
+export find_tableaux_fillings
 
 using ..AllSolutionsMatrix
 
@@ -24,7 +24,7 @@ end
     see the following discussion for context:
         https://discourse.julialang.org/t/right-solver-for-jump-to-find-every-solution-of-a-linear-system-of-equations-with-integer-solutions/44709/6
 """
-function find_tablaeux_fillings(A::Vector{Int}, B::Vector{Int})
+function find_tableaux_fillings(A::Vector{Int}, B::Vector{Int})
     if length(A) != length(B) || sum(A) != sum(B)
         println("No solution exists: row sums must equal column sums")
         return Matrix{Int}[]

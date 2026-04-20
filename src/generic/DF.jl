@@ -1,6 +1,6 @@
 export group_function, character
 export zweight, pweight
-export find_tablaeux_fillings
+export find_tableaux_fillings
 export find_double_coset_representative_matrices
 export occupation_number 
 
