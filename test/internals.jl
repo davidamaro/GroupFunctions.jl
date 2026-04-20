@@ -1,7 +1,7 @@
 @testset "descomposicion de una transposicion" begin
-    lista::Array{Tuple{Int64,Int64},1} = [(1,1)]
-    GroupFunctions.expand_transposition!((2,5), lista)
-    @test lista == [(1,1), (4,5), (3,4), (2,3), (3,4), (4,5)]
+    transposition_chain::Vector{Tuple{Int64, Int64}} = [(1,1)]
+    GroupFunctions.expand_transposition!((2,5), transposition_chain)
+    @test transposition_chain == [(1,1), (4,5), (3,4), (2,3), (3,4), (4,5)]
 end
 
 @testset "swap_adjacent_entries" begin

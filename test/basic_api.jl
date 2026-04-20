@@ -79,28 +79,28 @@ end
     @testset "Symbolic variants consistency" begin
         λ = [2, 1, 0]  # 8-dim irrep of SU(3)
         patterns = basis_states(λ)
-        pat_u, pat_v = patterns[1], patterns[2]
-        tab_u, tab_v = YoungTableau(pat_u), YoungTableau(pat_v)
+        first_pattern, second_pattern = patterns[1], patterns[2]
+        first_tableau, second_tableau = YoungTableau(first_pattern), YoungTableau(second_pattern)
 
         # All symbolic variants should give same polynomial
-        result_tab = group_function(λ, tab_u, tab_v)           # YTableau, no mat
-        result_pat = group_function(λ, pat_u, pat_v)           # GTPattern, no mat
+        result_tab = group_function(λ, first_tableau, second_tableau)   # YTableau, no mat
+        result_pat = group_function(λ, first_pattern, second_pattern)   # GTPattern, no mat
 
-        @test es_cero(expand(result_tab - result_pat))
+        @test symbolic_isapprox(result_tab, result_pat)
     end
 
     # Test 2: Symbolic with explicit symbolic_matrix equals no-matrix version
     @testset "Symbolic matrix vs implicit symbolic" begin
         λ = [1, 1, 0]  # 3-dim irrep of SU(3)
         patterns = basis_states(λ)
-        pat_u, pat_v = patterns[1], patterns[2]
-        tab_u, tab_v = YoungTableau(pat_u), YoungTableau(pat_v)
+        first_pattern, second_pattern = patterns[1], patterns[2]
+        first_tableau, second_tableau = YoungTableau(first_pattern), YoungTableau(second_pattern)
 
-        sym_mat = GroupFunctions.symbolic_matrix(3)
-        result_implicit = group_function(λ, tab_u, tab_v)
-        result_explicit = group_function(λ, tab_u, tab_v, sym_mat)
+        symbolic_matrix = GroupFunctions.symbolic_matrix(3)
+        result_implicit = group_function(λ, first_tableau, second_tableau)
+        result_explicit = group_function(λ, first_tableau, second_tableau, symbolic_matrix)
 
-        @test es_cero(expand(result_implicit - result_explicit))
+        @test symbolic_isapprox(result_implicit, result_explicit)
     end
 
     # Test 3: Numeric evaluation matches symbolic substituted
@@ -110,13 +110,13 @@ end
         mat = mat / det(mat)^(1/2)
 
         patterns = basis_states(λ)
-        pat_u, pat_v = patterns[1], patterns[2]
+        first_pattern, second_pattern = patterns[1], patterns[2]
 
         # Numeric directly
-        numeric_result = group_function(λ, pat_u, pat_v, mat)
+        numeric_result = group_function(λ, first_pattern, second_pattern, mat)
 
         # Symbolic then substitute
-        symbolic_result = group_function(λ, pat_u, pat_v)
+        symbolic_result = group_function(λ, first_pattern, second_pattern)
         substituted = symbolic_result
         for i in 1:2, j in 1:2
             substituted = SymEngine.subs(substituted,
@@ -135,9 +135,9 @@ end
 
         batch_result, patterns = group_function(λ, mat)
 
-        for (i, pat_u) in enumerate(patterns)
-            for (j, pat_v) in enumerate(patterns)
-                individual = group_function(λ, pat_u, pat_v, mat)
+        for (i, first_pattern) in enumerate(patterns)
+            for (j, second_pattern) in enumerate(patterns)
+                individual = group_function(λ, first_pattern, second_pattern, mat)
                 @test batch_result[i, j] ≈ individual
             end
         end

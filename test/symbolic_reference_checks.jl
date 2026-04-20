@@ -1,86 +1,65 @@
+function filled_tableau(shape, entries)
+    tableau = YoungTableau(shape)
+    fill!(tableau, entries)
+    return tableau
+end
+
+function assert_symbolic_match(irrep, first_tableau, second_tableau, expected_expression_string)
+    expected_expression = expected_expression_string |> mma_to_julia
+    actual_expression = group_function(irrep, first_tableau, second_tableau) |> expand
+    @test symbolic_isapprox(expected_expression, actual_expression)
+end
+
+function assert_symbolic_matrix_matches(irrep, tableaux, expected_expression_strings)
+    all_matches = Bool[]
+    for (first_index, first_tableau) in enumerate(tableaux), (second_index, second_tableau) in enumerate(tableaux)
+        expected_expression = expected_expression_strings[first_index][second_index] |> mma_to_julia
+        actual_expression = group_function(irrep, first_tableau, second_tableau) |> expand
+        difference_expression = expand(expected_expression - actual_expression)
+        matches_reference = symbolic_isapprox(expected_expression, actual_expression)
+        if !matches_reference
+            @show first_index second_index expected_expression actual_expression difference_expression
+        end
+        push!(all_matches, matches_reference)
+    end
+    @test all(all_matches)
+end
+
 @testset "irrep 221 de SU(4)" begin
-    t_u = YoungTableau([2,2, 1])
-    fill!(t_u, [1,2,3,3,4])
-    t_v = YoungTableau([2,2, 1])
-    fill!(t_v, [1,2,3,3,4])
-    edo_mma = "0.5 x[1, 4] x[2, 3] x[3, 2] x[3, 3] x[4, 1] +  0.5 x[1, 3] x[2, 4] x[3, 2] x[3, 3] x[4, 1] -  0.5 x[1, 4] x[2, 2] x[3, 3]^2* x[4, 1] -  0.5 x[1, 2] x[2, 4] x[3, 3]^2* x[4, 1] -  1.0 x[1, 3] x[2, 3] x[3, 2] x[3, 4] x[4, 1] +  0.5 x[1, 3] x[2, 2] x[3, 3] x[3, 4] x[4, 1] +  0.5 x[1, 2] x[2, 3] x[3, 3] x[3, 4] x[4, 1] +  0.5 x[1, 4] x[2, 3] x[3, 1] x[3, 3] x[4, 2] +  0.5 x[1, 3] x[2, 4] x[3, 1] x[3, 3] x[4, 2] -  0.5 x[1, 4] x[2, 1] x[3, 3]^2* x[4, 2] -  0.5 x[1, 1] x[2, 4] x[3, 3]^2* x[4, 2] -  1.0 x[1, 3] x[2, 3] x[3, 1] x[3, 4] x[4, 2] +  0.5 x[1, 3] x[2, 1] x[3, 3] x[3, 4] x[4, 2] +  0.5 x[1, 1] x[2, 3] x[3, 3] x[3, 4] x[4, 2] -  1.0 x[1, 4] x[2, 3] x[3, 1] x[3, 2] x[4, 3] -  1.0 x[1, 3] x[2, 4] x[3, 1] x[3, 2] x[4, 3] +  0.5 x[1, 4] x[2, 2] x[3, 1] x[3, 3] x[4, 3] + 0.5 x[1, 2] x[2, 4] x[3, 1] x[3, 3] x[4, 3] +  0.5 x[1, 4] x[2, 1] x[3, 2] x[3, 3] x[4, 3] +  0.5 x[1, 1] x[2, 4] x[3, 2] x[3, 3] x[4, 3] +  0.5 x[1, 3] x[2, 2] x[3, 1] x[3, 4] x[4, 3] +  0.5 x[1, 2] x[2, 3] x[3, 1] x[3, 4] x[4, 3] +  0.5 x[1, 3] x[2, 1] x[3, 2] x[3, 4] x[4, 3] +  0.5 x[1, 1] x[2, 3] x[3, 2] x[3, 4] x[4, 3] -  1.0 x[1, 2] x[2, 1] x[3, 3] x[3, 4] x[4, 3] -  1.0 x[1, 1] x[2, 2] x[3, 3] x[3, 4] x[4, 3] +  2.0 x[1, 3] x[2, 3] x[3, 1] x[3, 2] x[4, 4] -  1.0 x[1, 3] x[2, 2] x[3, 1] x[3, 3] x[4, 4] -  1.0 x[1, 2] x[2, 3] x[3, 1] x[3, 3] x[4, 4] -  1.0 x[1, 3] x[2, 1] x[3, 2] x[3, 3] x[4, 4] -  1.0 x[1, 1] x[2, 3] x[3, 2] x[3, 3] x[4, 4] +  x[1, 2] x[2, 1] x[3, 3]^2* x[4, 4] + x[1, 1] x[2, 2] x[3, 3]^2* x[4, 4]" |> mma_to_julia
-    edo_julia = group_function([2,2,1,0],t_u, t_v) |> expand
-    edo_final = expand(edo_mma - edo_julia)
-    @test es_cero(edo_final)
+    first_tableau = filled_tableau([2,2,1], [1,2,3,3,4])
+    second_tableau = filled_tableau([2,2,1], [1,2,3,3,4])
+    expected_expression_string = "0.5 x[1, 4] x[2, 3] x[3, 2] x[3, 3] x[4, 1] +  0.5 x[1, 3] x[2, 4] x[3, 2] x[3, 3] x[4, 1] -  0.5 x[1, 4] x[2, 2] x[3, 3]^2* x[4, 1] -  0.5 x[1, 2] x[2, 4] x[3, 3]^2* x[4, 1] -  1.0 x[1, 3] x[2, 3] x[3, 2] x[3, 4] x[4, 1] +  0.5 x[1, 3] x[2, 2] x[3, 3] x[3, 4] x[4, 1] +  0.5 x[1, 2] x[2, 3] x[3, 3] x[3, 4] x[4, 1] +  0.5 x[1, 4] x[2, 3] x[3, 1] x[3, 3] x[4, 2] +  0.5 x[1, 3] x[2, 4] x[3, 1] x[3, 3] x[4, 2] -  0.5 x[1, 4] x[2, 1] x[3, 3]^2* x[4, 2] -  0.5 x[1, 1] x[2, 4] x[3, 3]^2* x[4, 2] -  1.0 x[1, 3] x[2, 3] x[3, 1] x[3, 4] x[4, 2] +  0.5 x[1, 3] x[2, 1] x[3, 3] x[3, 4] x[4, 2] +  0.5 x[1, 1] x[2, 3] x[3, 3] x[3, 4] x[4, 2] -  1.0 x[1, 4] x[2, 3] x[3, 1] x[3, 2] x[4, 3] -  1.0 x[1, 3] x[2, 4] x[3, 1] x[3, 2] x[4, 3] +  0.5 x[1, 4] x[2, 2] x[3, 1] x[3, 3] x[4, 3] + 0.5 x[1, 2] x[2, 4] x[3, 1] x[3, 3] x[4, 3] +  0.5 x[1, 4] x[2, 1] x[3, 2] x[3, 3] x[4, 3] +  0.5 x[1, 1] x[2, 4] x[3, 2] x[3, 3] x[4, 3] +  0.5 x[1, 3] x[2, 2] x[3, 1] x[3, 4] x[4, 3] +  0.5 x[1, 2] x[2, 3] x[3, 1] x[3, 4] x[4, 3] +  0.5 x[1, 3] x[2, 1] x[3, 2] x[3, 4] x[4, 3] +  0.5 x[1, 1] x[2, 3] x[3, 2] x[3, 4] x[4, 3] -  1.0 x[1, 2] x[2, 1] x[3, 3] x[3, 4] x[4, 3] -  1.0 x[1, 1] x[2, 2] x[3, 3] x[3, 4] x[4, 3] +  2.0 x[1, 3] x[2, 3] x[3, 1] x[3, 2] x[4, 4] -  1.0 x[1, 3] x[2, 2] x[3, 1] x[3, 3] x[4, 4] -  1.0 x[1, 2] x[2, 3] x[3, 1] x[3, 3] x[4, 4] -  1.0 x[1, 3] x[2, 1] x[3, 2] x[3, 3] x[4, 4] -  1.0 x[1, 1] x[2, 3] x[3, 2] x[3, 3] x[4, 4] +  x[1, 2] x[2, 1] x[3, 3]^2* x[4, 4] + x[1, 1] x[2, 2] x[3, 3]^2* x[4, 4]"
+    assert_symbolic_match([2,2,1,0], first_tableau, second_tableau, expected_expression_string)
 end
 
 @testset "irrep 11 de SU(3)" begin
-    t_1 = YoungTableau([1, 1])# edo 21
-    fill!(t_1, [2,3])
-    t_2 = YoungTableau([1, 1])# edo 69
-    fill!(t_2, [1,3])
-    t_3 = YoungTableau([1, 1])# edo 69
-    fill!(t_3, [1,2])
-  ##ya
-    edo_mma = "-1.0 x[2, 3] x[3, 2] + x[2, 2] x[3, 3]" |> mma_to_julia
-    edo_julia = group_function([1,1,0],t_1, t_1) |> expand
-    edo_final = expand(edo_mma - edo_julia)
-    @test es_cero(edo_final)
-  ##ya
-    edo_mma = "-1.0 x[2, 3] x[3, 1] + x[2, 1] x[3, 3]" |> mma_to_julia
-    edo_julia = group_function([1,1,0],t_1, t_2) |> expand
-    edo_final = expand(edo_mma - edo_julia)
-    @test es_cero(edo_final)
-  ##ya
-    edo_mma = "-1.0 x[2, 2] x[3, 1] + x[2, 1] x[3, 2]" |> mma_to_julia
-    edo_julia = group_function([1,1,0],t_1, t_3) |> expand
-    edo_final = expand(edo_mma - edo_julia)
-    @test es_cero(edo_final)
-  ##ya
-    edo_mma = "-1.0 x[1, 3] x[3, 2] + x[1, 2] x[3, 3]" |> mma_to_julia
-    edo_julia = group_function([1,1,0],t_2, t_1) |> expand
-    edo_final = expand(edo_mma - edo_julia)
-    @test es_cero(edo_final)
-  ##ya
-    edo_mma = "-1.0 x[1, 3] x[3, 1] + x[1, 1] x[3, 3]" |> mma_to_julia
-    edo_julia = group_function([1,1,0],t_2, t_2) |> expand
-    edo_final = expand(edo_mma - edo_julia)
-    @test es_cero(edo_final)
-  ##ya
-    edo_mma = "-1.0 x[1, 2] x[3, 1] + x[1, 1] x[3, 2]" |> mma_to_julia
-    edo_julia = group_function([1,1,0],t_2, t_3) |> expand
-    edo_final = expand(edo_mma - edo_julia)
-    @test es_cero(edo_final)
-  ##ya
-    edo_mma = "-1.0 x[1, 3] x[2, 2] + x[1, 2] x[2, 3]" |> mma_to_julia
-    edo_julia = group_function([1,1,0],t_3, t_1) |> expand
-    edo_final = expand(edo_mma - edo_julia)
-    @test es_cero(edo_final)
-  ##
-    edo_mma = "-1.0 x[1, 3] x[2, 1] + x[1, 1] x[2, 3]" |> mma_to_julia
-    edo_julia = group_function([1,1,0],t_3, t_2) |> expand
-    edo_final = expand(edo_mma - edo_julia)
-    @test es_cero(edo_final)
-  ##
-    edo_mma = "-1.0 x[1, 2] x[2, 1] + x[1, 1] x[2, 2]" |> mma_to_julia
-    edo_julia = group_function([1,1,0],t_3, t_3) |> expand
-    edo_final = expand(edo_mma - edo_julia)
-    @test es_cero(edo_final)
+    tableau_23 = filled_tableau([1, 1], [2,3])
+    tableau_13 = filled_tableau([1, 1], [1,3])
+    tableau_12 = filled_tableau([1, 1], [1,2])
+
+    assert_symbolic_match([1,1,0], tableau_23, tableau_23, "-1.0 x[2, 3] x[3, 2] + x[2, 2] x[3, 3]")
+    assert_symbolic_match([1,1,0], tableau_23, tableau_13, "-1.0 x[2, 3] x[3, 1] + x[2, 1] x[3, 3]")
+    assert_symbolic_match([1,1,0], tableau_23, tableau_12, "-1.0 x[2, 2] x[3, 1] + x[2, 1] x[3, 2]")
+    assert_symbolic_match([1,1,0], tableau_13, tableau_23, "-1.0 x[1, 3] x[3, 2] + x[1, 2] x[3, 3]")
+    assert_symbolic_match([1,1,0], tableau_13, tableau_13, "-1.0 x[1, 3] x[3, 1] + x[1, 1] x[3, 3]")
+    assert_symbolic_match([1,1,0], tableau_13, tableau_12, "-1.0 x[1, 2] x[3, 1] + x[1, 1] x[3, 2]")
+    assert_symbolic_match([1,1,0], tableau_12, tableau_23, "-1.0 x[1, 3] x[2, 2] + x[1, 2] x[2, 3]")
+    assert_symbolic_match([1,1,0], tableau_12, tableau_13, "-1.0 x[1, 3] x[2, 1] + x[1, 1] x[2, 3]")
+    assert_symbolic_match([1,1,0], tableau_12, tableau_12, "-1.0 x[1, 2] x[2, 1] + x[1, 1] x[2, 2]")
 end
 @testset "irrep 21 de SU(3)" begin
-    t_1 = YoungTableau([2,1])# edo 21
-    fill!(t_1, [2,3,3])
-    t_2 = YoungTableau([2,1])# edo 69
-    fill!(t_2, [1,3,3])
-    t_3 = YoungTableau([2,1])# edo 69
-    fill!(t_3, [1,3,2])
-    t_4 = YoungTableau([2,1])# edo 69
-    fill!(t_4, [2,2,3])
-    t_5 = YoungTableau([2,1])# edo 21
-    fill!(t_5, [1,2,3])
-    t_6 = YoungTableau([2,1])# edo 69
-    fill!(t_6, [1,1,3])
-    t_7 = YoungTableau([2,1])# edo 69
-    fill!(t_7, [1,2,2])
-    t_8 = YoungTableau([2,1])# edo 69
-    fill!(t_8, [1,1,2])
+    tableaux = [
+        filled_tableau([2,1], [2,3,3]),
+        filled_tableau([2,1], [1,3,3]),
+        filled_tableau([2,1], [1,3,2]),
+        filled_tableau([2,1], [2,2,3]),
+        filled_tableau([2,1], [1,2,3]),
+        filled_tableau([2,1], [1,1,3]),
+        filled_tableau([2,1], [1,2,2]),
+        filled_tableau([2,1], [1,1,2]),
+    ]
 
-      mma_states = [
+      expected_expression_strings = [
       [
       "-1.0 x[2, 3] x[3, 2] x[3, 3] + x[2, 2] x[3, 3]^2",
       "-1.0 x[2, 3] x[3, 1] x[3, 3] + x[2, 1] x[3, 3]^2",
@@ -163,39 +142,22 @@ end
       ]
       ];
 
-    bolsa_estados = [ t_1, t_2, t_3, t_4, t_5, t_6, t_7, t_8 ]
-    output_test= []
-    for (idx,edox) in enumerate(bolsa_estados), (idy,edoy) in enumerate(bolsa_estados)
-      edo_mma = mma_states[idx][idy] |> mma_to_julia
-      edo_julia = group_function([2,1,0],edox, edoy) |> expand
-      edo_final = expand(edo_mma - edo_julia)
-      if !es_cero(edo_final)
-        @show edo_mma, edo_julia
-      end
-      push!(output_test, es_cero(edo_final))
-    end
-    @test all(output_test)
+    assert_symbolic_matrix_matches([2,1,0], tableaux, expected_expression_strings)
 end
 @testset "irrep 21 de SU(4)" begin
     # placeholder
-    t_1 = YoungTableau([2,1])# edo 21
-    fill!(t_1, [3, 4, 4])
-    t_2 = YoungTableau([2,1])# edo 69
-    fill!(t_2, [2, 4, 4])
-    t_3 = YoungTableau([2,1])# edo 69
-    fill!(t_3, [1, 4, 4])
-    t_4 = YoungTableau([2,1])# edo 69
-    fill!(t_4, [2, 4, 3])
-    t_5 = YoungTableau([2,1])# edo 21
-    fill!(t_5, [1, 4, 3])
-    t_6 = YoungTableau([2,1])# edo 69
-    fill!(t_6, [1, 4, 2])
-    t_7 = YoungTableau([2,1])# edo 69
-    fill!(t_7, [3, 3, 4])
-    t_8 = YoungTableau([2,1])# edo 69
-    fill!(t_8, [2, 3, 4])
+    tableaux = [
+        filled_tableau([2,1], [3, 4, 4]),
+        filled_tableau([2,1], [2, 4, 4]),
+        filled_tableau([2,1], [1, 4, 4]),
+        filled_tableau([2,1], [2, 4, 3]),
+        filled_tableau([2,1], [1, 4, 3]),
+        filled_tableau([2,1], [1, 4, 2]),
+        filled_tableau([2,1], [3, 3, 4]),
+        filled_tableau([2,1], [2, 3, 4]),
+    ]
 
-    basura_ejemplo = [
+    expected_expression_strings = [
     [
     "-1.0 x[3, 4] x[4, 3] x[4, 4] + x[3, 3] x[4, 4]^2",
     "-1.0 x[3, 4] x[4, 2] x[4, 4] + x[3, 2] x[4, 4]^2",
@@ -277,16 +239,5 @@ end
     "-0.5 x[2, 4] x[3, 3] x[4, 2] - 0.5 x[2, 3] x[3, 4] x[4, 2] - 0.5 x[2, 4] x[3, 2] x[4, 3] - 0.5 x[2, 2] x[3, 4] x[4, 3] + x[2, 3] x[3, 2] x[4, 4] + x[2, 2] x[3, 3] x[4, 4]"
     ]
     ];
-    bolsa_estados = [ t_1, t_2, t_3, t_4, t_5, t_6, t_7, t_8 ]
-    output_test = []
-    for (idx,edox) in enumerate(bolsa_estados), (idy,edoy) in enumerate(bolsa_estados)
-      edo_mma = basura_ejemplo[idx][idy] |> mma_to_julia
-      edo_julia = group_function([2,1,0,0],edox, edoy) |> expand
-      edo_final = expand(edo_mma - edo_julia)
-      if !es_cero(edo_final)
-        @show edo_mma, edo_julia
-      end
-      push!(output_test, es_cero(edo_final) )
-    end
-    @test all(output_test)
+    assert_symbolic_matrix_matches([2,1,0,0], tableaux, expected_expression_strings)
 end

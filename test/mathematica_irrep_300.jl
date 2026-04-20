@@ -64,8 +64,10 @@ function mathematica_irrep_300_cases()
 end
 
 @testset "Mathematica reference for irrep [3,0,0]" begin
-    for (name, U, gamma_mma) in mathematica_irrep_300_cases()
-        gamma_julia, _ = group_function([3,0,0], U)
-        @test isapprox(gamma_julia, gamma_mma; atol=1e-12, rtol=1e-12)
+    for (case_name, input_matrix, expected_representation) in mathematica_irrep_300_cases()
+        @testset "$case_name" begin
+            actual_representation, _ = group_function([3,0,0], input_matrix)
+            @test isapprox(actual_representation, expected_representation; atol=1e-12, rtol=1e-12)
+        end
     end
 end

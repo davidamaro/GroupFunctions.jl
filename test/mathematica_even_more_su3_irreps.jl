@@ -184,8 +184,10 @@ function mathematica_even_more_su3_irrep_cases()
 end
 
 @testset "Mathematica references for more SU(3) irreps" begin
-    for (irrep, name, U, gamma_mma) in mathematica_even_more_su3_irrep_cases()
-        gamma_julia, _ = group_function(irrep, U)
-        @test isapprox(gamma_julia, gamma_mma; atol=1e-12, rtol=1e-12)
+    for (irrep, case_name, input_matrix, expected_representation) in mathematica_even_more_su3_irrep_cases()
+        @testset "$irrep $case_name" begin
+            actual_representation, _ = group_function(irrep, input_matrix)
+            @test isapprox(actual_representation, expected_representation; atol=1e-12, rtol=1e-12)
+        end
     end
 end

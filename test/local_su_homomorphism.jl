@@ -4,24 +4,24 @@ import Random: seed!
 using Random
 
 function random_su(n::Int)
-    x = randn(ComplexF64, n, n)
-    q, r = qr(x)
-    q = Matrix(q)
-    d = diag(r)
-    phases = d ./ abs.(d)
-    q = q * Diagonal(conj.(phases))
-    return q / det(q)^(1 / n)
+    gaussian_matrix = randn(ComplexF64, n, n)
+    q, r = qr(gaussian_matrix)
+    unitary_factor = Matrix(q)
+    diagonal_entries = diag(r)
+    phases = diagonal_entries ./ abs.(diagonal_entries)
+    unitary_factor = unitary_factor * Diagonal(conj.(phases))
+    return unitary_factor / det(unitary_factor)^(1 / n)
 end
 
 function check_homomorphism(λ::Vector{Int}, n::Int, trials::Int, tol::Float64)
     for _ in 1:trials
-        u = random_su(n)
-        v = random_su(n)
-        uv = u * v
-        rep_u, _ = group_function(λ, u)
-        rep_v, _ = group_function(λ, v)
-        rep_uv, _ = group_function(λ, uv)
-        @assert isapprox(rep_u * rep_v, rep_uv; atol=tol, rtol=tol)
+        left_factor = random_su(n)
+        right_factor = random_su(n)
+        product_factor = left_factor * right_factor
+        left_representation, _ = group_function(λ, left_factor)
+        right_representation, _ = group_function(λ, right_factor)
+        product_representation, _ = group_function(λ, product_factor)
+        @assert isapprox(left_representation * right_representation, product_representation; atol=tol, rtol=tol)
     end
 end
 

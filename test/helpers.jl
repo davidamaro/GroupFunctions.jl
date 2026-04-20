@@ -90,13 +90,27 @@ function findzero(part::Array{Int,1})
     end
 end
 
-function es_cero(pol::Basic; ϵ = 10^(-5))
-    monomios_lista = SymEngine.free_symbols(pol)
+const SYMBOLIC_COMPARISON_POINTS = ComplexF64[
+    0.17 + 0.29im,
+   -0.31 + 0.23im,
+    0.41 - 0.37im,
+   -0.53 - 0.19im,
+]
 
-    while length(monomios_lista) > 0
-      mono = pop!(monomios_lista)
-      pol = SymEngine.subs(pol, mono, randn())
+function symbolic_isapprox(lhs::Basic, rhs::Basic; atol::Float64 = 1e-10, rtol::Float64 = 0.0)
+    difference = expand(lhs - rhs)
+    difference == 0 && return true
+
+    free_symbols = sort!(collect(SymEngine.free_symbols(difference)); by=string)
+    isempty(free_symbols) && return isapprox(convert(ComplexF64, difference), 0; atol, rtol)
+
+    for sample_point in SYMBOLIC_COMPARISON_POINTS
+        evaluated_difference = difference
+        for (symbol_index, symbol) in enumerate(free_symbols)
+            evaluated_difference = SymEngine.subs(evaluated_difference, symbol, sample_point^symbol_index)
+        end
+        isapprox(convert(ComplexF64, evaluated_difference), 0; atol, rtol) || return false
     end
 
-    abs(pol)^2 < ϵ
+    return true
 end
