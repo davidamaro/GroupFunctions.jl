@@ -6,30 +6,30 @@ DocTestSetup = GroupFunctions.doctestsetup()
 
 # Characters
 SU(d) characters can be evaluated directly with `character(irrep, U)`.
+They are the traces of the corresponding irreducible representation matrices, so
+`character` is the direct way to ask for that quantity without building the
+whole matrix yourself.
 
-```jldoctest
-julia> U = ComplexF64[1 0 0; 0 -1 0; 0 0 -1];
+## Example: character as the trace of a representation
 
-julia> iszero(character([2, 1, 0], U))
-true
+```@repl chars_trace
+using GroupFunctions
+
+λ = [2, 0];
+U = su2_block(2, 1, (0.0, pi/3, 0.0));
+
+χ = character(λ, U)
+
+values, basis = group_function(λ, U);
+χ_from_matrix = sum(values[i, i] for i in axes(values, 1))
+
+χ ≈ χ_from_matrix
 ```
 
-## Example: SU(3) character check
-Here we present an example with a known formula for the character in the irrep
-$\lambda = (2, 1, 0)$, and compare it against `character`.
+## Example: symbolic character
 
-```julia
+```@repl chars_symbolic
 using GroupFunctions
-using RandomMatrices
-using LinearAlgebra: det, eigvals
 
-irrep = [2, 1, 0]
-U = rand(Haar(2), 3)  # 3×3 Haar-random unitary matrix
-U_su = U / det(U)^(1 / 3)
-
-lambdas = eigvals(U_su)
-ideal_character = lambdas[1] / lambdas[2] + lambdas[2] / lambdas[1] +
-                  lambdas[1] / lambdas[3] + lambdas[3] / lambdas[1] +
-                  lambdas[2] / lambdas[3] + lambdas[3] / lambdas[2] + 2
-character(irrep, U_su) ≈ ideal_character
+character([2, 0])
 ```

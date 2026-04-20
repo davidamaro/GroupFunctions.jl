@@ -8,22 +8,19 @@ DocTestSetup = GroupFunctions.doctestsetup()
 SU(d) characters are traces of irreducible representation matrices. In
 `GroupFunctions.jl`, you can compute them directly with `character(irrep, U)`.
 
-## Example: SU(3) character check
+## Example: evaluate a sampled character
 
 ```julia
 using GroupFunctions
 using RandomMatrices
-using LinearAlgebra: det, eigvals
+using LinearAlgebra: det
 
 irrep = [2, 1, 0]
 U = rand(Haar(2), 3)  # 3×3 Haar-random unitary matrix
 U_su = U / det(U)^(1 / 3)
 
-lambdas = eigvals(U_su)
-ideal_character = lambdas[1] / lambdas[2] + lambdas[2] / lambdas[1] +
-                  lambdas[1] / lambdas[3] + lambdas[3] / lambdas[1] +
-                  lambdas[2] / lambdas[3] + lambdas[3] / lambdas[2] + 2
-character(irrep, U_su) ≈ ideal_character
+χ = character(irrep, U_su)
+χ
 ```
 
 ## Example: variance of sampled character values

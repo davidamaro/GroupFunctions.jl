@@ -69,22 +69,21 @@ For more examples and API details, see the documentation: https://davidamaro.git
 
 ## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request. A to-do list is included in the `todo.txt` file.
+Contributions are welcome! Please feel free to submit a Pull Request.
 
 - Run tests: `julia --project -e 'using Pkg; Pkg.test()'`
 - Build docs locally: `julia --project=docs docs/make.jl`
 
 ## License
 
-GroupFunctions.jl is distributed under the MIT License (see `LICENSE`). While the package still contains code derived from AbstractAlgebra.jl to handle Young tableaux, it follows the same (MIT) license terms.
+GroupFunctions.jl is distributed under the MIT License (see `LICENSE`).
 
 ## References
 
 1. [J Grabmeier and A Kerber, "The evaluation of irreducible polynomial representations of the general linear groups and of the unitary groups over fields of characteristic 0" Acta Appl. Math, 1987](http://dx.doi.org/10.1007/BF00046717)
 2. [A Alex et al, "A numerical algorithm for the explicit calculation of SU(N) and SL(N, C) Clebsch–Gordan coefficients" J. Math. Phys. 2011 ](http://dx.doi.org/10.1063/1.3521562)
 3. [D Amaro-Alcala et al "Sum rules in multiphoton coincidence rates" Phys. Lett. A 2020](http://dx.doi.org/10.1016/j.physleta.2020.126459)
-4. [AbstractAlgebra.jl](https://nemocas.github.io/AbstractAlgebra.jl/stable/)
 
 ## Citation
 
-Citation information is pending. In the meantime, please cite the repository URL and version tag (e.g., “GroupFunctions.jl v0.3.0, 2026, https://github.com/davidamaro/GroupFunctions.jl”).
+Citation information is pending. In the meantime, please cite the repository URL and version tag (e.g., “GroupFunctions.jl v0.3.1, 2026, https://github.com/davidamaro/GroupFunctions.jl”).
