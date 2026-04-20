@@ -8,20 +8,24 @@ DocTestSetup = GroupFunctions.doctestsetup()
 
 `GroupFunctions.jl` computes matrix elements of irreducible representations of the unitary group `U(n)`, both numerically and symbolically. Given a unitary matrix and an irrep label, it returns the corresponding transformation matrix, with basis states represented by [Gelfand-Tsetlin patterns](tutorial/states.md).
 
+For symbolic calculations, the same API works with symbolic block matrices such as `su2_block_symbolic`:
+
 ```jldoctest
-julia> values, basis = group_function([2, 0], ComplexF64[1 0; 0 1]);
+julia> U = su2_block_symbolic(2,1);
 
-julia> size(values)
-(3, 3)
+julia> U
+2×2 Matrix{SymEngine.Basic}:
+ v_1_1  v_1_2
+ v_2_1  v_2_2
 
-julia> length(basis)
-3
-
-julia> iszero(character([2, 1, 0], ComplexF64[1 0 0; 0 -1 0; 0 0 -1]))
-true
+julia> group_function([2,0], U)[1]
+3×3 Matrix{SymEngine.Basic}:
+             v_2_2^2        sqrt(2)*v_2_2*v_2_1              v_2_1^2
+ sqrt(2)*v_1_2*v_2_2  v_1_1*v_2_2 + v_1_2*v_2_1  sqrt(2)*v_1_1*v_2_1
+             v_1_2^2        sqrt(2)*v_1_1*v_1_2              v_1_1^2
 ```
 
-For symbolic calculations, the same API works with symbolic block matrices such as `su2_block_symbolic`. For symmetric irreps, `occupation_number` translates basis patterns into the corresponding Fock occupations; see the quantum-optics example for a full workflow.
+For symmetric irreps, `occupation_number` translates basis patterns into the corresponding Fock occupations; see the quantum-optics example for a full workflow.
 
 ## Installation
 
