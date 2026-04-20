@@ -18,7 +18,7 @@ GroupFunctions
 ```@docs
 group_function
 character
-find_tablaeux_fillings
+find_tableaux_fillings
 find_double_coset_representative_matrices
 ```
 
