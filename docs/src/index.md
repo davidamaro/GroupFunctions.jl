@@ -25,7 +25,26 @@ julia> group_function([2,0], U)[1]
              v_1_2^2        sqrt(2)*v_1_1*v_1_2              v_1_1^2
 ```
 
-For symmetric irreps, `occupation_number` translates basis patterns into the corresponding Fock occupations; see the quantum-optics example for a full workflow.
+The same approach works for `SU(3)` irreps with a full symbolic `3×3` matrix:
+
+```jldoctest
+julia> U = [GroupFunctions.SymEngine.symbols("u_$(i)_$(j)") for i in 1:3, j in 1:3];
+
+julia> U
+3×3 Matrix{SymEngine.Basic}:
+ u_1_1  u_1_2  u_1_3
+ u_2_1  u_2_2  u_2_3
+ u_3_1  u_3_2  u_3_3
+
+julia> group_function([2,0,0], U)[1]
+6×6 Matrix{SymEngine.Basic}:
+             u_3_3^2        sqrt(2)*u_3_2*u_3_3  …              u_3_1^2
+ sqrt(2)*u_2_3*u_3_3  u_2_2*u_3_3 + u_2_3*u_3_2     sqrt(2)*u_2_1*u_3_1
+ sqrt(2)*u_1_3*u_3_3  u_1_2*u_3_3 + u_1_3*u_3_2     sqrt(2)*u_1_1*u_3_1
+             u_2_3^2        sqrt(2)*u_2_2*u_2_3                 u_2_1^2
+ sqrt(2)*u_2_3*u_1_3  u_2_2*u_1_3 + u_2_3*u_1_2     sqrt(2)*u_2_1*u_1_1
+             u_1_3^2        sqrt(2)*u_1_2*u_1_3  …              u_1_1^2
+```
 
 ## Installation
 
