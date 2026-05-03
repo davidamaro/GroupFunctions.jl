@@ -45,3 +45,16 @@ end
 variance = var(values)
 variance
 ```
+
+## Example: Schur polynomial
+
+`schur_polynomial` computes the same character after restricting the matrix to
+the diagonal torus. The irrep label uses the same partition convention as the
+rest of the package: for `SU(3)`, pass a length-three vector such as `[2, 1, 0]`.
+
+```julia
+using GroupFunctions
+
+schur_polynomial([2, 1, 0])
+schur_polynomial([2, 1, 0], [2, 3, 5])
+```

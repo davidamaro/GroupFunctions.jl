@@ -18,6 +18,7 @@ GroupFunctions
 ```@docs
 group_function
 character
+schur_polynomial
 find_tableaux_fillings
 find_double_coset_representative_matrices
 ```
