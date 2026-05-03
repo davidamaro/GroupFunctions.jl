@@ -28,6 +28,7 @@ export julia_to_mma
 export mma_to_julia
 export occupation_number
 export pweight
+export schur_polynomial
 export simple
 export simplefactorization
 export su2_block

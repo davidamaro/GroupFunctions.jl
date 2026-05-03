@@ -703,4 +703,83 @@ This is equivalent to `reverse(pweight(x))`.
 """
 occupation_number
 
+@doc """
+    schur_polynomial(λ::AbstractVector{<:Integer}; prefix::String = "x") -> Basic
+    schur_polynomial(λ::AbstractVector{<:Integer}, variables::AbstractVector)
+
+Compute the Schur polynomial `s_λ` for the partition/top-row label `λ`.
+The length of `λ` sets the group dimension `d`, following the same convention
+as `basis_states`, `group_function`, and `character`.
+
+The one-argument method returns a symbolic polynomial in variables named
+`x_1, ..., x_d` by default. The two-argument method evaluates the same
+polynomial in the supplied `variables`, which may be numeric or symbolic.
+
+Mathematically this is the `SU(d)`/`U(d)` character evaluated on a diagonal
+matrix with diagonal entries `variables`.
+
+# Examples
+```jldoctest
+julia> using GroupFunctions
+
+julia> schur_polynomial([2, 0])
+x_1*x_2 + x_1^2 + x_2^2
+
+julia> schur_polynomial([2, 1, 0], [2, 3, 5])
+280
+```
+"""
+function schur_polynomial(λ::AbstractVector{<:Integer}; prefix::String = "x")
+    partition = _validate_schur_partition(λ)
+    variables = [SymEngine.symbols("$(prefix)_$(idx)") for idx in 1:length(partition)]
+    return _schur_polynomial(partition, variables)
+end
+
+function schur_polynomial(λ::AbstractVector{<:Integer}, variables::AbstractVector)
+    partition = _validate_schur_partition(λ)
+    length(variables) == length(partition) || throw(ArgumentError(
+        "Expected $(length(partition)) variables for λ of length $(length(partition)), got $(length(variables))"
+    ))
+
+    return _schur_polynomial(partition, variables)
+end
+
+function _validate_schur_partition(λ::AbstractVector{<:Integer})
+    isempty(λ) && throw(ArgumentError("λ must contain at least one component"))
+
+    partition = Int64.(λ)
+    any(<(0), partition) && throw(ArgumentError("λ must be nonnegative"))
+    issorted(partition; rev = true) || throw(ArgumentError("λ must be non-increasing"))
+
+    return partition
+end
+
+function _schur_polynomial(partition::Vector{Int64}, variables::AbstractVector)
+    if length(partition) == 1
+        return variables[1]^partition[1]
+    end
+
+    patterns = basis_states(partition)
+    first_term = _schur_monomial(variables, occupation_number(patterns[1]))
+    total = zero(first_term) + first_term
+
+    @inbounds for idx in 2:length(patterns)
+        total += _schur_monomial(variables, occupation_number(patterns[idx]))
+    end
+
+    return total
+end
+
+function _schur_monomial(variables::AbstractVector, exponents::AbstractVector{<:Integer})
+    term = one(variables[1])
+
+    @inbounds for idx in eachindex(exponents)
+        exponent = exponents[idx]
+        exponent == 0 && continue
+        term *= variables[idx]^exponent
+    end
+
+    return term
+end
+
 import Combinatorics: permutations
