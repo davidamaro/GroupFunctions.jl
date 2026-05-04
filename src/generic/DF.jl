@@ -705,15 +705,19 @@ occupation_number
 
 @doc """
     schur_polynomial(λ::AbstractVector{<:Integer}; prefix::String = "x") -> Basic
+    schur_polynomial(λ::AbstractVector{<:Integer}; variables::AbstractVector)
     schur_polynomial(λ::AbstractVector{<:Integer}, variables::AbstractVector)
 
 Compute the Schur polynomial `s_λ` for the partition/top-row label `λ`.
 The length of `λ` sets the group dimension `d`, following the same convention
-as `basis_states`, `group_function`, and `character`.
+as `basis_states`, `group_function`, and `character` for the one-argument
+symbolic method.
 
 The one-argument method returns a symbolic polynomial in variables named
 `x_1, ..., x_d` by default. The two-argument method evaluates the same
-polynomial in the supplied `variables`, which may be numeric or symbolic.
+polynomial in the supplied `variables`, which may be numeric or symbolic. When
+variables are supplied explicitly, trailing zeroes in `λ` are ignored and
+shorter partitions are padded with zeroes to match the number of variables.
 
 Mathematically this is the `SU(d)`/`U(d)` character evaluated on a diagonal
 matrix with diagonal entries `variables`.
@@ -729,18 +733,21 @@ julia> schur_polynomial([2, 1, 0], [2, 3, 5])
 280
 ```
 """
-function schur_polynomial(λ::AbstractVector{<:Integer}; prefix::String = "x")
+function schur_polynomial(λ::AbstractVector{<:Integer}; prefix::String = "x", variables = nothing)
+    if variables !== nothing
+        return schur_polynomial(λ, variables)
+    end
+
     partition = _validate_schur_partition(λ)
     variables = [SymEngine.symbols("$(prefix)_$(idx)") for idx in 1:length(partition)]
     return _schur_polynomial(partition, variables)
 end
 
 function schur_polynomial(λ::AbstractVector{<:Integer}, variables::AbstractVector)
-    partition = _validate_schur_partition(λ)
-    length(variables) == length(partition) || throw(ArgumentError(
-        "Expected $(length(partition)) variables for λ of length $(length(partition)), got $(length(variables))"
-    ))
+    isempty(variables) && throw(ArgumentError("variables must contain at least one element"))
 
+    partition = _partition_for_variables(λ, length(variables))
+    partition === nothing && return zero(variables[1])
     return _schur_polynomial(partition, variables)
 end
 
@@ -752,6 +759,20 @@ function _validate_schur_partition(λ::AbstractVector{<:Integer})
     issorted(partition; rev = true) || throw(ArgumentError("λ must be non-increasing"))
 
     return partition
+end
+
+function _partition_for_variables(λ::AbstractVector{<:Integer}, nvariables::Int)
+    partition = _trim_trailing_zeroes(_validate_schur_partition(λ))
+    length(partition) > nvariables && return nothing
+
+    return vcat(partition, zeros(Int64, nvariables - length(partition)))
+end
+
+function _trim_trailing_zeroes(partition::Vector{Int64})
+    last_nonzero = findlast(!=(0), partition)
+    last_nonzero === nothing && return Int64[]
+
+    return partition[1:last_nonzero]
 end
 
 function _schur_polynomial(partition::Vector{Int64}, variables::AbstractVector)

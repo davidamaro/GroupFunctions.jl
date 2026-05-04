@@ -18,9 +18,11 @@
     y = [SymEngine.symbols("y_1"), SymEngine.symbols("y_2")]
     @test symbolic_isapprox(schur_polynomial([1, 0], y), y[1] + y[2])
     @test symbolic_isapprox(schur_polynomial([3], [x1]), x1^3)
+    @test symbolic_isapprox(schur_polynomial([3], variables = [x1, x2]), x1^3 + x1^2 * x2 + x1 * x2^2 + x2^3)
 
     @test_throws ArgumentError schur_polynomial(Int[])
     @test_throws ArgumentError schur_polynomial([1, 2])
     @test_throws ArgumentError schur_polynomial([1, -1])
-    @test_throws ArgumentError schur_polynomial([1, 0], [x1])
+    @test symbolic_isapprox(schur_polynomial([1, 0], [x1]), x1)
+    @test schur_polynomial([1, 1], [x1]) == 0
 end
