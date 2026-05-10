@@ -229,6 +229,8 @@ function standard_tableaux_for_irrep(irrep::Irrep)
     return StandardYoungTableaux(filter(x -> x > 0, irrep))
 end
 
+is_trivial_irrep(irrep::Irrep) = !isempty(irrep) && all(iszero, irrep)
+
 function semistandard_indices(tab_u::YTableau, tab_v::YTableau)
     return index_of_semistandard_tableau(tab_u), index_of_semistandard_tableau(tab_v)
 end
@@ -403,6 +405,8 @@ Notes:
 - Involves matrix operations and coset calculations
 """
 function group_function(λ::Irrep, tab_u::YTableau, tab_v::YTableau)
+    is_trivial_irrep(λ) && return one(ComplexF64)
+
     n = length(λ)  # group dimension SU(n), not number of boxes
     mat = symbolic_matrix(n)
     return group_function(λ, tab_u, tab_v, mat)
@@ -435,6 +439,8 @@ Notes:
 - Uses SymEngine for symbolic computation
 """
 function group_function(λ::Irrep, pat_u::GTPattern, pat_v::GTPattern)
+    is_trivial_irrep(λ) && return one(ComplexF64)
+
     return group_function(λ, YoungTableau(pat_u), YoungTableau(pat_v))
 end
 
@@ -452,6 +458,8 @@ julia> group_function([2,1,0], t, t, mat)
 ```
 """
 function group_function(λ::Irrep, pat_u::GTPattern, pat_v::GTPattern, mat::AbstractMatrix{T}) where T
+    is_trivial_irrep(λ) && return one(eltype(mat))
+
     return group_function(λ, YoungTableau(pat_u), YoungTableau(pat_v), mat)
 end
 
@@ -477,6 +485,8 @@ julia> group_function([2,1,0], t, t, mat)
 ```
 """
 function group_function(λ::Irrep, tab_u::YTableau, tab_v::YTableau, mat::AbstractMatrix{T}) where T
+    is_trivial_irrep(λ) && return one(eltype(mat))
+
     standard_tableaux = standard_tableaux_for_irrep(λ)
     row_index = index_of_semistandard_tableau(tab_u)
     col_index = index_of_semistandard_tableau(tab_v)
@@ -525,6 +535,8 @@ Returns:
 """
 function group_function(λ::Irrep)
     patterns = basis_states(λ)
+    is_trivial_irrep(λ) && return one(ComplexF64), patterns
+
     n_states = length(patterns)
     values = Matrix{Basic}(undef, n_states, n_states)
 
@@ -555,6 +567,8 @@ Returns:
 """
 function group_function(λ::Irrep, mat::AbstractMatrix{T}) where T
     patterns = basis_states(λ)
+    is_trivial_irrep(λ) && return one(eltype(mat)), patterns
+
     n_states = length(patterns)
     first_value = group_function(λ, patterns[1], patterns[1], mat)
     values = Matrix{typeof(first_value)}(undef, n_states, n_states)
