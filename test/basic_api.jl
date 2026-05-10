@@ -36,6 +36,36 @@ end
     @test GroupFunctions.character(λ, mat) == sum(symbolic_values[i, i] for i in axes(symbolic_values, 1))
 end
 
+@testset "group_function with trivial irreps" begin
+    for λ in ([0], [0, 0], [0, 0, 0])
+        value, patterns = group_function(λ)
+
+        @test value == 1 + 0im
+        @test value isa Complex
+        @test length(patterns) == 1
+        @test group_function(λ, patterns[1], patterns[1]) == 1 + 0im
+        @test GroupFunctions.character(λ) == 1 + 0im
+
+        n = length(λ)
+        numeric_matrix = ComplexF64[i == j ? 1 : 0 for i in 1:n, j in 1:n]
+        numeric_value, numeric_patterns = group_function(λ, numeric_matrix)
+
+        @test numeric_value == 1 + 0im
+        @test map(p -> p.rows, numeric_patterns) == map(p -> p.rows, patterns)
+        @test group_function(λ, patterns[1], patterns[1], numeric_matrix) == 1 + 0im
+        @test GroupFunctions.character(λ, numeric_matrix) == 1 + 0im
+
+        symbolic_matrix = [SymEngine.symbols("u_$(i)_$(j)") for i in 1:n, j in 1:n]
+        symbolic_value, symbolic_patterns = group_function(λ, symbolic_matrix)
+
+        @test symbolic_value == 1
+        @test symbolic_value isa Basic
+        @test map(p -> p.rows, symbolic_patterns) == map(p -> p.rows, patterns)
+        @test group_function(λ, patterns[1], patterns[1], symbolic_matrix) == 1
+        @test GroupFunctions.character(λ, symbolic_matrix) == 1
+    end
+end
+
 @testset "character helper" begin
     λ = [2, 0]
     symbolic_character = GroupFunctions.character(λ)
