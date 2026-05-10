@@ -523,7 +523,8 @@ end
 
 Compute all symbolic group functions associated with the partition `λ`.
 The routine builds every valid GT pattern for `λ` and evaluates the group
-function for each pair.
+function for each pair. For the trivial irrep `[0, 0, ..., 0]`, the first
+tuple entry is the scalar `1 + 0im` instead of a `1x1` matrix.
 
 Arguments:
 - `λ::Irrep`: Partition describing the irrep
@@ -555,6 +556,8 @@ end
 Compute all group functions associated with the partition `λ` and a matrix `mat`.
 Generates the GT patterns for `λ` and evaluates every pair using the provided matrix.
 For numeric matrices, returns numeric values; for symbolic matrices, returns polynomials.
+For the trivial irrep `[0, 0, ..., 0]`, the first tuple entry is the scalar
+`one(eltype(mat))` instead of a `1x1` matrix.
 
 Arguments:
 - `λ::Irrep`: Partition describing the irrep

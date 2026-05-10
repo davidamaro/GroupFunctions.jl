@@ -71,6 +71,22 @@ size(values)
 round.(values, digits=4)
 ```
 
+## Trivial irreps
+
+Zero partitions such as `[0, 0]` and `[0, 0, 0]` label the trivial irrep. It has
+one basis state, and every group element acts as multiplication by `1`. The
+all-entry overload therefore returns the scalar value as the first tuple entry.
+
+```@repl gf_trivial
+using GroupFunctions
+
+value, patterns = group_function([0, 0]);
+value
+length(patterns)
+
+group_function([0, 0, 0])[1]
+```
+
 ## Compute a (single) symbolic entry
 
 ```@repl gf_symbolic
