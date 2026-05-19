@@ -36,6 +36,20 @@ end
     @test GroupFunctions.character(λ, mat) == sum(symbolic_values[i, i] for i in axes(symbolic_values, 1))
 end
 
+@testset "group_function with basis indices" begin
+    λ = [2, 1, 0]
+    patterns = basis_states(λ)
+
+    @test group_function(λ, 1, 3) == group_function(λ, patterns[1], patterns[3])
+
+    mat = ComplexF64[1 2 3; 4 5 6; 7 8 10]
+
+    @test group_function(λ, 2, 4, mat) ≈ group_function(λ, patterns[2], patterns[4], mat)
+
+    @test_throws BoundsError group_function(λ, 0, 1)
+    @test_throws BoundsError group_function(λ, 1, length(patterns) + 1, mat)
+end
+
 @testset "group_function with trivial irreps" begin
     for λ in ([0], [0, 0], [0, 0, 0])
         value, patterns = group_function(λ)
@@ -44,6 +58,7 @@ end
         @test value isa Complex
         @test length(patterns) == 1
         @test group_function(λ, patterns[1], patterns[1]) == 1 + 0im
+        @test group_function(λ, 1, 1) == 1 + 0im
         @test GroupFunctions.character(λ) == 1 + 0im
 
         n = length(λ)
@@ -53,6 +68,7 @@ end
         @test numeric_value == 1 + 0im
         @test map(p -> p.rows, numeric_patterns) == map(p -> p.rows, patterns)
         @test group_function(λ, patterns[1], patterns[1], numeric_matrix) == 1 + 0im
+        @test group_function(λ, 1, 1, numeric_matrix) == 1 + 0im
         @test GroupFunctions.character(λ, numeric_matrix) == 1 + 0im
 
         symbolic_matrix = [SymEngine.symbols("u_$(i)_$(j)") for i in 1:n, j in 1:n]
@@ -62,6 +78,7 @@ end
         @test symbolic_value isa Basic
         @test map(p -> p.rows, symbolic_patterns) == map(p -> p.rows, patterns)
         @test group_function(λ, patterns[1], patterns[1], symbolic_matrix) == 1
+        @test group_function(λ, 1, 1, symbolic_matrix) == 1
         @test GroupFunctions.character(λ, symbolic_matrix) == 1
     end
 end

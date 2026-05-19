@@ -445,6 +445,18 @@ function group_function(λ::Irrep, pat_u::GTPattern, pat_v::GTPattern)
 end
 
 @doc """
+    group_function(λ::Irrep, i::Integer, j::Integer)
+
+Return the symbolic group function for the `i, j` entry in the GT basis
+returned by `basis_states(λ)`. This is equivalent to
+`group_function(λ, basis_states(λ)[i], basis_states(λ)[j])`.
+"""
+function group_function(λ::Irrep, i::Integer, j::Integer)
+    patterns = basis_states(λ)
+    return group_function(λ, patterns[i], patterns[j])
+end
+
+@doc """
     group_function(λ::Irrep, pat_u::GTPattern, pat_v::GTPattern, mat::AbstractMatrix{T}) where T
 
 Returns the group function for an SU(n) element `mat`, corresponding to irrep `λ` and a pair of GT patterns
@@ -461,6 +473,18 @@ function group_function(λ::Irrep, pat_u::GTPattern, pat_v::GTPattern, mat::Abst
     is_trivial_irrep(λ) && return one(eltype(mat))
 
     return group_function(λ, YoungTableau(pat_u), YoungTableau(pat_v), mat)
+end
+
+@doc """
+    group_function(λ::Irrep, i::Integer, j::Integer, mat::AbstractMatrix{T}) where T
+
+Return the group function for the `i, j` entry in the GT basis returned by
+`basis_states(λ)`, evaluated on `mat`. This is equivalent to
+`group_function(λ, basis_states(λ)[i], basis_states(λ)[j], mat)`.
+"""
+function group_function(λ::Irrep, i::Integer, j::Integer, mat::AbstractMatrix{T}) where T
+    patterns = basis_states(λ)
+    return group_function(λ, patterns[i], patterns[j], mat)
 end
 
 function group_function_sym(λ::Irrep, pat_u::GTPattern, pat_v::GTPattern, mat::AbstractMatrix{T}) where T

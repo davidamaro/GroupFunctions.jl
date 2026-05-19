@@ -100,4 +100,11 @@ final   = basis[findfirst(gt -> pweight(gt) == [2, 0], basis)];
 group_function(λ, final, initial)
 ```
 
+If you only need a single matrix entry, you can also index directly into the
+GT basis returned by `basis_states(λ)`:
+
+```@repl gf_symbolic
+group_function(λ, 1, 2)
+```
+
 Next: [HOM effect](../applications/quantum_optics.md).
