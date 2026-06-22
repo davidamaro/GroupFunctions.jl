@@ -29,12 +29,12 @@ The basic items to translate between quantum optics and [GT pattern](../tutorial
 
 The Hilbert space of $N$ photons in $n$ modes has dimension $\binom{N+n-1}{n-1}$. We enumerate basis states as [GT patterns](../tutorial/states.md):
 
-```julia
+```@repl hom
 using GroupFunctions
 
 # Two photons in three modes
-λ = [2, 0, 0]
-basis = basis_states(λ)
+λ = [2, 0, 0];
+basis = basis_states(λ);
 
 # Each GT pattern corresponds to a Fock state
 for b in basis
@@ -43,15 +43,6 @@ for b in basis
 end
 ```
 
-Expected output:
-```
-|2,0,0⟩
-|1,1,0⟩
-|1,0,1⟩
-|0,2,0⟩
-|0,1,1⟩
-|0,0,2⟩
-```
 
 ### Building SU($n$) matrices
 
@@ -96,14 +87,14 @@ Two photons entering a 50:50 beamsplitter from different input ports:
 - Initial state: $|1,1\rangle$
 - Beamsplitter: $a^\dagger_1 \mapsto \frac{1}{\sqrt{2}}(a^\dagger_1 + a^\dagger_2)$, $a^\dagger_2 \mapsto \frac{1}{\sqrt{2}}(a^\dagger_1 - a^\dagger_2)$
 
-```julia
-λ = [2, 0]
-basis = basis_states(λ)
+```@repl hom
+λ = [2, 0];
+basis = basis_states(λ);
 
-initial = basis[findfirst(b -> occupation_number(b) == [1,1], basis)]
+initial = basis[findfirst(b -> occupation_number(b) == [1,1], basis)];
 
-θ = float(π)/2
-BS = su2_block(2, 1, (0., θ, 0.))
+θ = float(π)/2;
+BS = su2_block(2, 1, (0., θ, 0.));
 
 for final in basis
     amp = group_function(λ, final, initial, BS)

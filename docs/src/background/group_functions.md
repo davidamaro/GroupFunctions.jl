@@ -101,7 +101,7 @@ $$\langle m' | U | m \rangle \propto \sum_{\sigma \in S_N} \mathrm{sgn}(\sigma) 
 
 The weights $1$ and $\mathrm{sgn}(\sigma)$ are the matrix elements of the trivial and sign representations of $S_N$, both one-dimensional.
 
-For a general irrep $\lambda$, the representation has dimension $f^\lambda > 1$, and the weight becomes a matrix element $\omega^\lambda_{i,j}(\sigma)$ of the Young orthogonal representation. The general formula, due to [Grabmeier & Kerber (1985)](https://doi.org/10.1007/BF00046717), is:
+For a general irrep $\lambda$, the representation has dimension $f^\lambda > 1$, and the weight becomes a matrix element $\omega^\lambda_{i,j}(\sigma)$ of the Young orthogonal representation. The general formula, due to [Grabmeier & Kerber (1987)](https://doi.org/10.1007/BF00046717), is:
 
 $$T^\lambda_{U,V} = \frac{1}{\sqrt{\Theta^\lambda_U \Theta^\lambda_V}} \sum_{\gamma} \left( \sum_{\sigma \in S_\alpha \gamma S_\beta} \omega^\lambda_{i,j}(\sigma) \right) X_{f \circ \gamma, g}$$
 

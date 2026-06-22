@@ -104,6 +104,14 @@ function Base.show(io::IO, ::MIME"text/plain", G::GTPattern)
 end
 
 
+# compact single-line form, used when GTPatterns appear inside containers
+# useful in documentation in ```@repl environment.
+# otherwise display(...) does not render properly.
+function Base.show(io::IO, G::GTPattern)
+    show(io,MIME"text/plain"(), G)
+end
+
+
 struct NextRowIterator
     ranges::Vector{UnitRange{Int}}
     len::Int
