@@ -5,14 +5,16 @@ DocTestSetup = GroupFunctions.doctestsetup()
 ```
 
 # Characters
-SU(d) characters can be evaluated directly with `character(irrep, U)`.
-They are the traces of the corresponding irreducible representation matrices, so
-`character` is the direct way to ask for that quantity without building the
-whole matrix yourself.
 
-## Example: character as the trace of a representation
+`character(λ, U)` returns the trace of the irre, see the
+[background page](../background/characters.md) for the theory.
 
-```@repl chars_trace
+## Character as a trace
+
+The character is the trace of the representation matrix, so it equals the sum
+of the diagonal group functions (and is indeed defined in the code as such):
+
+```@repl chars
 using GroupFunctions
 
 λ = [2, 0];
@@ -21,15 +23,31 @@ U = su2_block(2, 1, (0.0, pi/3, 0.0));
 χ = character(λ, U)
 
 values, basis = group_function(λ, U);
-χ_from_matrix = sum(values[i, i] for i in axes(values, 1))
-
-χ ≈ χ_from_matrix
+χ ≈ sum(values[i, i] for i in axes(values, 1))
 ```
 
-## Example: symbolic character
+## Symbolic character
 
-```@repl chars_symbolic
+Omit `U` for the character as a symbolic polynomial:
+
+```@repl chars_sym
 using GroupFunctions
 
 character([2, 0])
+```
+
+## Schur polynomial on eigenvalues
+
+A character depends only on the eigenvalues of `U`. `schur_polynomial`
+evaluates it directly on them (without costly `group_function` calculation), matching `character`:
+
+```@repl chars_schur
+using GroupFunctions
+using LinearAlgebra: eigvals
+
+λ = [2, 1, 0];
+U = su2_block(3, 1, (0.0, pi/3, 0.0));
+
+character(λ, U)
+schur_polynomial(λ, eigvals(U))
 ```

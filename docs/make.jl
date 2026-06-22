@@ -11,23 +11,23 @@ makedocs(
     checkdocs = :exports,
     pages = [
         "Getting started" => "index.md",
+        "Background" => [
+            "Basis states" => "background/states.md",
+            "Calculation of group functions" => "background/group_functions.md",
+            "Characters" => "background/characters.md",
+            "Immanants" => "background/immanants.md",
+        ],
         "Tutorial" => [
             "Basis states" => "tutorial/states.md",
-            "Characters" => "tutorial/characters.md",
             "Calculation of group functions" => "tutorial/group_functions.md",
+            "Characters" => "tutorial/characters.md",
             "Immanants" => "tutorial/immanants.md",
         ],
         "Applications" => [
-            "Example: flavor mixing" => "applications/flavor.md",
-            "Example: HOM effect" => "applications/quantum_optics.md",
-            "Example: qubit transmission" => "applications/qubit_transmission.md",
+            "HOM effect" => "applications/quantum_optics.md",
+            "Qubit transmission" => "applications/qubit_transmission.md",
             "Sum rules" => "applications/sum_rules.md",
-        ],
-        "Background" => [
-            "Basis states" => "background/states.md",
-            "Characters" => "background/characters.md",
-            "Calculation of group functions" => "background/group_functions.md",
-            "Immanants" => "background/immanants.md",
+            "Coincidence calculations" => "applications/coincidences.md",
         ],
         "API reference" => "documentation.md",
     ],
