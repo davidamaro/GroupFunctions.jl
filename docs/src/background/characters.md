@@ -35,21 +35,31 @@ Characters of distinct irreps are orthonormal under the Haar measure on U(d):
 In particular, for a single irrep $\langle |\chi_\lambda|^2 \rangle = 1$. This
 is a statement about averages, and we can exemplified it by sampling.
 
-Here we draw Haar-random U(3) matrices (`Haar(2)` is the unitary ensemble, `2` does *not* denote the dimension) and
-average $|\chi_\lambda|^2$. The average approaches `1`; the estimator is noisy,
-so a small sample scatters by several percent, use $10^4$ samples or more:
+Here we draw Haar-random U(3) matrices with a QR-based sampler and average
+$|\chi_\lambda|^2$. The average approaches `1`; the estimator is noisy, so a
+small sample scatters by several percent, use $10^4$ samples or more:
 
 ```@repl chars_orth
 using GroupFunctions
-using RandomMatrices: Haar
+using LinearAlgebra: Diagonal, diag, qr
+using Random: randn, seed!
 using Statistics: mean
-using Random: seed!
+
+# Alternative with RandomMatrices.jl:
+# using RandomMatrices: Haar
+# rand(Haar(2), d)
+function haar_unitary(d)
+    z = randn(ComplexF64, d, d)
+    F = qr(z)
+    phases = diag(F.R) ./ abs.(diag(F.R))
+    Matrix(F.Q) * Diagonal(phases)
+end
 
 λ = [2, 1, 0];
 nsamples = 10000;
 seed!(420);
 
-values = [character(λ, rand(Haar(2), 3)) for _ in 1:nsamples];
+values = [character(λ, haar_unitary(3)) for _ in 1:nsamples];
 mean(abs2, values)
 ```
 

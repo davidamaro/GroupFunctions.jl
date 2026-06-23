@@ -24,8 +24,10 @@ First, set up the Hilbert space and identify the relevant Fock states:
 
 ```@repl example
 using GroupFunctions
-using SymEngine
 using LinearAlgebra: I
+
+# Alternative with a direct SymEngine dependency:
+# using SymEngine
 
 # Two photons in four modes
 λ = [2, 0, 0, 0];
@@ -51,7 +53,9 @@ M_14 = bs_block_symbolic(4, (1, 4));      # BS on modes 1-4 (non-adjacent)
 
 # Unknown fiber unitary: symbolic 2×2 block, embedded block-diagonally
 U_2x2 = su2_block_symbolic(2, 1, prefix="u");
-U_fiber = Matrix{Basic}(I, 4, 4);
+# Alternative with SymEngine imported directly:
+# U_fiber = Matrix{Basic}(I, 4, 4)
+U_fiber = Matrix{eltype(U_2x2)}(I, 4, 4);
 U_fiber[1:2, 1:2] = U_2x2[1:2, 1:2];
 U_fiber[3:4, 3:4] = U_2x2[1:2, 1:2];
 
