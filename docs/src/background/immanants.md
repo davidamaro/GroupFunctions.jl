@@ -10,7 +10,7 @@ Immanants generalize both permanents and determinants, and they appear naturally
 
 ## Definition and special cases
 
-+For an integer partition $\lambda=(\lambda_1,\ldots,\lambda_k)$ with $\sum_i \lambda_i = n$, the immanant of an $n \times n$ matrix $M$ is
+For an integer partition $\lambda=(\lambda_1,\ldots,\lambda_k)$ with $\sum_i \lambda_i = n$, the immanant of an $n \times n$ matrix $M$ is
 
 ```math
 \mathrm{Imm}^{\lambda}(M)=\sum_{\pi \in S_n}\chi^\lambda(\pi)\prod_{i=1}^n M_{i,\pi(i)},

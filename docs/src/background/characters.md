@@ -37,7 +37,8 @@ is a statement about averages, and we can exemplified it by sampling.
 
 Here we draw Haar-random U(3) matrices with a QR-based sampler and average
 $|\chi_\lambda|^2$. The average approaches `1`; the estimator is noisy, so a
-small sample scatters by several percent, use $10^4$ samples or more:
+small sample scatters by several percent, use roughly $2 \times 10^4$ samples
+or more:
 
 ```@repl chars_orth
 using GroupFunctions
@@ -56,7 +57,7 @@ function haar_unitary(d)
 end
 
 λ = [2, 1, 0];
-nsamples = 10000;
+nsamples = 20000;
 seed!(420);
 
 values = [character(λ, haar_unitary(3)) for _ in 1:nsamples];

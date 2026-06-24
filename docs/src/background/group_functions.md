@@ -5,7 +5,6 @@ DocTestSetup = GroupFunctions.doctestsetup()
 ```
 
 # Group Functions
-#todo this looks more like a background than to a result. too technical. maybe intermix with the actual function calls. 
 
 The [basis states and GT patterns page](states.md) introduced these labels for basis states, with different irreps corresponding to different exchange symmetries. Here we sketch the mathematical framework behind the library; actual code is shown in the applications pages on [HOM effect](../applications/quantum_optics.md), [qubit transmission with entangled light](../applications/qubit_transmission.md), [sum rules](../applications/sum_rules.md), as well as the related notes on [characters](characters.md) and [immanants](immanants.md).
 

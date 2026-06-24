@@ -55,7 +55,7 @@ Listing the occupation numbers across the basis recovers every Fock state of two
 in three modes:
 
 ```@repl states
-foreach(gt -> println(occupation_number(gt)), basis)
+occupation_number.(basis)
 ```
 
 ## Pick the states you need
@@ -93,7 +93,7 @@ stops being true for mixed-symmetry irreps. Take `λ = [2, 1, 0]`:
 ```@repl states
 basis21 = basis_states([2, 1, 0]);
 
-foreach(gt -> println(occupation_number(gt)), basis21)
+occupation_number.(basis21)
 ```
 
 Two different patterns share the occupation vector `[1, 1, 1]`; it is an *inner multiplicity*.
