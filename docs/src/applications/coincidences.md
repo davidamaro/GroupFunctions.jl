@@ -142,7 +142,7 @@ For inputs $2,3,4$ in a four-mode interferometer, with the photon in mode 4 dela
 
 ```math
 R(234\to pp4;z)
-=\frac{1}{3}(1+2z})\left|\mathrm{Per}(U_{234\to pp4})\right|^2
+=\frac{1}{3}(1+2z)\left|\mathrm{Per}(U_{234\to pp4})\right|^2
 +\frac{2}{3}(1-z)\left|\mathrm{Imm}^{(2,1)}(U_{234\to pp4})\right|^2.
 ```
 
@@ -166,9 +166,9 @@ imm21(M) = 2*M[1,1]*M[2,2]*M[3,3] - M[1,2]*M[2,3]*M[3,1] - M[1,3]*M[2,1]*M[3,2];
 u = su2_block(4,1,(0.5,0.9,0.2)) * su2_block(4,2,(0.4,0.8,0.1)) *
     su2_block(4,3,(0.7,0.3,0.6)) * su2_block(4,2,(0.2,0.5,0.9));
 
-ζ = 0.37;
+ζ = 0.37; #overlap
 
-z = ζ^2;
+z = ζ^2; #squared overlap 
 M = u[[2,2,4],[2,3,4]]; # we go from 2,3,4 to 2,2,4
 #direct calculation from the formula above:
 R_calc = (1/2) * ((1/3)*(1+2z)*abs2(permanent3(M)) + (2/3)*(1-z)*abs2(imm21(M)))
