@@ -17,29 +17,42 @@ If your representation theory knowledge stops at the basic definitions, fear not
 A representation is *irreducible (irrep)* if the only subspaces fixed by every $\rho(U)$ are 0-dimensional trivial subspace and full $V$. A *partition* is a nonincreasing integer list $\lambda=[\lambda_1 \ge \cdots \ge \lambda_d]$, or equivalently, a Young diagram with $\lambda_j$ boxes in row $j$. Each finite-dimensional irrep of $U(d)$ corresponds to exactly one partition $\lambda$; we write it $\rho_\lambda$ on $V_\lambda$. (Eventually the partition $\lambda$ will become the top row of a GT-pattern.)
 
 **GT-pattern origin**
-If you restrict $\rho_\lambda$ to $U(d-1)$ in sense of evaluating it only on *block diagonal matrices*,
+If you restrict $\rho_\lambda$ to $U(d-1)$ in the sense of evaluating it only on *block diagonal matrices*,
 
 ```math
 u = \begin{pmatrix} u' & 0 \\ 0& 1\end{pmatrix}=u'\oplus (1), 
 ```
 
-where $u'$ is an unitary matrix of dimension $d-1$, the restricted $\rho$ becomes a representation of $U(d-1)$: it sends $u'$ to $\rho(u' \oplus (1))$. This representation is, however, generally *not* irreducible, so the space $V$ splits into a sum, and each subspace -- an irrep of $U(d-1)$ -- is labeled by a partition $\mu=[\mu_1, \ldots, \mu_{d-1}]$, so that
+where $u'$ is a unitary matrix of dimension $d-1$, the restricted $\rho$ becomes a representation of $U(d-1)$: it sends $u'$ to $\rho(u' \oplus (1))$. This representation is, however, generally *not* irreducible. The standard $U(d)\downarrow U(d-1)$ branching rule gives the multiplicity-free decomposition
 
 ```math
-V_\lambda=\bigoplus_i V_{\mu_i}, 
+V_\lambda\big|_{U(d-1)} \cong \bigoplus_{\mu\,\prec\,\lambda} V_\mu,
 ```
 
-As it turns out (TODO: find source, it's standard I think), the labels that appear in this decomposition are *exactly those and only those* which are fixed by the rule that
+where the irreducible $U(d-1)$-representations that occur are exactly those with highest weights $\mu=(\mu_1,\ldots,\mu_{d-1})$ satisfying the *betweenness*, or *interlacing*, condition
 
 ```math
-\lambda_1 \ge \mu_1 \ge \lambda_2 \ge \mu_2 \ge \cdots \ge \lambda_{d-1} \ge \mu_{d-1} \ge \lambda_d, 
+\lambda_1 \geq \mu_1 \geq \lambda_2 \geq \mu_2 \geq \cdots
+\geq \lambda_{d-1} \geq \mu_{d-1} \geq \lambda_d.
 ```
 
-which is called the *betweenness condition*. For instance, for $\lambda=[2,1,0]$ representation of $U(3)$, the valid $\mu=[\mu_1, \mu_2]$ labels of embedded $U(2)$ are $[2,1], [2,0], [1,1], [1,0]$.
+Each admissible $\mu$ therefore appears exactly once. For example, for the $U(3)$ highest weight $\lambda=(2,1,0)$, the admissible $U(2)$ labels $\mu=(\mu_1,\mu_2)$ satisfy
 
-The irreducible representation of $U(d)$ therefore splits into irreducible representations of $U(d-1)$. Each of those we can further split into irreps of $U(d-2)$, and follow this recursive procedure. At each step we obtain a label, with decreasing sizes, and a final $U(1)$ irrep at the very end.
+```math
+2 \geq \mu_1 \geq 1,
+\qquad
+1 \geq \mu_2 \geq 0,
+```
 
-Irreducible representations of $U(1)$ are one-dimensional - it is just a single state. The entire construction does in the end yield an orthonormal basis of vectors, each labeled by *all the labels that appeared in the recursion*. This is the Gelfand-Tsetlin basis. 
+and hence are
+
+```math
+(2,1),\quad (2,0),\quad (1,1),\quad (1,0).
+```
+
+% TODO: add standard reference for the Gelfand--Tsetlin branching rule.
+
+Iterating this interlacing rule along the chain $U(d)\supset U(d-1)\supset\cdots\supset U(1)$ produces the triangular Gelfand-Tsetlin patterns. A pattern is the combinatorial record of the successive highest weights, while the Gelfand-Tsetlin basis is the actual basis of vectors indexed by the admissible patterns. Since the branching is multiplicity-free and the final $U(1)$ representations are one-dimensional, these patterns label the basis vectors uniquely (up to normalization and phase).
 
 ## SU(2): simple example
 
@@ -182,4 +195,3 @@ For mixed irreps, multiple GT patterns can share the same p-weight. This inner m
 
 
 Now that we have a labeling scheme for basis states, the natural question is: how do transition amplitudes between these states depend on the unitary transformation $U$? For bosons, this involves permanents; for fermions, determinants; for mixed symmetry, a generalization called the [Grabmeier-Kerber formula](group_functions.md#The-general-formula). See the [tutorial discussion of group functions](../tutorial/group_functions.md) or the corresponding [background page](group_functions.md).
-
