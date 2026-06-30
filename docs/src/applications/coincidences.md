@@ -5,49 +5,58 @@ DocTestSetup = GroupFunctions.doctestsetup()
 ```
 # Coincidence rates
 
-The contents of this page can be thought of as a mathematical description and formalisation of the following experiment:
-1. We have a device that can output given number of photons in specific spatial modes at will, or at least *herald preparation of such a state* (for instance with multiplexed SPDC), so that the photons are contained in well-defined time windows.
-2. The photons can be delayed with respect to each other (e.g. by having the heralding photon traverse a longer distance). 
-3. We pass the photons through linear optical system, and measure coincidences of observing clicks in specific output ports.
+## Outline
 
-Distinguishability of the photons, controlled by the relative delay, affects the observed coincidences rates. This can be mathematically modelled by a frequency-varying photon profile: this is roughly the same as a time profile after a Fourier transform. Each spatial mode $k$ contains a continuum of frequency modes $\omega$ (with annilation operators labelled $\hat a_k(\omega)$), and an operator creating a photon with a Gaussian profile, in mode $k$, centered at time $\tau$, is
+- [Introduction](#introduction)
+- [Two-photon coincidence rate with delay](#two-photon-coincidence-rate-with-delay)
+- [Three photons with one delayed input](#three-photons-with-one-delayed-input)
+
+## Introduction
+
+This page studies coincidence rates for photons in linear optical networks. The discussion below introduces the experimental setting, the overlap parameter that captures delay-induced distinguishability, and the shorthand used throughout the examples.
+
+The basic experiment is as follows:
+1. A device produces a given number of photons in specific spatial modes on demand, or at least *heralds the preparation of such a state* (for instance, with multiplexed SPDC), so that the photons occupy well-defined time windows.
+2. The photons can be delayed relative to one another (e.g. by having a heralding photon traverse a longer distance).
+3. We pass the photons through a linear optical system and measure coincident clicks at specific output ports.
+
+The relative delay controls photon distinguishability and thereby affects the observed coincidence rates. We model this dependence with a frequency-varying photon profile, which corresponds roughly to a time profile after a Fourier transform. Each spatial mode $k$ contains a continuum of frequency modes $\omega$, with annihilation operators labelled $\hat a_k(\omega)$. An operator that creates a photon with a Gaussian profile in mode $k$, centered at time $\tau$, is
 
 ```math
-\hat{A}^\dagger_k(\tau)=
+\hat{A}^\dagger_k(\tau) \coloneqq
 \int d\omega\,e^{i\omega\tau}\varphi(\omega)\hat{a}^\dagger_k(\omega),
 ```
-As a concrete simple example, a photon with Gaussian spectrum is created by such $\hat{A}^\dagger$ with the following frequency profile $\varphi$:
+As a simple concrete example, $\hat{A}^\dagger$ creates a photon with a Gaussian spectrum when $\varphi$ has the following frequency profile:
 
 ```math
-|\varphi(\omega)|^2=\frac{\exp({-(\omega-\omega_0)^2/(2\sigma^2)})}{\sqrt{2\pi}\sigma},
+|\varphi(\omega)|^2 \coloneqq \frac{\exp({-(\omega-\omega_0)^2/(2\sigma^2)})}{\sqrt{2\pi}\sigma},
 ```
 
-If we have two photons with the same spectral profile, but centered at different times $\tau, \tau'$, the overlap of their wavefunctions $\langle 0\vert \hat A (\tau) \hat A^\dagger(\tau') \vert 0\rangle$ is
+For two photons with the same spectral profile but centered at different times $\tau, \tau'$, the wavefunction overlap $\langle 0\vert \hat A (\tau) \hat A^\dagger(\tau') \vert 0\rangle$ is
 
 ```math
-\zeta=\exp({-\frac12\sigma^2(\tau-\tau')^2}).
+\zeta \coloneqq \exp({-\frac12\sigma^2(\tau-\tau')^2}).
 ```
 
-In the next two sections we will calculate coincidence rates as a function of the overlap.
- It will be useful to define the squared overlap 
+The next two sections calculate coincidence rates as a function of this overlap. For convenience, we define the squared overlap
 
-$$z=\vert \zeta\vert^2.$$
+$$z \coloneqq \vert \zeta\vert^2.$$
 
- To keep track of the indices "which photon goes where", the following shorthand is introduced:
+To track which photon goes where, we introduce the shorthand
 
 ```math
 R(\text{inputs} \to \text{outputs}, z)
 ```
 
-meaning: coincidence probability for a fixed input occupation pattern, output occupation pattern; one (specified in the text) photon is delayed, with squared overlap $z$ with respect to the other ones.
+Here, $R$ denotes the coincidence probability for fixed input and output occupation patterns. One photon, specified in the text, is delayed and has squared overlap $z$ with the other photons.
 
-For example, $R(23 \to 13; z)$ means "one photon enters input 2 and one enters input 3; detect one at output 1 and one at output 3". Similarly, $R(234 \to \alpha\alpha4; z)$ reads "one photon enters each of inputs 2,3,4; detect two photons at output $\alpha$ and one at output 4".
+For example, $R(23 \to 13; z)$ means that one photon enters input 2, one enters input 3, and one is detected at each of outputs 1 and 3. Similarly, $R(234 \to \alpha\alpha4; z)$ means that one photon enters each of inputs 2, 3, and 4, while two photons are detected at output $\alpha$ and one at output 4.
 
-Repeated output labels encode multiplicity, $R(234\to pp4;z)$ meaning that we observe two photons at port $p$.
+Repeated output labels encode multiplicity. Thus, $R(234\to pp4;z)$ means that we observe two photons at port $p$.
 
 ## Two-photon coincidence rate with delay
 
-For two photons entering input modes $k,l$ and detected at outputs $m,n$, with squared overlap $z$:
+For two photons entering input modes $k,l$ and detected at outputs $m,n$, the coincidence rate at squared overlap $z$ is
 
 ```math
 R(kl \to mn;z)
@@ -55,15 +64,15 @@ R(kl \to mn;z)
 +\frac{1}{2}(1-z)\left|\mathrm{Det}(U_{kl\to mn})\right|^2,
 ```
 
-where $U_{kl \to mn}$ is a matrix constructed from $U$ by picking the specified columns and rows (see [the background page](../background/group_functions.md#Bosons:-the-permanent)).
+where $U_{kl \to mn}$ is constructed from $U$ by selecting the specified columns and rows (see [the background page](../background/group_functions.md#Bosons:-the-permanent)).
 
-If the delay is zero, photons are completely indistinguishable ($z=1$) and the result collapses to a standard permanent:
+If the delay is zero, the photons are completely indistinguishable ($z=1$), and the result reduces to a standard permanent:
 
 ```math
 \tau=0 \Rightarrow R=\left|\mathrm{Per}(U_{kl\to mn})\right|^2,
 ```
 
-With infinite delay, the photons are completely distinguishable ($z=0$) and the rate is an equal mixture of permanent and determinant: 
+With infinite delay, the photons are completely distinguishable ($z=0$), and the rate is an equal mixture of the permanent and determinant:
 
 ```math
 \tau\to\infty \Rightarrow
@@ -72,48 +81,48 @@ R=\frac{1}{2}\left|\mathrm{Per}(U_{kl\to mn})\right|^2
 ```
 
 
-We can verify these equations with our library. Naturally, it is infeasible to track a continuum of frequency modes. But the only thing that matters is the overlap, and we can simulate the behavior by introducing internal states in addition to the spatial modes. 
+We can verify these equations with our library. Tracking a continuum of frequency modes is infeasible, but only the overlap matters. We can therefore simulate the behavior by introducing internal states in addition to the spatial modes.
 
-We restrict to two spatial modes to exemplify an usage. The calculationss are done in the basis where occupation numbers $(a,a',b,b')$ denote $a=$photons "on time" in spatial mode 1, $a'$=photons "late" (out of time) in spatial mode 1; $b$=photons "on time" in spatial mode 2, $b'$=photon "late" in spatial mode 2.
+We use two spatial modes to illustrate the method. The calculations use a basis in which the occupation numbers $(a,a',b,b')$ have the following meanings: $a$ counts "on-time" photons in spatial mode 1, $a'$ counts "late" (out-of-time) photons in spatial mode 1, $b$ counts "on-time" photons in spatial mode 2, and $b'$ counts "late" photons in spatial mode 2.
 
-In this space, linear optical transformation in spatial modes get inflated (transformations are constant on coherence timescales, hence the identity):
+In this extended space, the linear optical transformation on the spatial modes is extended by the identity on the internal modes because the transformations are constant on coherence timescales:
 
 ```math
-V = U_{\text{spatial}} \otimes \operatorname{id}_{\text{internal}} 
+V \coloneqq U_{\text{spatial}} \otimes \operatorname{id}_{\text{internal}}
 ```
 
-So we inflate a beamsplitter and define a group function in the enlarged space:
+We therefore extend a beamsplitter and define a group function in the extended space:
 ```@repl coincidences2
 using GroupFunctions
 using LinearAlgebra: kron
-u2 = su2_block(2,1,(1.5,0.9,0.2));          # 2×2 spatial beam splitter
-V2=kron(u2, [1.0 0.0; 0.0 1.0]);
+two_photon_spatial_bs = su2_block(2, 1, (1.5, 0.9, 0.2)); # 2×2 spatial beam splitter
+two_photon_extended_u = kron(two_photon_spatial_bs, [1.0 0.0; 0.0 1.0]);
 
-vals, pats = group_function([2,0,0,0], V2);
+two_photon_group_vals, two_photon_occ_pats = group_function([2, 0, 0, 0], two_photon_extended_u);
 ```
 
-Now we define the initial state:
+We next define the initial state:
 
 
 ```@repl coincidences2
-ζ = 0.37; # amplitude overlap
+overlap_amp = 0.37; # amplitude overlap
 
-z = ζ^2; # squared overlap
+two_photon_overlap_sq = overlap_amp^2; # squared overlap
 #initial state is spanned by these two:
-occ_a = [1,0,1,0]; # one photon in sp. mode 1, one in sp. mode 2, both "on time"
-occ_b = [1,0,0,1]; # one photon "on time" in sp. mode 1, one "late" in 2
-idx(occ) = findfirst(p -> occupation_number(p) == occ, pats);
-in_vec = zeros(ComplexF64, length(pats));
-in_vec[idx(occ_a)] = ζ ;
-in_vec[idx(occ_b)] = sqrt(1-ζ^2);
+input_occ_on_time = [1, 0, 1, 0]; # one photon in sp. mode 1, one in sp. mode 2, both "on time"
+input_occ_delayed = [1, 0, 0, 1]; # one photon "on time" in sp. mode 1, one "late" in 2
+two_photon_occ_idx(occupation) = findfirst(p -> occupation_number(p) == occupation, two_photon_occ_pats);
+two_photon_input_vec = zeros(ComplexF64, length(two_photon_occ_pats));
+two_photon_input_vec[two_photon_occ_idx(input_occ_on_time)] = overlap_amp;
+two_photon_input_vec[two_photon_occ_idx(input_occ_delayed)] = sqrt(1 - overlap_amp^2);
 
 ```
 
-The coincidence rate are calculated with four possible states; all are "one photon in spatial mode 1, one in spatial mode 2", but they have different internal ("on time"/"late") indices:
+We calculate the coincidence rate by summing over four possible output states. Each contains one photon in spatial mode 1 and one in spatial mode 2, but the states have different internal ("on-time"/"late") indices:
 
 
 ```@repl coincidences2
-out_occs = [
+output_occupation_patterns = [
     [1,0,1,0],
     [1,0,0,1],
     [0,1,1,0],
@@ -121,24 +130,25 @@ out_occs = [
 ];
 ```
 
-Direct verification shows that the calculations using inflated space and hand-calculated one match:
+A direct verification shows that the calculation in the extended space matches the hand calculation:
 
 ```@repl coincidences2
-amp(occ) = (vals * in_vec)[idx(occ)]
-R_infl = sum(abs2(amp(o)) for o in out_occs)
+two_photon_output_amp(occupation) = (two_photon_group_vals * two_photon_input_vec)[two_photon_occ_idx(occupation)]
+extended_space_rate = sum(abs2(two_photon_output_amp(occupation)) for occupation in output_occupation_patterns)
 
-permanent2(M) = M[1,1]*M[2,2]+M[1,2]*M[2,1]
-det2(M) = M[1,1]*M[2,2]-M[1,2]*M[2,1]
+perm2(matrix) = matrix[1, 1] * matrix[2, 2] + matrix[1, 2] * matrix[2, 1]
+det2(matrix) = matrix[1, 1] * matrix[2, 2] - matrix[1, 2] * matrix[2, 1]
 
-R_calc = (1+z)/2*abs2(permanent2(u2)) + (1-z)/2*abs2(det2(u2))
-R_infl, R_calc, R_infl ≈ R_calc
+calc_rate = (1 + two_photon_overlap_sq) / 2 * abs2(perm2(two_photon_spatial_bs)) +
+            (1 - two_photon_overlap_sq) / 2 * abs2(det2(two_photon_spatial_bs))
+extended_space_rate, calc_rate, extended_space_rate ≈ calc_rate
 ```
 
 
 
 ## Three photons with one delayed input
 
-For inputs $2,3,4$ in a four-mode interferometer, with the photon in mode 4 delayed with respect to the other ones (so that it has squared overlap $z$), and output pattern `pp4`:
+Consider photons entering inputs $2,3,4$ of a four-mode interferometer, with the photon in mode 4 delayed relative to the others so that it has squared overlap $z$. For the output pattern `pp4`, the coincidence rate is
 
 ```math
 R(234\to pp4;z)
@@ -147,49 +157,49 @@ R(234\to pp4;z)
 ```
 
 
-At zero delay, $z=1$ and photons are fully indistinguishable; only the permanent term survives in the `pp4` rate.
+At zero delay, $z=1$, and the photons are fully indistinguishable; only the permanent term survives in the `pp4` rate.
 
-Just as before, the `pp4` rate can be computed two ways: directly from the permanent and immanant of the spatial submatrix, or by inflating each spatial mode into early/late internal sub-modes and using a single permanent in the enlarged space. They agree; below we calculate the rates for $p=2$.
+As before, we can compute the `pp4` rate in two ways: directly from the permanent and immanant of the spatial submatrix, or from a single permanent in an extended space obtained by extending each spatial mode into early/late internal sub-modes. The two calculations agree. Below, we calculate the rates for $p=2$.
 
 ```@repl coincidences
 using GroupFunctions
 using LinearAlgebra: kron
 
 #auxiliary functions
-permanent3(M) = M[1,1]*M[2,2]*M[3,3] + M[1,1]*M[2,3]*M[3,2] +
-                M[1,2]*M[2,1]*M[3,3] + M[1,2]*M[2,3]*M[3,1] +
-                M[1,3]*M[2,1]*M[3,2] + M[1,3]*M[2,2]*M[3,1];
-imm21(M) = 2*M[1,1]*M[2,2]*M[3,3] - M[1,2]*M[2,3]*M[3,1] - M[1,3]*M[2,1]*M[3,2];
+perm3(matrix) = matrix[1,1]*matrix[2,2]*matrix[3,3] + matrix[1,1]*matrix[2,3]*matrix[3,2] +
+                matrix[1,2]*matrix[2,1]*matrix[3,3] + matrix[1,2]*matrix[2,3]*matrix[3,1] +
+                matrix[1,3]*matrix[2,1]*matrix[3,2] + matrix[1,3]*matrix[2,2]*matrix[3,1];
+imm21(matrix) = 2*matrix[1,1]*matrix[2,2]*matrix[3,3] - matrix[1,2]*matrix[2,3]*matrix[3,1] - matrix[1,3]*matrix[2,1]*matrix[3,2];
 
 
 # linear optical transformation in 4 modes
-u = su2_block(4,1,(0.5,0.9,0.2)) * su2_block(4,2,(0.4,0.8,0.1)) *
+four_mode_spatial_u = su2_block(4,1,(0.5,0.9,0.2)) * su2_block(4,2,(0.4,0.8,0.1)) *
     su2_block(4,3,(0.7,0.3,0.6)) * su2_block(4,2,(0.2,0.5,0.9));
 
-ζ = 0.37; #overlap
+overlap_amp = 0.37; # overlap
 
-z = ζ^2; #squared overlap 
-M = u[[2,2,4],[2,3,4]]; # we go from 2,3,4 to 2,2,4
+three_photon_overlap_sq = overlap_amp^2; # squared overlap
+submatrix = four_mode_spatial_u[[2,2,4],[2,3,4]]; # we go from 2,3,4 to 2,2,4
 #direct calculation from the formula above:
-R_calc = (1/2) * ((1/3)*(1+2z)*abs2(permanent3(M)) + (2/3)*(1-z)*abs2(imm21(M)))
+calc_rate = (1/2) * ((1/3) * (1 + 2 * three_photon_overlap_sq) * abs2(perm3(submatrix)) +
+                     (2/3) * (1 - three_photon_overlap_sq) * abs2(imm21(submatrix)))
 
-#… or inflate each spatial mode into (early, late); one permanent in 8 modes
-V = kron(u, [1.0 0.0; 0.0 1.0]);
-vals, pats = group_function([3,0,0,0,0,0,0,0], V);
+#… or extend each spatial mode into (early, late); one permanent in 8 modes
+three_photon_extended_u = kron(four_mode_spatial_u, [1.0 0.0; 0.0 1.0]);
+three_photon_group_vals, three_photon_occ_pats = group_function([3,0,0,0,0,0,0,0], three_photon_extended_u);
 
-idx(occ) = findfirst(p -> occupation_number(p) == occ, pats);
-in_vec = zeros(ComplexF64, length(pats));
-in_vec[idx([0,0,1,0,1,0,1,0])] = ζ; # photon in mode 4 is late
-in_vec[idx([0,0,1,0,1,0,0,1])] = sqrt(1-ζ^2); #photon in mode 4 is on time
+three_photon_occ_idx(occupation) = findfirst(p -> occupation_number(p) == occupation, three_photon_occ_pats);
+three_photon_input_vec = zeros(ComplexF64, length(three_photon_occ_pats));
+three_photon_input_vec[three_photon_occ_idx([0,0,1,0,1,0,1,0])] = overlap_amp; # photon in mode 4 is late
+three_photon_input_vec[three_photon_occ_idx([0,0,1,0,1,0,0,1])] = sqrt(1 - overlap_amp^2); # photon in mode 4 is on time
 
 #all observations of three photons in spatial modes 2 (two photons) and 4 (one photon),
 #including all "late"/"on time" combinations:
-out_occs = [[0,0,2,0,0,0,1,0], [0,0,2,0,0,0,0,1],
-            [0,0,1,1,0,0,1,0], [0,0,1,1,0,0,0,1],
-            [0,0,0,2,0,0,1,0], [0,0,0,2,0,0,0,1]]; 
-amp(occ) = (vals * in_vec)[idx(occ)];
-R_infl = sum(abs2(amp(o)) for o in out_occs)
+output_occupation_patterns = [[0,0,2,0,0,0,1,0], [0,0,2,0,0,0,0,1],
+                               [0,0,1,1,0,0,1,0], [0,0,1,1,0,0,0,1],
+                               [0,0,0,2,0,0,1,0], [0,0,0,2,0,0,0,1]];
+three_photon_output_amp(occupation) = (three_photon_group_vals * three_photon_input_vec)[three_photon_occ_idx(occupation)];
+extended_space_rate = sum(abs2(three_photon_output_amp(occupation)) for occupation in output_occupation_patterns)
 
-R_infl ≈ R_calc
+extended_space_rate ≈ calc_rate
 ```
-
