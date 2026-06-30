@@ -1,7 +1,9 @@
 using Documenter
+using DocumenterCitations
 using GroupFunctions
 
 const run_doctests = !("--nodoctests" in ARGS)
+const bibliography = CitationBibliography(joinpath(@__DIR__, "src", "references.bib"))
 
 makedocs(
     sitename = "GroupFunctions.jl",
@@ -30,7 +32,9 @@ makedocs(
             "Coincidence calculations" => "applications/coincidences.md",
         ],
         "API reference" => "documentation.md",
+        "References" => "references.md",
     ],
+    plugins = [bibliography],
     format = Documenter.HTML(
         assets = ["assets/favicon.ico"],
         sidebar_sitename = false,
