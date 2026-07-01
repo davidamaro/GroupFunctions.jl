@@ -84,7 +84,7 @@ By linearity, the full output state (conditioned on postselection) is obtained b
 
 $$|\psi_{\mathrm{out}}\rangle \propto \alpha \bigl(\mathrm{amp}_{11}|0,1,0,1\rangle + \mathrm{amp}_{12}|0,0,1,1\rangle\bigr) + \beta \bigl(\mathrm{amp}_{21}|0,1,0,1\rangle + \mathrm{amp}_{22}|0,0,1,1\rangle\bigr).$$
 
-The symbolic calculation reveals that $\mathrm{amp}_{12} = \mathrm{amp}_{21} = 0$ and $\mathrm{amp}_{11} = \mathrm{amp}_{22} \equiv A$, where $A$ is independent of the fiber unitary $U$. The postselected state therefore simplifies to:
+The symbolic computation reveals that $\mathrm{amp}_{12} = \mathrm{amp}_{21} = 0$ and $\mathrm{amp}_{11} = \mathrm{amp}_{22} \equiv A$, where $A$ is independent of the fiber unitary $U$. The postselected state therefore simplifies to:
 
 $$|\psi_{\mathrm{out}}\rangle = \frac{1}{\mathcal{N}}\bigl(\alpha|0,1,0,1\rangle + \beta|0,0,1,1\rangle\bigr),$$
 

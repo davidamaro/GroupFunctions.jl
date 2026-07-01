@@ -8,7 +8,7 @@ DocTestSetup = GroupFunctions.doctestsetup()
 
 The coincidence rate for indistinguishable photons is the modulus squared of a permanent (see [the background page](../background/group_functions.md)) built from the scattering matrix $U$, an element of $U(d)$ for $d$ modes.
 Permanents are expensive to compute.
-However, nontrivial constraints apply to *sums* of rates, and in some cases the rate sum is unchanged if $U$ is replaced by a simpler matrix. This can speed up rate-sum calculations. This is the result of [Amaro-Alcalá, Spivak, and de Guise (2020)](https://doi.org/10.1016/j.physleta.2020.126459);
+However, nontrivial constraints apply to *sums* of rates, and in some cases the rate sum is unchanged if $U$ is replaced by a simpler matrix. This can speed up rate-sum computations. This is the result of [Amaro-Alcalá, Spivak, and de Guise (2020)](https://doi.org/10.1016/j.physleta.2020.126459);
 we reproduce the three-photon case here, following section 3 of the article.
 
 ## Rate sum invariance
@@ -52,7 +52,7 @@ In an interferometer, this corresponds to deleting optical elements, as shown in
 The point of removing the block is that the simpler matrix has zeros, and zeros make the permanent cheap.
 Look at `U1`: after dropping the block that acts on modes (1,2,3), the matrix has a staircase of zeros above the diagonal.
 Every entry more than one step above the diagonal vanishes.
-A matrix of this shape, with vanishing superdiagonals except for the one directly above the main diagonal, is called *upper Hessenberg*:
+A matrix of this shape, with vanishing superdiagonals except for the one directly above the main diagonal, is called *[upper Hessenberg](https://en.wikipedia.org/wiki/Hessenberg_matrix)*:
 
 ```@repl sumrules
 M = U1[[2,3,4],[2,3,4]];
@@ -82,7 +82,7 @@ permanent3(M) ≈ det(T)
 ```
 
 The two agree.
-This allows a faster calculation of the summed rate.
+This allows a faster computation of the summed rate.
 Instead of evaluating permanents after the unimportant block (`addon`) has been removed, we can use determinants of a modified matrix.
-Determinants are *much more computationally efficient to calculate*: standard algorithms scale like $O(n^3)$, whereas direct permanent calculation scales like $O(2^n n^2)$.
+Determinants are *much more efficient to compute*: standard algorithms scale like $O(n^3)$, whereas direct permanent computation scales like $O(2^n n^2)$.
 In a $3\times3$ matrix, this does not make much difference, but the method shown here and in the paper generalizes to more complex situations.

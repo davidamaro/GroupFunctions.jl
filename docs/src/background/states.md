@@ -177,7 +177,7 @@ end
 
 Mixed irreps such as $[2, 1]$ are neither fully symmetric nor fully antisymmetric. They arise physically when particles are *partially distinguishable*.
 
-Consider three photons entering an interferometer. Two arrive simultaneously with identical spectral properties and can therefore interfere fully. Because the third arrives later, it cannot interfere with the earlier pair. The resulting quantum state has components in both the symmetric sector $[3,0,0]$ and the mixed-symmetry sector $[2,1,0]$. This decomposition appears in observable coincidence rates; see Section 3.2 of [D. Amaro Alcalá et al.](https://arxiv.org/abs/2004.11504) for an explicit calculation.
+Consider three photons entering an interferometer. Two arrive simultaneously with identical spectral properties and can therefore interfere fully. Because the third arrives later, it cannot interfere with the earlier pair. The resulting quantum state has components in both the symmetric sector $[3,0,0]$ and the mixed-symmetry sector $[2,1,0]$. This decomposition appears in observable coincidence rates; see Section 3.2 of [D. Amaro Alcalá et al.](https://arxiv.org/abs/2004.11504) for an explicit computation.
 
 Likewise, the simpler case of two photons with partial overlap involves both $[2]$ (symmetric, contributing via the permanent) and $[1,1]$ (antisymmetric, contributing via the determinant); see Section 2.1 of the above paper.
 

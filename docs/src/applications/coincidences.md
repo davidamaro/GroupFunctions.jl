@@ -38,7 +38,7 @@ For two photons with the same spectral profile but centered at different times $
 \zeta \coloneqq \exp({-\frac12\sigma^2(\tau-\tau')^2}).
 ```
 
-The next two sections calculate coincidence rates as a function of this overlap. For convenience, we define the squared overlap
+The next two sections compute coincidence rates as a function of this overlap. For convenience, we define the squared overlap
 
 $$z \coloneqq \vert \zeta\vert^2.$$
 
@@ -83,7 +83,7 @@ R=\frac{1}{2}\left|\mathrm{Per}(U_{kl\to mn})\right|^2
 
 We can verify these equations with our library. Tracking a continuum of frequency modes is infeasible, but only the overlap matters. We can therefore simulate the behavior by introducing internal states in addition to the spatial modes.
 
-We use two spatial modes to illustrate the method. The calculations use a basis in which the occupation numbers $(a,a',b,b')$ have the following meanings: $a$ counts "on-time" photons in spatial mode 1, $a'$ counts "late" (out-of-time) photons in spatial mode 1, $b$ counts "on-time" photons in spatial mode 2, and $b'$ counts "late" photons in spatial mode 2.
+We use two spatial modes to illustrate the method. The computations use a basis in which the occupation numbers $(a,a',b,b')$ have the following meanings: $a$ counts "on-time" photons in spatial mode 1, $a'$ counts "late" (out-of-time) photons in spatial mode 1, $b$ counts "on-time" photons in spatial mode 2, and $b'$ counts "late" photons in spatial mode 2.
 
 In this extended space, the linear optical transformation on the spatial modes is extended by the identity on the internal modes because the transformations are constant on coherence timescales:
 
@@ -118,7 +118,7 @@ two_photon_input_vec[two_photon_occ_idx(input_occ_delayed)] = sqrt(1 - overlap_a
 
 ```
 
-We calculate the coincidence rate by summing over four possible output states. Each contains one photon in spatial mode 1 and one in spatial mode 2, but the states have different internal ("on-time"/"late") indices:
+We compute the coincidence rate by summing over four possible output states. Each contains one photon in spatial mode 1 and one in spatial mode 2, but the states have different internal ("on-time"/"late") indices:
 
 
 ```@repl coincidences2
@@ -130,7 +130,7 @@ output_occupation_patterns = [
 ];
 ```
 
-A direct verification shows that the calculation in the extended space matches the hand calculation:
+A direct verification shows that the computation in the extended space matches the manual computation:
 
 ```@repl coincidences2
 two_photon_output_amp(occupation) = (two_photon_group_vals * two_photon_input_vec)[two_photon_occ_idx(occupation)]
@@ -159,7 +159,7 @@ R(234\to pp4;z)
 
 At zero delay, $z=1$, and the photons are fully indistinguishable; only the permanent term survives in the `pp4` rate.
 
-As before, we can compute the `pp4` rate in two ways: directly from the permanent and immanant of the spatial submatrix, or from a single permanent in an extended space obtained by extending each spatial mode into early/late internal sub-modes. The two calculations agree. Below, we calculate the rates for $p=2$.
+As before, we can compute the `pp4` rate in two ways: directly from the permanent and immanant of the spatial submatrix, or from a single permanent in an extended space obtained by extending each spatial mode into early/late internal sub-modes. The two computations agree. Below, we compute the rates for $p=2$.
 
 ```@repl coincidences
 using GroupFunctions
@@ -180,7 +180,7 @@ overlap_amp = 0.37; # overlap
 
 three_photon_overlap_sq = overlap_amp^2; # squared overlap
 submatrix = four_mode_spatial_u[[2,2,4],[2,3,4]]; # we go from 2,3,4 to 2,2,4
-#direct calculation from the formula above:
+# Direct computation from the formula above:
 calc_rate = (1/2) * ((1/3) * (1 + 2 * three_photon_overlap_sq) * abs2(perm3(submatrix)) +
                      (2/3) * (1 - three_photon_overlap_sq) * abs2(imm21(submatrix)))
 

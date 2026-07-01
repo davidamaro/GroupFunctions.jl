@@ -84,7 +84,7 @@ det(U)
 
 Omit `U` altogether and `group_function` returns the matrix element
 *symbolically*, as a function of $U$ with matrix elements `u_i_j` rather than a
-number. The ability to calculate group functions purely symbolically is this library
+number. The ability to compute group functions purely symbolically is this library
 most distinctive capability. The same machinery that
 gives permanents and determinants for the symmetric and antisymmetric irreps
 produces, in general, the [immanants](immanants.md) of the relevant submatrix.

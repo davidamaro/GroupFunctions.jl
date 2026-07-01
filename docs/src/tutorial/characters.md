@@ -50,4 +50,5 @@ U = su2_block(3, 1, (0.0, pi/3, 0.0));
 
 character(λ, U)
 schur_polynomial(λ, eigvals(U))
+character(λ, U) ≈ schur_polynomial(λ, eigvals(U))
 ```

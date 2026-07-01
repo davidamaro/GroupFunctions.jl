@@ -31,7 +31,7 @@ $$U|m\rangle = \frac{1}{\sqrt{\prod_i m_i!}} \prod_{i=1}^{n} \left(\sum_j U_{ij}
 
 The first step unfolds powers into labeled factors; the second is distributivity. 
 
-So now we have products of operators acting on the vacuum $\ket{0}$; we wish to close it with a bra $\bra{m'}$ to calculate the matrix element. Let us act with the creatio operators on the vacuum and identify terms proportional to $\ket{m'}$ there; then, the matrix element will be a sum of prefactors leading to $\ket{m'}$.
+So now we have products of operators acting on the vacuum $\ket{0}$; we wish to close it with a bra $\bra{m'}$ to compute the matrix element. Let us act with the creatio operators on the vacuum and identify terms proportional to $\ket{m'}$ there; then, the matrix element will be a sum of prefactors leading to $\ket{m'}$.
  For terms where the tuple $(j_1, \ldots, j_N)$ contains mode $k$ exactly $m'_k$ times, the creation operators produce:
 
 $$\prod_{\alpha=1}^N a_{j_\alpha}^\dagger |0\rangle = \sqrt{\prod_j m'_j!}\, |m'\rangle$$

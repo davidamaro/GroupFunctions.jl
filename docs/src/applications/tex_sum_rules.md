@@ -1,6 +1,6 @@
 Sum rules
 
-The coincidence rate for indistinguishable photons is the modulus squared of a permanent built from the scattering matrix U, an element of the d-dimensional unitary group. Permanents are expensive to compute. However, nontrivial constraints apply to sums of rates, and in some cases the sum remains unchanged if U is replaced by a simpler matrix. This can speed up rate-sum calculations. This is the result of Amaro-Alcala, Spivak, and de Guise (2020). We reproduce the three-photon case here, following Section 3 of the article.
+The coincidence rate for indistinguishable photons is the modulus squared of a permanent built from the scattering matrix U, an element of the d-dimensional unitary group. Permanents are expensive to compute. However, nontrivial constraints apply to sums of rates, and in some cases the sum remains unchanged if U is replaced by a simpler matrix. This can speed up rate-sum computations. This is the result of Amaro-Alcala, Spivak, and de Guise (2020). We reproduce the three-photon case here, following Section 3 of the article.
 
 Rate sum invariance
 
@@ -20,4 +20,4 @@ In the three-by-three submatrix used in the example, the top-right entry is nume
 
 For such a matrix, the permanent, normally an expensive sum over all permutations, equals an ordinary determinant, provided we first flip the sign of the entries just above the diagonal. The example builds this sign-flipped matrix and compares its determinant with the permanent of the original matrix.
 
-The two agree. This allows a faster calculation of the summed rate. Instead of evaluating permanents after the unimportant block has been removed, we can use determinants of a modified matrix. Determinants are much more computationally efficient: standard algorithms scale like order n cubed, whereas direct permanent calculation scales like order two to the n times n squared. In a three-by-three matrix, this does not make much difference, but the method shown here and in the paper generalises to more complex situations.
+The two agree. This allows a faster computation of the summed rate. Instead of evaluating permanents after the unimportant block has been removed, we can use determinants of a modified matrix. Determinants are much more computationally efficient: standard algorithms scale like order n cubed, whereas direct permanent computation scales like order two to the n times n squared. In a three-by-three matrix, this does not make much difference, but the method shown here and in the paper generalises to more complex situations.
