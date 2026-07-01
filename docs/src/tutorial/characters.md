@@ -6,7 +6,7 @@ DocTestSetup = GroupFunctions.doctestsetup()
 
 # Characters
 
-`character(λ, U)` returns the trace of the irre, see the
+`character(λ, U)` returns the trace of the irrep, see the
 [background page](../background/characters.md) for the theory.
 
 ## Character as a trace
@@ -39,7 +39,7 @@ character([2, 0])
 ## Schur polynomial on eigenvalues
 
 A character depends only on the eigenvalues of `U`. `schur_polynomial`
-evaluates it directly on them (without costly `group_function` calculation), matching `character`:
+evaluates it directly on them (without a costly `group_function` computation), matching `character`:
 
 ```@repl chars_schur
 using GroupFunctions
