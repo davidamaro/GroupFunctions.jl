@@ -8,6 +8,8 @@ DocTestSetup = GroupFunctions.doctestsetup()
 
 Immanants generalize both permanents and determinants, and they appear naturally in multiphoton interference when exchange symmetry is not purely bosonic or purely fermionic. In `GroupFunctions.jl`, these quantities are recovered from sums of matrix elements computed by `group_function`.
 
+Tichy and Mølmer call particles governed by generalized exchange symmetries beyond the fully symmetric bosonic and fully antisymmetric fermionic cases *immanons*.[^1]
+
 ## Definition and special cases
 
 For an integer partition $\lambda=(\lambda_1,\ldots,\lambda_k)$ with $\sum_i \lambda_i = n$, the immanant of an $n \times n$ matrix $M$ is
@@ -47,3 +49,5 @@ $\lambda$, and $\langle t| \Gamma^{(\lambda)}(U) |t\rangle$ is a diagonal group 
 For the mixed $(2,1)$ immanant of a $3\times3$ matrix the $(11)$ irrep has two
 zero-weight states, so the sum has two terms -- the relation verified on the
 [tutorial page](../tutorial/immanants.md).
+
+[^1]: M. C. Tichy and K. Mølmer, “Extending exchange symmetry beyond bosons and fermions,” *Physical Review A* **96**, 022119 (2017). [doi:10.1103/PhysRevA.96.022119](https://doi.org/10.1103/PhysRevA.96.022119)
