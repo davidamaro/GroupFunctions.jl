@@ -4,32 +4,33 @@ CollapsedDocStrings = true
 DocTestSetup = GroupFunctions.doctestsetup()
 ```
 
-# Basis states and GT patterns
+# Basis states and Gelfand-Tsetlin patterns
 
-This library computes matrix elements of U(d) irreducible representations, which arise, for example, in quantum optics when describing how multiphoton states transform under passive linear networks. But between which states are these matrix elements taken? The answer involves Gelfand-Tsetlin (GT) patterns: an abstract scheme for labeling quantum states that sometimes admits a physical interpretation.
+This library computes matrix elements of U(d) irreducible representations. In quantum optics, for example, these elements describe how multiphoton states transform under passive linear networks. Gelfand-Tsetlin (GT) patterns label the basis states between which the matrix elements are taken and sometimes give those states a physical interpretation.
 
-U(d) irreps are commonly identified by Young diagrams. A GT pattern records both this information---which irrep is being represented---and which state within that irrep is being labeled. In representation-theoretic terms, its rows record the integer partitions obtained by restricting the irrep along the chain $U(d) \supset U(d-1) \supset \cdots \supset U(1)$. GT patterns thus provide canonical, computable labels for basis vectors.
+Young diagrams commonly identify U(d) irreps. A GT pattern records both the irrep and a state within it. More precisely, its rows record the integer partitions obtained by restricting the irrep along the chain $U(d) \supset U(d-1) \supset \cdots \supset U(1)$. GT patterns thus provide canonical, computable labels for basis vectors.
 
-The basic picture requires only the standard definitions, which we recall first.
+The following standard definitions establish the basic picture.
 
 **Definitions**. Fix a positive integer $d$. The group $U(d)$ consists of the $d\times d$ unitary matrices. A *representation* is a homomorphism $\rho: U(d) \rightarrow GL(V)$, so $\rho(u \cdot u')=\rho(u)\rho(u')$, where $V$ is a finite-dimensional complex vector space and $GL(V)$ is the group of invertible linear maps from $V$ to itself.
 
-A representation is *irreducible* (an *irrep*) if its only subspaces invariant under every $\rho(U)$ are the zero subspace and $V$ itself. A *partition* is a nonincreasing integer list $\lambda=[\lambda_1 \ge \cdots \ge \lambda_d]$, or equivalently, a Young diagram with $\lambda_j$ boxes in row $j$. Each finite-dimensional irrep of $U(d)$ corresponds to exactly one partition $\lambda$; we denote the representation by $\rho_\lambda$ and its representation space by $V_\lambda$. This partition will become the top row of a GT pattern.
+A representation is *irreducible* (an *irrep*) if the zero subspace and $V$ itself are its only subspaces invariant under every $\rho(U)$. A *partition* is a nonincreasing integer list $\lambda=[\lambda_1 \ge \cdots \ge \lambda_d]$, or equivalently, a Young diagram with $\lambda_j$ boxes in row $j$. Every finite-dimensional irrep of $U(d)$ corresponds to exactly one partition $\lambda$. We denote the representation by $\rho_\lambda$ and its representation space by $V_\lambda$; the partition becomes the top row of a GT pattern.
 
 **GT-pattern origin**
-Restricting $\rho_\lambda$ to $U(d-1)$ means evaluating it only on *block-diagonal matrices* of the form
+
+To restrict $\rho_\lambda$ to $U(d-1)$, evaluate it only on *block-diagonal matrices* of the form
 
 ```math
 u = \begin{pmatrix} u' & 0 \\ 0& 1\end{pmatrix}=u'\oplus (1), 
 ```
 
-where $u'$ is a unitary matrix of dimension $d-1$. The restricted representation of $U(d-1)$ sends $u'$ to $\rho(u' \oplus (1))$ and is generally *not* irreducible. It has the multiplicity-free decomposition
+where $u'$ is a unitary matrix of dimension $d-1$. The restricted representation sends $u'$ to $\rho(u' \oplus (1))$ and generally decomposes further. Its decomposition is multiplicity-free:
 
 ```math
-V_\lambda\big|_{U(d-1)} \cong \bigoplus_{\mu\,\prec\,\lambda} V_\mu,
+V_\lambda\big|_{U(d-1)} \cong \bigoplus_{\mu\,\prec\,\lambda} V_\mu.
 ```
 
-By the standard Gelfand--Tsetlin branching rule for the restriction $U(d)\downarrow U(d-1)$, the labels that appear in this decomposition are exactly those highest weights $\mu=(\mu_1,\ldots,\mu_{d-1})$ satisfying the betweenness condition[^1]:
+The standard Gelfand--Tsetlin branching rule for the restriction $U(d)\downarrow U(d-1)$ states that this decomposition contains exactly the highest weights $\mu=(\mu_1,\ldots,\mu_{d-1})$ satisfying the betweenness condition[^1]:
 
 ```math
 \lambda_1 \geq \mu_1 \geq \lambda_2 \geq \mu_2
@@ -37,7 +38,7 @@ By the standard Gelfand--Tsetlin branching rule for the restriction $U(d)\downar
 \geq \lambda_{d-1} \geq \mu_{d-1} \geq \lambda_d.
 ```
 
-Thus, each admissible $\mu$ appears exactly once. For example, when the $U(3)$ highest weight is $\lambda=(2,1,0)$, the admissible $U(2)$ labels $\mu=(\mu_1,\mu_2)$ satisfy
+Each admissible $\mu$ therefore appears exactly once. For example, when the $U(3)$ highest weight is $\lambda=(2,1,0)$, the admissible $U(2)$ labels $\mu=(\mu_1,\mu_2)$ satisfy
 
 ```math
 2 \geq \mu_1 \geq 1,
@@ -51,22 +52,22 @@ and hence are
 (2,1),\quad (2,0),\quad (1,1),\quad (1,0).
 ```
 
-Iterating this interlacing rule along the chain $U(d)\supset U(d-1)\supset\cdots\supset U(1)$ produces triangular Gelfand-Tsetlin patterns. Each pattern records the successive highest weights; the corresponding Gelfand-Tsetlin basis consists of the vectors indexed by the admissible patterns. Because the branching is multiplicity-free and the final $U(1)$ representations are one-dimensional, these patterns label the basis vectors uniquely, up to normalization and phase.
+Iterating this interlacing rule along the chain $U(d)\supset U(d-1)\supset\cdots\supset U(1)$ produces triangular Gelfand-Tsetlin patterns. Each pattern records the successive highest weights, and the admissible patterns index the corresponding Gelfand-Tsetlin basis. Because the branching is multiplicity-free and the final $U(1)$ representations are one-dimensional, these patterns label the basis vectors uniquely, up to normalization and phase.
 
 [^1]: I. M. Gelfand and M. L. Tsetlin, “Finite-dimensional representations of the group of unimodular matrices,” *Doklady Akademii Nauk SSSR* **71**, 825--828 (1950).
 
-## SU(2): simple example
+## SU(2) case
 
-The simplest underlying algebraic structure is SU(2), a subgroup of U(2) that differs from it only by phase. The determinant of a U(2) element may be any number on the complex unit circle; multiplying the element by a suitable unimodular scalar produces an SU(2) element with unit determinant. The Lie algebra su(2) is generated by
+The simplest example comes from SU(2), a subgroup of U(2) that differs from it only by phase. The determinant of a U(2) element may be any number on the complex unit circle; multiplying the element by a suitable unimodular scalar produces an SU(2) element with unit determinant. The Lie algebra su(2) is generated by
 
 ```math
 [J_z, J_\pm] = \pm J_\pm, \qquad [J_+, J_-] = 2 J_z.
 ```
 
 
-The states $|j, m\rangle$, with $m = -j, -j+1, \ldots, j$, form a basis for the spin-$j$ irrep: $J_z |j,m\rangle = m |j,m\rangle$, and $J_\pm$ act as ladder operators. These are spin states and, for $j\in\mathbb{N}$, angular-momentum states.
+The states $|j, m\rangle$, with $m = -j, -j+1, \ldots, j$, form a basis for the spin-$j$ irrep: $J_z |j,m\rangle = m |j,m\rangle$, and $J_\pm$ act as ladder operators. These states describe spin and, for $j\in\mathbb{N}$, angular momentum.
 
-The same algebraic structure arises in a different physical setting. Consider two bosonic modes with creation operators $a^\dagger_1$ and $a^\dagger_2$. Define
+The same algebraic structure also describes two bosonic modes with creation operators $a^\dagger_1$ and $a^\dagger_2$. Define
 
 ```math
 J_z = \tfrac{1}{2}(a^\dagger_1 a_1 - a^\dagger_2 a_2), \qquad J_+ = a^\dagger_1 a_2, \qquad J_- = a^\dagger_2 a_1.
@@ -78,10 +79,11 @@ These operators satisfy the commutation relations above. Here, $J_z$ measures th
 j = \tfrac{1}{2}(n_1 + n_2), \qquad m = \tfrac{1}{2}(n_1 - n_2).
 ```
 
-The Fock state $|n_1, n_2\rangle$ is therefore mathematically equivalent to the spin state $|j, m\rangle$ with these values of $j$ and $m$.
+With these identifications, the Fock state $|n_1, n_2\rangle$ is mathematically equivalent to the spin state $|j, m\rangle$.
 
 
 For SU(2), a GT pattern is an inverted triangle of the form
+
 ```math
 \left|\begin{array}{ccc}
 2j&&0\\
@@ -89,7 +91,7 @@ For SU(2), a GT pattern is an inverted triangle of the form
 \end{array}\right\rangle.
 ```
 
-The top row specifies the total spin $j$, and the single entry in the bottom row determines $m$. The next section develops the general structure; for now, consider a simple example:
+The top row specifies the total spin $j$, while the single entry in the bottom row determines $m$. The next section develops the general structure. For now, consider a simple example:
 
 ```@repl stateexample
 using GroupFunctions
@@ -107,9 +109,9 @@ end
 ## SU(N): Multiple $J^{(l)}_z$ operators
 
 
-For SU(N), there are $N-1$ commuting operators $J^{(l)}_z$ with corresponding ladder operators $J^{(l)}_\pm$. Each set $J^{(l)}_z, J^{(l)}_\pm$ satisfies the su(2) commutation relations. See [Alex et al.](https://arxiv.org/abs/1009.0437) for explicit definitions. We retain the abstract viewpoint here because these operators and states can describe many different physical settings.
+For SU(N), there are $N-1$ commuting operators $J^{(l)}_z$, each with corresponding ladder operators $J^{(l)}_\pm$. Every set $J^{(l)}_z, J^{(l)}_\pm$ satisfies the su(2) commutation relations. See [Alex et al.](https://arxiv.org/abs/1009.0437) for explicit definitions. Because these operators and states describe many different physical settings, we retain the abstract viewpoint here.
 
-As described above, a GT pattern labels a basis vector by recording the integer partitions obtained through successive group restrictions. The vector is also a simultaneous eigenstate of all $J^{(l)}_z$, but these eigenvalues determine only the p-weight defined below. In general, the p-weight does not fix the state unless the irrep is totally symmetric or totally antisymmetric. The pattern forms a triangular array:
+A GT pattern labels a basis vector by recording the integer partitions obtained through successive group restrictions. The vector is also a simultaneous eigenstate of all $J^{(l)}_z$, whose eigenvalues determine the p-weight defined below. In general, this p-weight fixes the state only when the irrep is totally symmetric or totally antisymmetric. The pattern forms a triangular array:
 
 ```math
 \left|\begin{array}{ccccccc}
@@ -122,7 +124,7 @@ m_{1,N} & & m_{2,N} & & \cdots & & m_{N,N} \\
 ```
 
 
-The **top row** $(m_{1,N}, m_{2,N}, \ldots, m_{N,N})$ specifies the irrep and corresponds to a Young diagram, or integer partition. The remaining rows identify a state within that irrep and satisfy the **betweenness condition**:
+The **top row** $(m_{1,N}, m_{2,N}, \ldots, m_{N,N})$ specifies the irrep and corresponds to a Young diagram, or integer partition. The remaining rows identify a state within that irrep by satisfying the **betweenness condition**:
 
 ```math
 m_{k, l+1} \geq m_{k, l} \geq m_{k+1, l+1},
@@ -143,9 +145,9 @@ for b in basis[1:3]
 end
 ```
 
-The **p-weight** of a pattern is the sequence of differences between consecutive row sums: if $\sigma_l = \sum_k m_{k,l}$, then $w_l = \sigma_l - \sigma_{l-1}$. For certain irreps, the p-weight has a direct physical interpretation.
+The **p-weight** of a pattern is the sequence of differences between consecutive row sums: if $\sigma_l = \sum_k m_{k,l}$, then $w_l = \sigma_l - \sigma_{l-1}$. For certain irreps, this p-weight has a direct physical interpretation.
 
-The *symmetric irrep* $\lambda = [N, 0, \ldots, 0]$, whose Young diagram has a single row, describes $N$ indistinguishable bosons in $d$ modes. For this irrep, reversing the p-weight gives the occupation numbers $(n_1, n_2, \ldots, n_d)$; accordingly, the function `occupation_number` used below is defined as `reverse ∘ pweight`.
+The *symmetric irrep* $\lambda = [N, 0, \ldots, 0]$, whose Young diagram has a single row, describes $N$ indistinguishable bosons in $d$ modes. Reversing the p-weight of this irrep gives the occupation numbers $(n_1, n_2, \ldots, n_d)$. Accordingly, the function `occupation_number` used below is defined as `reverse ∘ pweight`.
 
 ```julia
 # 2 photons in 3 modes
@@ -173,11 +175,11 @@ for b in basis
 end
 ```
 
-Irreps such as $[2, 1]$ are neither fully symmetric nor fully antisymmetric. They arise physically when particles are *partially distinguishable*.
+Mixed irreps such as $[2, 1]$ are neither fully symmetric nor fully antisymmetric. They arise physically when particles are *partially distinguishable*.
 
-Consider three photons entering an interferometer. Two arrive simultaneously with identical spectral properties and can therefore interfere fully. The third arrives later and cannot interfere with the earlier pair. The resulting quantum state is not confined to a single irrep: it has components in both the symmetric sector $[3,0,0]$ and the mixed-symmetry sector $[2,1,0]$. This decomposition appears in observable coincidence rates; see Section 3.2 of [D. Amaro Alcalá et al.](https://arxiv.org/abs/2004.11504) for an explicit calculation.
+Consider three photons entering an interferometer. Two arrive simultaneously with identical spectral properties and can therefore interfere fully. Because the third arrives later, it cannot interfere with the earlier pair. The resulting quantum state has components in both the symmetric sector $[3,0,0]$ and the mixed-symmetry sector $[2,1,0]$. This decomposition appears in observable coincidence rates; see Section 3.2 of [D. Amaro Alcalá et al.](https://arxiv.org/abs/2004.11504) for an explicit calculation.
 
-The simpler case of two photons with partial overlap similarly involves both $[2]$ (symmetric, contributing via the permanent) and $[1,1]$ (antisymmetric, contributing via the determinant); see Section 2.1 of the above paper.
+Likewise, the simpler case of two photons with partial overlap involves both $[2]$ (symmetric, contributing via the permanent) and $[1,1]$ (antisymmetric, contributing via the determinant); see Section 2.1 of the above paper.
 
 ```julia
 # Mixed irrep [2,1,0]: dimension 8
@@ -193,4 +195,5 @@ end
 For mixed irreps, multiple GT patterns can share the same p-weight. This inner multiplicity shows that occupation numbers alone do not uniquely specify a state when particles have mixed exchange symmetry.
 
 
-With this labeling scheme in place, we can ask how transition amplitudes between basis states depend on the unitary transformation $U$. For bosons, the answer involves permanents; for fermions, determinants; and for mixed symmetry, a generalization called the [Grabmeier-Kerber formula](group_functions.md#The-general-formula). See the [tutorial discussion of group functions](../tutorial/group_functions.md) or the corresponding [background page](group_functions.md).
+Once the GT patterns have labeled the basis states, we can ask how their transition amplitudes depend on the unitary transformation $U$.
+For bosons, the answer involves permanents; for fermions, determinants; and for mixed symmetry, a generalization called the immanant.
