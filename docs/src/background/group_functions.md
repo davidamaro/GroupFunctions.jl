@@ -21,7 +21,7 @@ What is the output state? Each creation operator in the original Fock state tran
 
 The function `group_function` computes these coefficients — the transition amplitudes $\langle m' | U | m \rangle$. The presentation here is slightly more mathematical than a typical quantum optics treatment, for consistency with representation theory literature and to handle more general cases beyond bosons.
 
-## Bosons: the permanent
+## Bosons: symmetric representation
 
 For bosonic systems, consider the transition amplitude between an input Fock state $|m\rangle$ and an output Fock state $|m'\rangle$, both having $N$ total particles. We follow the derivation of [Scheel (2004)](https://arxiv.org/abs/quant-ph/0406127).
 
@@ -67,7 +67,7 @@ Note the repeated rows from $m_1 = 2$.
 
 In representation-theoretic terms, bosonic Fock states live in the symmetric subspace, the irrep $\lambda = [N, 0, \ldots, 0]$.
 
-## Fermions: the determinant
+## Fermions: anti-symmetric representation
 
 For fermions, the derivation parallels the bosonic case with three modifications: occupation numbers are restricted to $m_i, m'_j \in \{0,1\}$ (Pauli exclusion), leading to all normalization factors become $\sqrt{0!}=\sqrt{1!} = 1$, and anticommutation introduces signs.
 
