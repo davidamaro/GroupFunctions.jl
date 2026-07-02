@@ -8,6 +8,12 @@ DocTestSetup = GroupFunctions.doctestsetup()
 
 Kostant's theorem ([background page](../background/immanants.md)) writes an immanant as a sum of diagonal group functions over the zero-`zweight` states of an irrep. The irrep `λ = [2,1,0]` has two zero-weight states, so the $(2,1)$ immanant of a $3\times3$ matrix is the sum of their two group functions. We pick the states out by their vanishing `zweight`, evaluate the immanant from its definition, and compare:
 
+```@raw html
+<p style="text-align: center;">
+  <img style="width: 63%; height: auto;" src="../../assets/tutorial/tutorial_immanant_zero_weight.svg" alt="Kostant's zero-weight diagonal sum for the (2,1) immanant">
+</p>
+```
+
 ```@repl immanants_zero
 using GroupFunctions
 
@@ -27,6 +33,13 @@ total ≈ imm21(M1)
 ## Permanent as special case
 
 The permanent is the immanant of the fully symmetric irrep, $\mathrm{Per}=\mathrm{Imm}^{(n)}$, and there the zero-weight sum collapses to a single term. For three photons in four modes (`λ = [3,0,0,0]`) the group function reproduces the permanent of the relevant submatrix (with a $\sqrt{2}$ normalization factor -- see [the background page](../background/group_functions.md#Bosons:-the-permanent)):
+
+```@raw html
+<p style="text-align: center;">
+  <img style="width: 63%; height: auto;" src="../../assets/tutorial/tutorial_permanent_submatrix.svg" alt="Repeated input occupations select repeated submatrix indices in the permanent">
+</p>
+```
+
 ```@repl immanants_perm
 using GroupFunctions
 

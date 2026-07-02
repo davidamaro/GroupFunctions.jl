@@ -28,6 +28,12 @@ A single matrix element is one call. Here `U` is a 50:50 beam splitter on modes
 1–2 (an SU(2) block embedded in three modes), and we ask for the amplitude
 $\langle 1,1,0 \mid U \mid 2,0,0\rangle$:
 
+```@raw html
+<p style="text-align: center;">
+  <img style="width: 63%; height: auto;" src="../../assets/tutorial/tutorial_group_function.svg" alt="A group function as one input-to-output transition amplitude">
+</p>
+```
+
 ```@repl gf
 U = su2_block(3, 1, (0.0, pi/2, 0.0));
 amp = group_function(λ, final, initial, U)
