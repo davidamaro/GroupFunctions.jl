@@ -8,7 +8,7 @@ DocTestSetup = GroupFunctions.doctestsetup()
 
 This library computes matrix elements of U(d) irreducible representations. In quantum optics, for example, these elements describe how multiphoton states transform under passive linear networks. Gelfand-Tsetlin (GT) patterns label the basis states between which the matrix elements are taken and sometimes give those states a physical interpretation.
 
-Young diagrams commonly identify U(d) irreps. A GT pattern records both the irrep and a state within it. More precisely, its rows record the integer partitions obtained by restricting the irrep along the chain $U(d) \supset U(d-1) \supset \cdots \supset U(1)$. GT patterns thus provide canonical, computable labels for basis vectors.
+Young diagrams commonly identify U(d) irreps. A GT pattern records both the irrep and a state within it. More precisely, its rows record the integer partitions obtained by restricting the irrep along the chain $U(d) \supset U(d-1) \supset \cdots \supset U(1)$. GT patterns thus provide canonical labels for basis vectors, helpful in further computations.
 
 The following standard definitions establish the basic picture.
 
@@ -16,7 +16,9 @@ The following standard definitions establish the basic picture.
 
 A representation is *irreducible* (an *irrep*) if the zero subspace and $V$ itself are its only subspaces invariant under every $\rho(U)$. A *partition* is a nonincreasing integer list $\lambda=[\lambda_1 \ge \cdots \ge \lambda_d]$, or equivalently, a Young diagram with $\lambda_j$ boxes in row $j$. Every finite-dimensional irrep of $U(d)$ corresponds to exactly one partition $\lambda$. We denote the representation by $\rho_\lambda$ and its representation space by $V_\lambda$; the partition becomes the top row of a GT pattern.
 
-**GT-pattern origin**
+**GT-pattern origin** 
+
+The goal is to enumerate an orthonormal basis of $V_\lambda$ with particularly useful properties. In order to do that, we will consider restrictions of the group $U(d)$ to $U(d-1)$ and recurse: consider restrictions to $U(d-2)$, and so on until $U(1)$ is reached. Since $U(1)$ has one-dimensional irreducible representations, their representation spaces will define the sought basis vectors.
 
 To restrict $\rho_\lambda$ to $U(d-1)$, evaluate it only on *block-diagonal matrices* of the form
 
@@ -24,13 +26,13 @@ To restrict $\rho_\lambda$ to $U(d-1)$, evaluate it only on *block-diagonal matr
 u = \begin{pmatrix} u' & 0 \\ 0& 1\end{pmatrix}=u'\oplus (1), 
 ```
 
-where $u'$ is a unitary matrix of dimension $d-1$. The restricted representation sends $u'$ to $\rho(u' \oplus (1))$ and generally decomposes further. Its decomposition is multiplicity-free:
+where $u'$ is a unitary matrix of dimension $d-1$. The restricted representation sends $u'$ to $\rho(u' \oplus (1))$ and generally decomposes further. Each of the labels $\mu$ appears exactly once in the decomposition (it is multiplicity-free):
 
 ```math
 V_\lambda\big|_{U(d-1)} \cong \bigoplus_{\mu\,\prec\,\lambda} V_\mu.
 ```
 
-The standard Gelfand--Tsetlin branching rule for the restriction $U(d)\downarrow U(d-1)$ states that this decomposition contains exactly the highest weights $\mu=(\mu_1,\ldots,\mu_{d-1})$ satisfying the betweenness condition[^1]:
+The standard Gelfand--Tsetlin branching rule for the restriction sketched above states that this decomposition contains exactly the labels $\mu=(\mu_1,\ldots,\mu_{d-1})$ satisfying the betweenness condition[^1]:
 
 ```math
 \lambda_1 \geq \mu_1 \geq \lambda_2 \geq \mu_2
@@ -97,8 +99,8 @@ The top row specifies the total spin $j$, while the single entry in the bottom r
 using GroupFunctions
 
 # Irrep [2,0] of SU(2): spin-1, dimension 3
-λ = [2, 0]
-basis = basis_states(λ)
+λ = [2, 0];
+basis = basis_states(λ);
 
 for b in basis
     print(b)
@@ -131,8 +133,7 @@ m_{k, l+1} \geq m_{k, l} \geq m_{k+1, l+1},
 ```
 
 
-```julia
-using GroupFunctions
+```@repl stateexample
 
 # Irrep [2,1,0] of SU(3): 8-dimensional
 λ = [2, 1, 0];
@@ -149,10 +150,10 @@ The **p-weight** of a pattern is the sequence of differences between consecutive
 
 The *symmetric irrep* $\lambda = [N, 0, \ldots, 0]$, whose Young diagram has a single row, describes $N$ indistinguishable bosons in $d$ modes. Reversing the p-weight of this irrep gives the occupation numbers $(n_1, n_2, \ldots, n_d)$. Accordingly, the function `occupation_number` used below is defined as `reverse ∘ pweight`.
 
-```julia
+```@repl stateexample
 # 2 photons in 3 modes
-λ = [2, 0, 0]
-basis = basis_states(λ)
+λ = [2, 0, 0];
+basis = basis_states(λ);
 
 for b in basis
     println(b, " → occupation ", occupation_number(b)) # will output all Fock states of 3 modes with total number of particles = 2
@@ -164,10 +165,10 @@ Each Fock state corresponds to exactly one GT pattern.
 
 The antisymmetric irrep $\lambda = [1, 1, \ldots, 1,0,0,\ldots,0]$, whose Young diagram has a single column, describes fermions. The Pauli exclusion principle restricts each occupation number to 0 or 1.
 
-```julia
+```@repl stateexample
 # 2 fermions in 3 modes
-λ = [1, 1, 0]
-basis = basis_states(λ)
+λ = [1, 1, 0];
+basis = basis_states(λ);
 println("Dimension: ", length(basis))  # Should be 3
 
 for b in basis
@@ -181,10 +182,10 @@ Consider three photons entering an interferometer. Two arrive simultaneously wit
 
 Likewise, the simpler case of two photons with partial overlap involves both $[2]$ (symmetric, contributing via the permanent) and $[1,1]$ (antisymmetric, contributing via the determinant); see Section 2.1 of the above paper.
 
-```julia
+```@repl stateexample
 # Mixed irrep [2,1,0]: dimension 8
-λ = [2, 1, 0]
-basis = basis_states(λ)
+λ = [2, 1, 0];
+basis = basis_states(λ);
 
 for b in basis
     println(occupation_number(b))

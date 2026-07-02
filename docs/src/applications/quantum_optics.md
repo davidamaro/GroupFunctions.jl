@@ -60,7 +60,6 @@ BS_23 = su2_block(3, 2, (0., θ, 0.))
 U = BS_12 * BS_23
 ```
 
-TODO: Verify sign/phase conventions for `su2_block`. The beamsplitter mixing $a^\dagger_1 \mapsto \frac{1}{\sqrt{2}}(a^\dagger_1 + a^\dagger_2)$ corresponds to which Euler angles?
 
 ### Transition amplitudes
 
@@ -104,4 +103,3 @@ end
 
 Expected (HOM effect): The $|1,1\rangle \to |1,1\rangle$ amplitude vanishes due to destructive interference. Output is $\frac{1}{\sqrt{2}}(|2,0\rangle + |0,2\rangle)$.
 
-TODO: Verify output matches expected HOM signature. Check if beamsplitter convention gives the correct phases.
