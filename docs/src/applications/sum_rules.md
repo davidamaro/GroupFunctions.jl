@@ -8,7 +8,7 @@ DocTestSetup = GroupFunctions.doctestsetup()
 
 The coincidence rate for indistinguishable photons is the modulus squared of a permanent (see [the background page](../background/group_functions.md)) built from the scattering matrix $U$, an element of $U(d)$ for $d$ modes.
 Permanents are expensive to compute.
-However, nontrivial constraints apply to *sums* of rates, and in some cases the rate sum is unchanged if $U$ is replaced by a simpler matrix. This can speed up rate-sum computations. This is the result of [Amaro-Alcalá, Spivak, and de Guise (2020)](https://doi.org/10.1016/j.physleta.2020.126459);
+However, nontrivial constraints apply to *sums* of rates, and in some cases the rate sum is unchanged if $U$ is replaced by a simpler matrix. This can speed up rate-sum computations. This is the result of Amaro-Alcalá, Spivak, and de Guise;[^1]
 we reproduce the three-photon case here, following section 3 of the article.
 
 ## Rate sum invariance
@@ -86,3 +86,5 @@ This allows a faster computation of the summed rate.
 Instead of evaluating permanents after the unimportant block (`addon`) has been removed, we can use determinants of a modified matrix.
 Determinants are *much more efficient to compute*: standard algorithms scale like $O(n^3)$, whereas direct permanent computation scales like $O(2^n n^2)$.
 In a $3\times3$ matrix, this does not make much difference, but the method shown here and in the paper generalizes to more complex situations.
+
+[^1]: D. Amaro-Alcalá, D. Spivak, and H. de Guise, “Sum rules in multiphoton coincidence rates,” *Physics Letters A* **384**, 126459 (2020).

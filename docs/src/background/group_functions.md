@@ -23,7 +23,7 @@ The function `group_function` computes these coefficients — the transition amp
 
 ## Bosons: symmetric representation
 
-For bosonic systems, consider the transition amplitude between an input Fock state $|m\rangle$ and an output Fock state $|m'\rangle$, both having $N$ total particles. We follow the derivation of [Scheel (2004)](https://arxiv.org/abs/quant-ph/0406127).
+For bosonic systems, consider the transition amplitude between an input Fock state $|m\rangle$ and an output Fock state $|m'\rangle$, both having $N$ total particles. We follow Scheel's derivation.[^1]
 
  Label the $N$ particles by $\alpha = 1, \ldots, N$, assigning each to its input mode via $\alpha \mapsto i_\alpha$ such that mode $i$ appears $m_i$ times (so, e.g. for $\ket{2,1,0}$, $(i_1, i_2, i_3)=(1,1,2)$). Then:
  
@@ -40,7 +40,7 @@ The $\sqrt{m'_j!}$ arises because $m'_j$ identical creation operators acting on 
 
 $$\langle m' | U | m \rangle = \frac{\sqrt{\prod_j m'_j!}}{\sqrt{\prod_i m_i!}} \sum_{(j_1,\ldots,j_N) \sim m'} \prod_{\alpha=1}^{N} U_{i_\alpha, j_\alpha}$$
 
-The above expression can be shown to be expressible as a permanent of a properly constructed matrix. This is, by the way, the basis for boson sampling problems; computing the permanent is #P-hard ([Aaronson & Arkhipov, 2011](https://arxiv.org/abs/1011.3245)), making bosonic transition amplitudes classically intractable.
+The above expression can be shown to be expressible as a permanent of a properly constructed matrix. This is, by the way, the basis for boson sampling problems; computing the permanent is #P-hard,[^2] making bosonic transition amplitudes classically intractable.
 
 The relation is as follows: construct an $N \times N$ matrix $M$ using output labeling $\beta \mapsto j_\beta$ (analogous to input): $M_{\alpha\beta} = U_{i_\alpha, j_\beta}$. The permanent sums over all permutations $\sigma \in S_N$:
 
@@ -100,10 +100,16 @@ $$\langle m' | U | m \rangle \propto \sum_{\sigma \in S_N} \mathrm{sgn}(\sigma) 
 
 The weights $1$ and $\mathrm{sgn}(\sigma)$ are the matrix elements of the trivial and sign representations of $S_N$, both one-dimensional.
 
-For a general irrep $\lambda$, the representation has dimension $f^\lambda > 1$, and the weight becomes a matrix element $\omega^\lambda_{i,j}(\sigma)$ of the Young orthogonal representation. The general formula, due to [Grabmeier & Kerber (1987)](https://doi.org/10.1007/BF00046717), is:
+For a general irrep $\lambda$, the representation has dimension $f^\lambda > 1$, and the weight becomes a matrix element $\omega^\lambda_{i,j}(\sigma)$ of the Young orthogonal representation. The general formula, due to Grabmeier and Kerber,[^3] is:
 
 $$T^\lambda_{U,V} = \frac{1}{\sqrt{\Theta^\lambda_U \Theta^\lambda_V}} \sum_{\gamma} \left( \sum_{\sigma \in S_\alpha \gamma S_\beta} \omega^\lambda_{i,j}(\sigma) \right) X_{f \circ \gamma, g}$$
 
 Here $U, V$ are semistandard tableaux labeling basis states (equivalent to [GT patterns](states.md)), $\Theta$ is a normalization factor generalizing $\sqrt{m!}$, and $X_{f \circ \gamma, g}$ is the monomial $\prod_k U_{i_k, j_k}$. The double coset decomposition $S_\alpha \backslash S_N / S_\beta$ groups permutations contributing the same monomial.
 
 The partition $\lambda$ labels the symmetry type: $[N]$ for bosons, $[1^N]$ for fermions, mixed shapes for particles with mixed exchange symmetry. The function `group_function(λ, ...)` evaluates this formula.
+
+[^1]: S. Scheel, “Permanents in linear optical networks,” *arXiv preprint quant-ph/0406127* (2004).
+
+[^2]: S. Aaronson and A. Arkhipov, “The computational complexity of linear optics,” in *Proceedings of the 43rd Annual ACM Symposium on Theory of Computing*, 333--342 (2011).
+
+[^3]: J. Grabmeier and A. Kerber, “The evaluation of irreducible polynomial representations of the general linear groups and of the unitary groups over fields of characteristic 0,” *Acta Applicandae Mathematicae* **8**, 271--291 (1987).

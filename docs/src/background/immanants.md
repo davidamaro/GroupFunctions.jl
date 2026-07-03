@@ -36,8 +36,7 @@ For $3 \times 3$ matrices and mixed symmetry $(2,1)$:
 
 ## Connection with group functions
 
-A theorem of Kostant (see theorem 3 in [de Guise et al., D-functions and immanants of unitary matrices and
-submatrices](https://arxiv.org/pdf/1511.01851)) gives the immanant directly as a sum of group functions.
+A theorem of Kostant (see theorem 3 in de Guise et al.[^2]) gives the immanant directly as a sum of group functions.
 With $U \in U(d)$ the unitary matrix and $\Gamma^{(\lambda)}(U)$ its matrix in the irrep $\lambda$,
 
 ```math
@@ -50,4 +49,6 @@ For the mixed $(2,1)$ immanant of a $3\times3$ matrix the $(11)$ irrep has two
 zero-weight states, so the sum has two terms -- the relation verified on the
 [tutorial page](../tutorial/immanants.md).
 
-[^1]: M. C. Tichy and K. Mølmer, “Extending exchange symmetry beyond bosons and fermions,” *Physical Review A* **96**, 022119 (2017). [doi:10.1103/PhysRevA.96.022119](https://doi.org/10.1103/PhysRevA.96.022119)
+[^1]: M. C. Tichy and K. Mølmer, “Extending exchange symmetry beyond bosons and fermions,” *Physical Review A* **96**, 022119 (2017).
+
+[^2]: H. de Guise, D. Spivak, J. Kulp, and I. Dhand, “D-functions and immanants of unitary matrices and submatrices,” *Journal of Physics A: Mathematical and Theoretical* **49**, 09LT01 (2016).

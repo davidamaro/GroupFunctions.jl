@@ -111,7 +111,7 @@ end
 ## SU(N): Multiple $J^{(l)}_z$ operators
 
 
-For SU(N), there are $N-1$ commuting operators $J^{(l)}_z$, each with corresponding ladder operators $J^{(l)}_\pm$. Each triple $J^{(l)}_z, J^{(l)}_\pm$ satisfies the su(2) commutation relations. See [Alex et al.](https://arxiv.org/abs/1009.0437) for explicit definitions. Because these operators and states describe many different physical settings, we retain the abstract viewpoint here.
+For SU(N), there are $N-1$ commuting operators $J^{(l)}_z$, each with corresponding ladder operators $J^{(l)}_\pm$. Each triple $J^{(l)}_z, J^{(l)}_\pm$ satisfies the su(2) commutation relations. See Alex et al.[^2] for explicit definitions. Because these operators and states describe many different physical settings, we retain the abstract viewpoint here.
 
 A GT pattern labels a basis vector by recording the integer partitions obtained through successive group restrictions. This vector is also a simultaneous eigenstate of all $J^{(l)}_z$, whose eigenvalues determine the p-weight defined below. In general, the p-weight fixes the state only when the irrep is totally symmetric or totally antisymmetric. The pattern forms a triangular array:
 
@@ -178,9 +178,13 @@ end
 
 Mixed irreps such as $[2, 1]$ are neither fully symmetric nor fully antisymmetric. They arise physically when particles are *partially distinguishable*.
 
-Consider three photons entering an interferometer. Two arrive simultaneously with identical spectral properties and can therefore interfere fully. Because the third arrives later, it cannot interfere with the earlier pair. The resulting quantum state has components in both the symmetric sector $[3,0,0]$ and the mixed-symmetry sector $[2,1,0]$. This decomposition appears in observable coincidence rates; see Section 3.2 of [D. Amaro Alcalá et al.](https://arxiv.org/abs/2004.11504) for an explicit computation.
+Consider three photons entering an interferometer. Two arrive simultaneously with identical spectral properties and can therefore interfere fully. Because the third arrives later, it cannot interfere with the earlier pair. The resulting quantum state has components in both the symmetric sector $[3,0,0]$ and the mixed-symmetry sector $[2,1,0]$. This decomposition appears in observable coincidence rates; see Section 3.2 of Amaro-Alcalá et al.[^3] for an explicit computation.
 
 The simpler case of two photons with partial overlap likewise involves both $[2]$ (symmetric, contributing via the permanent) and $[1,1]$ (antisymmetric, contributing via the determinant); see Section 2.1 of the above paper.
+
+[^2]: A. Alex, M. Kalus, A. Huckleberry, and J. von Delft, “A numerical algorithm for the explicit calculation of SU(N) and SL(N,C) Clebsch-Gordan coefficients,” *Journal of Mathematical Physics* **52**, 023507 (2011).
+
+[^3]: D. Amaro-Alcalá, D. Spivak, and H. de Guise, “Sum rules in multiphoton coincidence rates,” *Physics Letters A* **384**, 126459 (2020).
 
 ```@repl stateexample
 # Mixed irrep [2,1,0]: dimension 8
