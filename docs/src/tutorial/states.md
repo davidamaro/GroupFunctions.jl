@@ -63,11 +63,6 @@ occupation_number.(basis)
 To compute a transition amplitude you select an initial and a final pattern. `findfirst`
 on the occupation numbers is the convenient way:
 
-```@raw html
-<p style="text-align: center;">
-  <img style="width: 63%; height: auto;" src="../../assets/tutorial/tutorial_states.svg" alt="Selecting initial and final GT-basis states by their Fock occupations">
-</p>
-```
 
 ```@repl states
 initial = basis[findfirst(gt -> occupation_number(gt) == [2, 0, 0], basis)];

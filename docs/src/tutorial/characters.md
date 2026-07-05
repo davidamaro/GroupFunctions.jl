@@ -14,11 +14,6 @@ DocTestSetup = GroupFunctions.doctestsetup()
 The character is the trace of the representation matrix, so it equals the sum
 of the diagonal group functions (and is indeed defined in the code as such):
 
-```@raw html
-<p style="text-align: center;">
-  <img style="width: 63%; height: auto;" src="../../assets/tutorial/tutorial_character_trace.svg" alt="The character as a sum over diagonal input-to-output transitions">
-</p>
-```
 
 ```@repl chars
 using GroupFunctions
