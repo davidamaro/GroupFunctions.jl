@@ -30,7 +30,7 @@ Representations of the unitary group $\mathrm{U}(d)$ arise in many subfields of 
 
 $$ D^{(\lambda)}_{\mathrm{out},\mathrm{init}}(U) = \langle \mathrm{out} \mid D^{(\lambda)}(U) \mid \mathrm{init} \rangle ,$$
 
-Here, $\mathrm{init}$ and $\mathrm{out}$ denote basis states in the representation carrier space.
+here, $\mathrm{init}$ and $\mathrm{out}$ denote basis states in the representation carrier space.
 
 In mathematics, summing the diagonal group functions gives the trace of the representation matrix of $U$. This trace is the character of the representation and the Schur polynomial of the eigenvalues of $U$, an object central to algebraic combinatorics and symmetric function theory.
 
@@ -40,7 +40,7 @@ Some of these tasks require only a numerical estimate, whereas others require an
 
 ## Similar software
 
-Several existing packages relate to `GroupFunctions.jl` but address different problems. `SUNRepresentations.jl` [@SUNRepresentations] and the algorithm of @Alex2011 (with appendix code) compute $\mathrm{SU}(d)$ Clebsch-Gordan coefficients. `RepLAB` [@RepLAB] supports manipulating irreducible representations of various groups, including $\mathrm{U}(d)$, but provides only indirect numerical access to group functions. `IntegrateUnitary.jl` [@IntegrateUnitary] performs symbolic integration over compact groups rather than evaluating representation matrices. Other libraries focus on quantum optics. `BosonSampling.jl` [@Seron2024], `Perceval` [@Heurtel2023], and `QOptCraft` [@QOptCraft] numerically model linear optical devices, while `The Walrus` [@Gupt2019] helps compute amplitudes for Gaussian boson sampling. These packages do not target the symbolic computation of individual representation-matrix entries, which is the primary purpose of `GroupFunctions.jl`.
+Several existing packages relate to `GroupFunctions.jl` but address different problems. `SUNRepresentations.jl` [@SUNRepresentations] and the algorithm of @Alex2011 (with appendix code) compute $\mathrm{SU}(d)$ Clebsch-Gordan coefficients. `RepLAB` [@RepLAB] supports manipulating irreducible representations of various groups, including $\mathrm{U}(d)$, but provides only indirect numerical access to group functions. `IntegrateUnitary.jl` [@IntegrateUnitary] performs symbolic integration over compact groups rather than evaluating representation matrices. `haarpy` <https://github.com/polyquantique/haarpy> implements Weingarten-calculus methods. Other libraries focus on quantum optics. `BosonSampling.jl` [@Seron2024], `Perceval` [@Heurtel2023], and `QOptCraft` [@QOptCraft] numerically model linear optical devices, while `The Walrus` [@Gupt2019] helps compute amplitudes for Gaussian boson sampling. These packages do not target the symbolic computation of individual representation-matrix entries, which is the primary purpose of `GroupFunctions.jl`.
 
 # Example use and documentation
 The library primarily computes matrix elements of a representation between basis states, with auxiliary functions that support calculations in quantum optics. These matrix elements can be computed from a symbolic matrix. The following example evaluates a matrix element between states of the $\mathrm{U}(10)$ symmetric irrep corresponding to $7$ bosons.
@@ -59,7 +59,7 @@ This functionality supports more complex calculations. For example, the library 
 # Design choices
 This library provides a unified method for computing representation matrix elements of $\mathrm{U}(d)$ irreps specified by integer partitions of length at most $d$, including computations with symbolic input matrices. Several computational routes are possible in principle. For symmetric irreps, which model fully indistinguishable bosons, one can manipulate states as polynomials of creation operators applied to the vacuum. Another approach constructs and exponentiates the Lie algebra generators in the chosen representation. Both approaches are computationally expensive. More restricted methods based on generating functions also exist [@prakash1996wigner].
 
-We chose the Grabmeier-Kerber formula [@Grabmeier1987] as the most general solution. It expresses the matrix element as a sum of monomials in the entries of the input matrix, weighted by the irreducible representation and the states in question. Our implementation optimises the enumeration of the double cosets that index this sum by grouping permutations that contribute the same monomial. This implementation provides the library's main function, `group_function`.
+The author of the original package chose the Grabmeier-Kerber formula [@Grabmeier1987] as the most general solution. It expresses the matrix element as a sum of monomials in the entries of the input matrix, weighted by the irreducible representation and the states in question. Our implementation optimises the enumeration of the double cosets that index this sum by grouping permutations that contribute the same monomial. This implementation provides the library's main function, `group_function`.
 
 Internally, the algorithm represents basis states as semistandard Young tableaux. The user-facing functions expose the equivalent Gelfand-Tsetlin patterns through the `GTPattern` data structure and provide utility functions for common quantum optics scenarios, such as `occupation_number`.
 
@@ -71,7 +71,7 @@ The library is available under the MIT licence and can be installed through the 
  ```
 
 # AI usage disclosure
-OpenAI Codex (GPT-5.3) assisted with implementing Gelfand–Tsetlin pattern pretty-printing and optimising the performance of the double-coset enumeration at a late stage. The authors developed the mathematical design and proof of correctness of the optimised algorithm. Anthropic Claude (Opus 4.8) assisted with code review and language review of the documentation and manuscript. The authors reviewed and edited all AI-assisted changes.
+OpenAI Codex (GPT-5.3) assisted with optimising the performance of the double-coset enumeration at a late stage. The authors developed the mathematical design and proof of correctness of the optimised algorithm. Anthropic Claude (Opus 4.8) assisted with code review and language review of the documentation and manuscript. The authors reviewed and edited all AI-assisted changes.
 
 # Acknowledgements
 We thank Dr. Hubert de Guise for helpful discussions and suggestions on the bibliography, and Dr. Alonso Botero for suggestions that improved the presentation. Mitacs CALAREO, DeQHOST APVV-22-0570, QUAS VEGA 2/0164/25, Postdokgrant APD0161, and the Stefan Schwarz programme supported this work. David Amaro-Alcalá acknowledges the indirect support of the Government of Alberta and NSERC during his PhD studies at the University of Calgary.
