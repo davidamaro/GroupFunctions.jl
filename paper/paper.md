@@ -1,276 +1,79 @@
 ---
-title: "GroupFunctions.jl: code base to compute entries of the irreducible
-representations of the special unitary group SU(d)"
+title: "GroupFunctions.jl: computing individual entries of the irreducible representations of the unitary group U(d)"
 tags:
   - Julia
   - group theory
-  - computational algebra
+  - representation theory
   - unitary group
+  - quantum optics
 authors:
-  - name: "Amaro-Alcala, David"
+  - name: "David Amaro-Alcalá"
     orcid: "0000-0001-8137-2161"
     affiliation: 1
+  - name: "Konrad Szymański"
+    orcid: "0000-0001-7676-1605"         
+    affiliation: 1   
 affiliations:
-  - name: "Research Centre for Quantum Information, Institute of Physics, Slovak Academy of Sciences, Dúbravská cesta 9, Bratislava 845 11, Slovakia"
+  - name: "Research Centre for Quantum Information, Institute of Physics, Slovak Academy of Sciences, Dúbravská cesta 9, Bratislava, Slovakia"
     index: 1
-date: "2026-01-26"
+date: "2026-07-07"
 bibliography: references.bib
 ---
 
+
 # Summary
-
-<!--Provide a concise overview of the software, its purpose, and the main contributions.-->
-<!--Mention the domain context and what is novel or useful about this package.-->
-
-The software computes both symbolic and numerical matrix elements of
-irreducible representations of the unitary group.
-It is based on well-established formulae.
-Group functions of the unitary group are widely useful in quantum optics,
-quantum information, and quantum computing.
-To our knowledge, this is the first public implementation that can compute
-individual group-function entries without constructing the full
-representation.
-
+`GroupFunctions.jl` is a Julia library for computations involving irreducible representations of $\mathrm{U}(d)$. Its core is the evaluation of individual group functions -- the matrix elements of an irrep between basis states, which for $\mathrm{SU}(2)$ reduce to the Wigner $D$-functions -- either symbolically or numerically. The matrix elements are computed between the vectors belonging to a carrier space basis enumerated via Gelfand-Tsetlin patterns [@GelfandTsetlin1950]. The library can also compute entire representation operators, construct input unitaries from parameterizations common in quantum optics, translate Gelfand–Tsetlin patterns into occupation-number kets, and compute the associated Schur functions. Results can be exported to a form compatible with Mathematica.
+     
 # Statement of need
 
-<!--Explain the problem this software addresses, why existing tools are insufficient,-->
-<!--and who benefits from this work.-->
+Representations of the unitary group $\mathrm{U}(d)$ arise in many subfields of physics and mathematics, and computations often reduce to evaluating their matrix elements, called group functions. For an irrep labelled by $\lambda$, the corresponding object is
 
-Representations of the unitary group are needed in many branches of physics
-because the unitary group appears in many contexts.
-However, there is no widely available implementation covering the practical
-computations used in applications.
-This package addresses that gap by providing tools to compute these
-representation-theoretic quantities directly.
-Current applications of unitary irreps include boson sampling and related
-photonic protocols [@Aaronson2011], as well as recent applications in our
-work [@AmaroAlcal2020; @amaroalcala2025].
+$$ D^{(\lambda)}_{\mathrm{out},\mathrm{init}}(U) = \langle \mathrm{out} \mid D^{(\lambda)}(U) \mid \mathrm{init} \rangle ,$$
 
-# Software description
+where $\mathrm{init}$ and $\mathrm{out}$ denote basis states of the representation carrier space.
 
-## Features
+In mathematics, the trace of the representation matrix of $U$, obtained by summing the diagonal group functions, is the character of the representation; this character is the Schur polynomial of the eigenvalues of $U$. This object is central to algebraic combinatorics and symmetric function theory.
 
-<!--- Feature 1 and why it matters.-->
-<!--- Feature 2 with a short example use case.-->
-<!--- Feature 3 and its practical impact.-->
+In quantum physics, group functions appear in several settings. In quantum optics, a group function is the transition amplitude of photons through a linear optical network; the same object helps the characterization of quantum devices [@amaroalcala2025] and the description of symmetry properties of states [@OttoSzymanski2024]. An important subproblem is boson sampling [@Aaronson2011], where the transition amplitude reduces to a permanent, whose evaluation is classically computationally hard; whether noisy real life quantum devices can perform this computation is an active question. 
 
+For some of these tasks a numerical estimate suffices; for others an exact and symbolic group function is required. This need is answered by the `GroupFunctions.jl` library: related packages exist (see below), but to our knowledge, none of these tools is designed to compute individual group function entries symbolically, which is more efficient than assembling the entire matrix, when applicable.
 
-Group functions for numerical and symbolic computations.
-This is the main contribution: it enables the computation of individual
-irreducible-representation entries for the unitary group.
-These matrix elements are common in applications such as boson sampling and
-passive interferometry.
-Here are two SU(2) examples, common in undergraduate quantum mechanics
-classes.
-```julia
-julia> group_function([1,0])[1]
-2×2 Matrix{SymEngine.Basic}:
- u_2_2  u_2_1
- u_1_2  u_1_1
+## Similar software
 
-julia> group_function([2,0])[1]
-3×3 Matrix{SymEngine.Basic}:
-             u_2_2^2        sqrt(2)*u_2_2*u_2_1              u_2_1^2
- sqrt(2)*u_2_2*u_1_2  u_2_1*u_1_2 + u_2_2*u_1_1  sqrt(2)*u_2_1*u_1_1
-             u_1_2^2        sqrt(2)*u_1_1*u_1_2              u_1_1^2
-```
+Several  existing packages are related to `GroupFunctions.jl`, but address different problems. `SUNRepresentations.jl` [@SUNRepresentations] and the algorithm of @Alex2011 (with appendix code) compute $\mathrm{SU}(d)$ Clebsch-Gordan coefficients. `RepLAB` [@RepLAB] allows for manipulation of irreducible representations of various groups including $\mathrm{U}(d)$, but group functions are only accessible as indirect numerics. `IntegrateUnitary.jl` [@IntegrateUnitary] performs symbolic integration over compact groups rather than evaluating representation matrices. There also exist libraries oriented towards quantum optics: the aim of `BosonSampling.jl` [@Seron2024], `Perceval` [@Heurtel2023], and `QOptCraft` [@QOptCraft] is numerical modelling of linear optical devices rather than symbolic computation, and `The Walrus` [@Gupt2019] helps with computation of amplitudes for Gaussian boson sampling. These packages do not target the symbolic computation of individual group function entries, which is the purpose of `GroupFunctions.jl`.
 
-Writing down states.
-This allows enumeration of the basis.
-It is useful both for computing matrix elements and for a consistent notation
-of states in systems with unitary invariance.
-Users of the package may also benefit from gaining familiarity with
-Gelfand-Tsetlin patterns.
-```julia
-julia> states = basis_states([2,1,0])
-8-element Vector{GTPattern}:
- GTPattern([[2, 1, 0], [1, 0], [0]], [0])
- GTPattern([[2, 1, 0], [1, 0], [1]], [1])
- GTPattern([[2, 1, 0], [1, 1], [1]], [1])
- GTPattern([[2, 1, 0], [2, 0], [0]], [0])
- GTPattern([[2, 1, 0], [2, 0], [1]], [1])
- GTPattern([[2, 1, 0], [2, 0], [2]], [2])
- GTPattern([[2, 1, 0], [2, 1], [1]], [1])
- GTPattern([[2, 1, 0], [2, 1], [2]], [2])
-
-julia> states[3]
-│ 2   1   0 ╲
-│   1   1    〉
-│     1     ╱
-```
-
-Generation of unitary matrices.
-This is also useful in the context of boson sampling and related tasks, such
-as the characterization of gates.
-
-For example, we can construct an SU(2) matrix from Euler angles with
-`sud_from_angles` and evaluate a transition amplitude in the symmetric irrep:
+# Example use and documentation
+The core functionality of the library is to compute the matrix element of a representation between basis states, with auxiliary functions that ease computations in quantum optics. The calculation can be done with a symbolic matrix, as in the following example of a matrix element between states of the $\mathrm{U}(10)$ symmetric irrep corresponding to $7$ bosons.
 
 ```julia
-using GroupFunctions
-
-lambda = [2, 0]
-basis = basis_states(lambda)
-angles = [0.0, pi/2, 0.0]           # length = 2^2 - 1
-U = sud_from_angles(angles, 2)
-
-initial = basis[findfirst(b -> pweight(b) == [1, 1], basis)]
-final   = basis[findfirst(b -> pweight(b) == [2, 0], basis)]
-
-amp = group_function(lambda, final, initial, U)
-abs2(amp)
+λ = [7,0,0,0,0,0,0,0,0,0]; basis=basis_states(λ); # integer partition and basis  
+init = findfirst(gt -> occupation_number(gt)==[0,0,0,1,1,1,1,1,1,1],basis); 
+out  = findfirst(gt -> occupation_number(gt)==[1,1,1,1,1,1,1,0,0,0],basis);
+group_function(λ, basis[init],basis[out]) # symbolic matrix element
 ```
+`GroupFunctions.jl` is currently single-threaded. On an AMD Ryzen 7 PRO 4750U laptop CPU, the symbolic computation in the example took approximately 4 seconds after compilation warmup, without reusing cached intermediate or final results.
 
-The same constructor works for higher dimensions. For SU(3), the angle vector
-has length `3^2 - 1 = 8`:
-
-```julia
-using GroupFunctions
-
-angles3 = [0.3, 1.1, -0.4, 0.7, 0.5, -0.8, 0.9, 0.2]
-U3 = sud_from_angles(angles3, 3)
-
-lambda3 = [2, 0, 0]
-basis3 = basis_states(lambda3)
-group_function(lambda3, basis3[1], basis3[2], U3)
-```
-
-## Examples
-
-The following short scripts can be run directly as plain Julia scripts (no notebooks).
-
-### Example: compute a single D-function entry and a character
-
-```julia
-using GroupFunctions
-using RandomMatrices
-using LinearAlgebra: det
-
-irrep = [2, 1, 0]
-U = rand(Haar(2), 3)                # 3x3 Haar-random unitary
-basis = basis_states(irrep)
-
-group_function(irrep, basis[1], basis[3], U)
-character_weyl(irrep, U / det(U)^(1/3))
-```
-
-### Example: Hong-Ou-Mandel interference (50:50 beamsplitter)
-
-```julia
-using GroupFunctions
-
-lambda = [2, 0]
-basis = basis_states(lambda)
-
-initial = basis[findfirst(b -> pweight(b) == [1, 1], basis)]
-final   = basis[findfirst(b -> pweight(b) == [2, 0], basis)]
-
-BS = su2_block(2, 1, (0.0, pi/2, 0.0))
-amp = group_function(lambda, final, initial, BS)
-abs2(amp)  # ~0.5 for a 50:50 beamsplitter
-```
-
-### Example: SU(3) character check
-
-```julia
-using GroupFunctions
-using RandomMatrices
-using LinearAlgebra: det, tr
-
-irrep = [2, 1, 0]
-U = rand(Haar(2), 3)
-U_su = U / det(U)^(1/3)
-
-rep, _ = group_function(irrep, U_su)
-isapprox(tr(rep), character_weyl(irrep, U_su))
-```
-
-Additional examples in the documentation and tests include:
-- Enumerating Gelfand-Tsetlin basis states and mapping them to p-weights.
-- SU(3) character variance checks over Haar-random ensembles.
-- SU(2)-invariant qubit transmission via symbolic blocks and `group_function_sym`.
-- Immanant/permanent relations and sum-rule rate identities for coincidence counts.
-- Construction of `GTPattern` objects and symbolic `group_function` entries.
+More complex calculations can be built on top of this, as in [@amaroalcala2025], where the library was used for numerical evaluation of $\mathrm{SU}(d)$ group characters in randomized benchmarking. Further examples, applications, and mathematical background  are available in the documentation, <https://davidamaro.github.io/GroupFunctions.jl/dev/>.
 
 
-## Implementation details
+# Design choices
+The goal of this library is a unified computation of representation matrix elements for irreps of $\mathrm{U}(d)$ specified by integer partitions of length at most $d$, including symbolic input matrices. Several computational routes are possible in principle: for symmetric irreps (modeling fully indistinguishable bosons), states can be manipulated as polynomials of creation operators applied to the vacuum. One could construct the Lie algebra generators in the chosen representation and exponentiate them. Both approaches mentioned are computationally expensive. Restricted approaches using generating functions also exist [@prakash1996wigner].
 
-<!--Describe the core design choices, data structures, and algorithms.-->
-<!--If relevant, mention performance considerations and complexity.-->
+The Grabmeier-Kerber formula [@Grabmeier1987] was chosen as the most general solution: the matrix element is a sum of monomials in the entries of the input matrix, with weights stemming from the irreducible representation and the states in question. The authors implemented the formula with an optimized enumeration of the double cosets that index the sum, grouping permutations contributing the same monomial; the result is the main functionality of the library, `group_function`.
 
-Examples are provided in `docs/` and `test/`, and are rendered in the
-documentation site built by GitHub Actions.
-
-<!--core design choices-->
-The code implements the formula in Grabmeier and Kerber's paper
-[@Grabmeier1987].
-As such, the main computations involve:
-1. Computing the double coset representatives.
-2. Computing irreps of the symmetric group.
-3. Working with semistandard Young tableaux.
-
-The first task requires obtaining every solution of a linear system of
-equations with positive integer solutions.
-This is done using `HiGHS.jl`, a robust open-source linear solver.
-In previous versions of the code, we used Gurobi.
-However, it was inconvenient for CI purposes to require a Gurobi license,
-so we adopted `HiGHS.jl` as an alternative.
-
-<!--Data structures-->
-
-The most important structure is `YoungTableau`,
-which holds both standard and semistandard tableaux.
-These are used, in conjunction with `GTPattern`,
-to label states.
-However, for the core computation, `YoungTableau` is especially important
-because it is needed to compute `Content` values and the double coset
-representatives. These form the core of the computation.
-
-
-<!--and algorithms.-->
-
-There is no single custom algorithm beyond the representation-theoretic
-construction described above.
-In the future, we may replace `HiGHS.jl` for the integer-system step if a
-more specialized approach becomes available.
-
-
-# Quality control
-
-Tests cover both internal correctness and physics-facing outcomes.
-Internally, we test the computation of double coset representatives and the
-ordering conventions in permutations.
-For outcomes, we use tests based on known results, including comparisons with
-character formulae, polynomial identities, and results from the literature.
+Internally, the algorithm represents basis states by semistandard Young tableaux. The user-facing functions expose the equivalent Gelfand-Tsetlin patterns as the `GTPattern` data structure, together with utility functions for common quantum optics scenarios, such as `occupation_number`.
 
 # Availability
+The library is available under the MIT licence and can be installed through the Julia package manager:
 
-<!--State the license, where to find the source, and how to install.-->
-<!--Include a short, reproducible install snippet if useful.-->
+```julia
+ ] add GroupFunctions
+ ```
 
-The software uses the same license as `AbstractAlgebra.jl`.
-The source is hosted on GitHub.
-Installation can be done within the Julia package manager: `] add GroupFunctions`.
-
-# Dependencies
-
-- `AbstractAlgebra.jl`, for permutation and Young tableau manipulation.
-- `JuMP.jl` and `HiGHS.jl`, for finding all solutions of a system of linear
-  equations in $\mathbb{Z}^+$.
-- `SymEngine.jl`, to handle symbolic output.
+# AI usage disclosure
+OpenAI Codex (GPT-5.3) was used to assist with the implementation of Gelfand–Tsetlin pattern pretty-printing and late-stage performance optimization of the double-coset enumeration. The mathematical design and proof of correctness of the optimized algorithm were developed by the authors. Anthropic Claude (Opus 4.8) was used for code review and for language review of the documentation and manuscript. All AI-assisted changes were reviewed and edited by the authors.
 
 # Acknowledgements
-
-<!--Credit collaborators, funding sources, or helpful discussions.-->
-Helpful discussions with:
-Dr. Hubert de Guise (facilitating bibliography for this and other versions),
-Dr. Alonso Botero (suggesting improvements in the presentation), and
-Dr. Konrad Szymanski (improving the documentation).
-We also thank Diana Cencer Garafova for the logo design.
-Funding: Mitacs CALAREO, DeQHOST APVV-22-0570, and QUAS VEGA 2/0164/25.
-Part of the work was done while I was a PhD student in the University of
-Calgary,
-thus, indirectly, I also acknowledge support from the Government of Alberta
-and NSERC.
-
+We thank Dr. Hubert de Guise for helpful discussions and bibliography suggestions, and Dr. Alonso Botero for suggestions that improved the presentation. This work was supported by Mitacs CALAREO, DeQHOST APVV-22-0570, and QUAS VEGA 2/0164/25, Postdokgrant APD0161, and Stefan Schwarz programme.  David Amaro-Alcalá acknowledges his time as a PhD student at the University of Calgary, supported indirectly by the Government of Alberta and NSERC.
+  
 # References
