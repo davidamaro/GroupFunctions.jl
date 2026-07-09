@@ -22,7 +22,9 @@ bibliography: references.bib
 
 
 # Summary
-`GroupFunctions.jl` is a Julia library for computing individual matrix elements of irreducible representations of $\mathrm{U}(d)$. These matrix elements, called group functions, can be evaluated symbolically or numerically. For $\mathrm{SU}(2)$, they reduce to the Wigner $D$-functions. The library computes these matrix elements in a carrier-space basis enumerated by Gelfand-Tsetlin patterns [@GelfandTsetlin1950]. It can also compute entire representation operators, construct input unitaries from parameterisations common in quantum optics, translate Gelfand–Tsetlin patterns into occupation-number kets, and compute the associated Schur functions. Results can be exported in a form compatible with Mathematica.
+`GroupFunctions.jl`[^author-contributions] is a Julia library for computing individual matrix elements of irreducible representations of $\mathrm{U}(d)$. These matrix elements, called group functions, can be evaluated symbolically or numerically. For $\mathrm{SU}(2)$, they reduce to the Wigner $D$-functions. The library computes these matrix elements in a carrier-space basis enumerated by Gelfand-Tsetlin patterns [@GelfandTsetlin1950]. It can also compute entire representation operators, construct input unitaries from parameterisations common in quantum optics, translate Gelfand–Tsetlin patterns into occupation-number kets, and compute the associated Schur functions. Results can be exported in a form compatible with Mathematica.
+
+[^author-contributions]: David Amaro-Alcalá wrote the package code, implemented the algorithms, developed the tests, and prepared the first version of the documentation. Konrad Szymański substantially revised and expanded the documentation, added examples, requested additions to the code API, and translated several Spanish-language function names and related documentation into English.
      
 # Statement of need
 
