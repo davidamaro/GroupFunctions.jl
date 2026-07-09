@@ -256,6 +256,48 @@ function symbolic_matrix(n::Int)
     return [SymEngine.symbols("u_$(i)_$(j)") for i in 1:n, j in 1:n]
 end
 
+function subgroup_intersection(left_subgroup::Vector{Perm{Int64}}, right_subgroup::Vector{Perm{Int64}},
+                               representative::Perm{Int64})
+    inverse_representative = inv(representative)
+    conjugated_right = Set(representative * right_perm * inverse_representative for right_perm in right_subgroup)
+
+    return [left_perm for left_perm in left_subgroup if left_perm in conjugated_right]
+end
+
+function right_coset_transversal(group::Vector{Perm{Int64}}, subgroup::Vector{Perm{Int64}})
+    remaining = Set(group)
+    representatives = Perm{Int64}[]
+
+    while !isempty(remaining)
+        representative = first(remaining)
+        push!(representatives, representative)
+
+        for subgroup_element in subgroup
+            delete!(remaining, representative * subgroup_element)
+        end
+    end
+
+    return representatives
+end
+
+function double_coset_elements(left_subgroup::Vector{Perm{Int64}}, representative::Perm{Int64},
+                              right_subgroup::Vector{Perm{Int64}})
+    intersection = subgroup_intersection(left_subgroup, right_subgroup, representative)
+    left_transversal = right_coset_transversal(left_subgroup, intersection)
+
+    elements = Vector{Perm{Int64}}()
+    sizehint!(elements, length(left_transversal) * length(right_subgroup))
+
+    for left_perm in left_transversal
+        left_representative = left_perm * representative
+        for right_perm in right_subgroup
+            push!(elements, left_representative * right_perm)
+        end
+    end
+
+    return elements
+end
+
 struct DoubleCosetSumContext{TG,TC,TM,TT,TTabs,TIrr,P,T}
     gamma_list::TG
     coset_list::TC
@@ -348,7 +390,8 @@ Returns:
 
 Notes:
 - Uses stabilizer_permutations for stabilizer computations
-- Performs unique factorization of permutations
+- Uses a transversal of the stabilizer intersection to avoid duplicate
+  stabilizer-product elements
 """
 function double_coset(μ::Content, ν::Content)
     # Find representatives between contents
@@ -357,20 +400,11 @@ function double_coset(μ::Content, ν::Content)
     # Calculate stabilizers for both contents
     stabilizer_left, stabilizer_right = stabilizer_permutations.([μ, ν])
 
-    # Precompute cartesian size to sizehint! and reuse a set for dedup
     reps_count = length(representatives)
     coset_list = Vector{Vector{Perm}}(undef, reps_count)
 
     @inbounds for (idx, representative) in enumerate(representatives)
-        coset = Vector{Perm}()
-        sizehint!(coset, length(stabilizer_left) * length(stabilizer_right))
-        for left_perm in stabilizer_left
-            for right_perm in stabilizer_right
-                push!(coset, left_perm * representative * right_perm)
-            end
-        end
-        unique!(coset)
-        coset_list[idx] = coset
+        coset_list[idx] = double_coset_elements(stabilizer_left, representative, stabilizer_right)
     end
     
     return representatives, coset_list
