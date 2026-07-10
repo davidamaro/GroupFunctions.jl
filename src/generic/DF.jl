@@ -650,9 +650,10 @@ end
 @doc """
     character(λ::Irrep) -> Basic
 
-Compute the symbolic character of the irrep `λ` by summing the diagonal group
-functions over the GT basis. This avoids constructing the full representation
-matrix when only the trace is needed.
+Compute the symbolic character of the irrep `λ` directly from the implicit
+symbolic matrix. The implementation uses power traces, Newton's identities,
+and the Jacobi--Trudi identity; it does not construct GT basis states or group
+functions.
 
 Arguments:
 - `λ::Irrep`: Partition describing the irrep
@@ -662,44 +663,133 @@ Returns:
   symbolic SU(n) matrix
 """
 function character(λ::Irrep)
-    patterns = basis_states(λ)
-    first_pattern = patterns[1]
-    out = group_function(λ, first_pattern, first_pattern)
-
-    @inbounds for idx in 2:length(patterns)
-        pat_u = patterns[idx]
-        out += group_function(λ, pat_u, pat_u)
-    end
-
-    return out
+    partition = _validate_schur_partition(λ)
+    is_trivial_irrep(λ) && return one(ComplexF64)
+    return _character_from_matrix(partition, symbolic_matrix(length(partition)))
 end
 
 @doc """
     character(λ::Irrep, mat::AbstractMatrix{T}) where T
 
-Compute the character of the irrep `λ` evaluated on `mat` by summing only the
-diagonal group functions over the GT basis. For numeric matrices, the result is
-numeric; for symbolic matrices, the result is a symbolic polynomial.
+Compute the character of the irrep `λ` evaluated on `mat` without constructing
+any group functions. Power traces of `mat` generate the complete homogeneous
+symmetric polynomials, and a Jacobi--Trudi determinant produces the Schur
+polynomial `s_λ`. For numeric matrices, the result is numeric; for SymEngine
+matrices, the result is an expanded polynomial in the entries of `mat`.
 
 Arguments:
 - `λ::Irrep`: Partition describing the irrep
 - `mat::AbstractMatrix{T}`: Matrix representing the SU(n) element
 
 Returns:
-- The character value with the same inferred type as the diagonal group
-  functions for the provided matrix
+- The character value with the scalar type of `mat`
 """
 function character(λ::Irrep, mat::AbstractMatrix{T}) where T
-    patterns = basis_states(λ)
-    first_pattern = patterns[1]
-    out = group_function(λ, first_pattern, first_pattern, mat)
+    partition = _validate_schur_partition(λ)
+    expected_size = (length(partition), length(partition))
+    size(mat) == expected_size || throw(DimensionMismatch(
+        "matrix size $(size(mat)) does not match irrep dimension $(length(partition))",
+    ))
+    is_trivial_irrep(λ) && return one(T)
+    return _character_from_matrix(partition, mat)
+end
 
-    @inbounds for idx in 2:length(patterns)
-        pat_u = patterns[idx]
-        out += group_function(λ, pat_u, pat_u, mat)
+# Compute tr(U), ..., tr(U^max_degree), reusing two dense work matrices. This
+# is O(max_degree*d^3), independent of the representation dimension.
+function _matrix_power_traces(mat::AbstractMatrix{T}, max_degree::Int) where T
+    traces = Vector{T}(undef, max_degree)
+    power = Matrix{T}(mat)
+    work = similar(power)
+
+    @inbounds for degree in 1:max_degree
+        power_trace = zero(T)
+        for idx in axes(power, 1)
+            power_trace += power[idx, idx]
+        end
+        traces[degree] = power_trace
+
+        if degree < max_degree
+            mul!(work, power, mat)
+            power, work = work, power
+        end
     end
 
-    return out
+    return traces
+end
+
+
+# Newton's identity has an exact quotient for integer matrices because every
+# h_k is an integer-coefficient polynomial in the matrix entries.
+@inline _newton_quotient(value::Integer, degree::Int) = div(value, degree)
+@inline _newton_quotient(value, degree::Int) = value / degree
+
+function _complete_homogeneous_from_traces(traces::Vector{T}) where T
+    max_degree = length(traces)
+    complete = Vector{T}(undef, max_degree + 1)
+    complete[1] = one(T) # h_0
+
+    @inbounds for degree in 1:max_degree
+        value = zero(T)
+        for power in 1:degree
+            value += traces[power] * complete[degree - power + 1]
+        end
+        complete[degree + 1] = _newton_quotient(value, degree)
+    end
+
+    return complete
+end
+
+
+# Division-free subset dynamic programming for the Jacobi--Trudi determinant.
+# For SU(3) and SU(4) this needs only 2^3 and 2^4 determinant states.
+function _jacobi_trudi_determinant(partition::Vector{Int64}, complete::Vector{T}) where T
+    order = length(partition)
+    order == 0 && return one(T)
+
+    state_count = 1 << order
+    determinants = fill(zero(T), state_count)
+    determinants[1] = one(T)
+
+    @inbounds for mask in 1:(state_count - 1)
+        row = count_ones(mask)
+        value = zero(T)
+        column_position = 0
+
+        for column in 1:order
+            bit = 1 << (column - 1)
+            iszero(mask & bit) && continue
+            column_position += 1
+
+            h_index = partition[row] - row + column
+            h_index < 0 && continue
+            entry = complete[h_index + 1]
+            term = determinants[xor(mask, bit) + 1] * entry
+
+            if isodd(row + column_position)
+                value -= term
+            else
+                value += term
+            end
+        end
+
+        determinants[mask + 1] = value
+    end
+
+    return determinants[end]
+end
+
+
+_expand_character(value::Basic) = expand(value)
+_expand_character(value) = value
+
+function _character_from_matrix(partition::Vector{Int64}, mat::AbstractMatrix)
+    shape = _trim_trailing_zeroes(partition)
+    isempty(shape) && return one(eltype(mat))
+
+    max_degree = shape[1] + length(shape) - 1
+    traces = _matrix_power_traces(mat, max_degree)
+    complete = _complete_homogeneous_from_traces(traces)
+    return _expand_character(_jacobi_trudi_determinant(shape, complete))
 end
 
 # macro mma_str(s)

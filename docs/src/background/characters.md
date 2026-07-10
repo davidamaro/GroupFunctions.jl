@@ -9,9 +9,9 @@ DocTestSetup = GroupFunctions.doctestsetup()
 The character of an irrep is the trace of its representation matrix,
 $\chi_\lambda(U) = \operatorname{tr}\rho_\lambda(U)$. Because the trace is
 unchanged by conjugation ($\chi(U)=\chi(V^\dagger U V)$ for unitary $V$), $\chi_\lambda$ depends on
-`U` only through its eigenvalues (it is a *class function*). `character(λ, U)` computes it by summing the
-diagonal group functions over the GT basis (see [group
-functions](../tutorial/group_functions.md)).
+`U` only through its eigenvalues (it is a *class function*). `character(λ, U)`
+computes it directly as a Schur polynomial in the entries of `U`, without
+constructing the GT basis or any [group functions](../tutorial/group_functions.md).
 
 ```@repl chars
 using GroupFunctions
@@ -102,9 +102,10 @@ For $d=2$, $\lambda=(1,0)$, the top exponents are $(2,0)$ and the ratio is
 $\frac{x_1^2 - x_2^2}{x_1 - x_2} = x_1 + x_2$. The size of the irrep never
 enters — two $d\times d$ determinants regardless of $\dim V_\lambda$.
 
-This is what `schur_polynomial` computes; `character(λ, U)` instead builds and
-traces the representation, so prefer `schur_polynomial` when only the character
-is needed.
+This is what `schur_polynomial` computes from supplied eigenvalues.
+`character(λ, U)` evaluates the same polynomial directly from matrix-power
+traces and a Jacobi--Trudi determinant, so it neither diagonalizes `U` nor builds
+the representation matrix.
 
 ```@repl chars_schur
 using GroupFunctions

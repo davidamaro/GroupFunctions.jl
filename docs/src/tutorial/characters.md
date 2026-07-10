@@ -12,7 +12,8 @@ DocTestSetup = GroupFunctions.doctestsetup()
 ## Character as a trace
 
 The character is the trace of the representation matrix, so it equals the sum
-of the diagonal group functions (and is indeed defined in the code as such):
+of the diagonal group functions. `character` computes that same result directly,
+without constructing the group functions:
 
 
 ```@repl chars
@@ -40,7 +41,7 @@ character([2, 0])
 ## Schur polynomial on eigenvalues
 
 A character depends only on the eigenvalues of `U`. `schur_polynomial`
-evaluates it directly on them (without a costly `group_function` computation), matching `character`:
+evaluates it directly on supplied eigenvalues, matching `character`:
 
 ```@repl chars_schur
 using GroupFunctions

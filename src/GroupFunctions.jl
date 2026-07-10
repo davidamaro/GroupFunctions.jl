@@ -10,6 +10,7 @@ Documentation: <https://davidamaro.github.io/GroupFunctions.jl>
 module GroupFunctions
 
 using SymEngine
+using LinearAlgebra: mul!
 
 import SparseArrays: SparseMatrixCSC, spzeros
 import SymEngine: expand
