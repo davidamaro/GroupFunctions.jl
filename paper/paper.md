@@ -60,15 +60,13 @@ Internally, the algorithm represents basis states as semistandard Young tableaux
  ] add GroupFunctions
  ```
 
- The following example evaluates, symbolically, a matrix element between states of the $\mathrm{U}(10)$ symmetric irrep corresponding to $7$ bosons. 
+ The following example evaluates, symbolically, a matrix element between states of the $\mathrm{U}(4)$ mixed-symmetry irrep.
 ```julia
-λ = [7,0,0,0,0,0,0,0,0,0]; basis=basis_states(λ); # integer partition and basis  
-init = findfirst(gt -> occupation_number(gt)==[0,0,0,1,1,1,1,1,1,1],basis); 
-out  = findfirst(gt -> occupation_number(gt)==[1,1,1,1,1,1,1,0,0,0],basis);
-group_function(λ, basis[init], basis[out]) # symbolic matrix element
+λ = [2,2,1,0]; basis=basis_states(λ); # integer partition and basis
+group_function(λ, basis[1], basis[end]) # symbolic matrix element
 ```
 
-The result is a polynomial in the entries of the $\mathrm{U}(10)$ matrix with 5040 monomials. For symmetric irreps the matrix element reduces to a permanent, which symbolic algebra packages also compute; for mixed-symmetry irreps no analogous reduction exists. The computation is currently single-threaded; on an AMD Ryzen 7 PRO 4750U laptop CPU, it took approximately 4 seconds after compilation warmup, without reusing cached intermediate or final results.  Further examples, including mixed-symmetry irreps, applications, and mathematical background are available in [the documentation](https://davidamaro.github.io/GroupFunctions.jl/dev/).
+The result is a polynomial in the entries of the $\mathrm{U}(4)$ matrix. For symmetric irreps the matrix element reduces to a permanent, which symbolic algebra packages also compute; for mixed-symmetry ones no existing software computes these elements symbolically. Further examples, applications, and mathematical background are available in [the documentation](https://davidamaro.github.io/GroupFunctions.jl/dev/).
 
 
 # AI usage disclosure
