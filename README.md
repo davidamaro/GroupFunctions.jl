@@ -67,12 +67,16 @@ julia_to_mma(sym)  # Mathematica-friendly expression
 
 For more examples and API details, see the documentation: https://davidamaro.github.io/GroupFunctions.jl/dev/
 
+
 ## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+Contributions are welcome. Please open an [issue](https://github.com/davidamaro/GroupFunctions.jl/issues) before writing code, and read the [contribution guidelines](CONTRIBUTING.md) first. Questions and bug reports belong in the issue tracker too.
+
+For local development convenience:
 
 - Run tests: `julia --project -e 'using Pkg; Pkg.test()'`
 - Build docs locally: `julia --project=docs docs/make.jl`
+
 
 ## License
 

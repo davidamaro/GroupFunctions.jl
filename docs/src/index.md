@@ -58,8 +58,7 @@ pkg> add GroupFunctions
 
 Requires Julia ≥ 1.6.
 
-## Contact
 
-Send questions and suggestions to `david.amaroalcala@savba.sk`.
+## Contributing and support
 
-## References
+Please open an [issue](https://github.com/davidamaro/GroupFunctions.jl/issues) for questions not answered by this documentation, bug reports, and suggestions. Contributions are welcome; please read the [contribution guidelines](https://github.com/davidamaro/GroupFunctions.jl/blob/HEAD/CONTRIBUTING.md) first.
