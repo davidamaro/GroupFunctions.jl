@@ -36,14 +36,13 @@ julia> U
  u_2_1  u_2_2  u_2_3
  u_3_1  u_3_2  u_3_3
 
-julia> group_function([2,0,0], U)[1]
-6×6 Matrix{SymEngine.Basic}:
-             u_3_3^2        sqrt(2)*u_3_2*u_3_3  …              u_3_1^2
- sqrt(2)*u_2_3*u_3_3  u_2_2*u_3_3 + u_2_3*u_3_2     sqrt(2)*u_2_1*u_3_1
- sqrt(2)*u_1_3*u_3_3  u_1_2*u_3_3 + u_1_3*u_3_2     sqrt(2)*u_1_1*u_3_1
-             u_2_3^2        sqrt(2)*u_2_2*u_2_3                 u_2_1^2
- sqrt(2)*u_2_3*u_1_3  u_2_2*u_1_3 + u_2_3*u_1_2     sqrt(2)*u_2_1*u_1_1
-             u_1_3^2        sqrt(2)*u_1_2*u_1_3  …              u_1_1^2
+julia> D = group_function([2,0,0], U)[1];
+
+julia> size(D)
+(6, 6)
+
+julia> D[1, end]
+u_3_1^2
 ```
 
 ## Installation
