@@ -60,8 +60,6 @@ swap_block
 swap_block_symbolic
 su2_factorization
 sud_from_angles
-julia_to_mma
-mma_to_julia
 expand
 ```
 

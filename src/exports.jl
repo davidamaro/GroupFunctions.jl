@@ -24,8 +24,6 @@ export generate_matrix
 export group_function
 export index_of_semistandard_tableau
 export indice_tablon_semistandard
-export julia_to_mma
-export mma_to_julia
 export occupation_number
 export pweight
 export schur_polynomial
