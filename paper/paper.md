@@ -38,7 +38,17 @@ In mathematics, summing the diagonal group functions gives the trace of the repr
 
 In quantum physics, group functions appear in several settings. In quantum optics, a group function gives the transition amplitude of photons through a linear optical network [@deGuise2014]. The same object can be used to characterise the performance of quantum devices [@amaroalcala2025] and to describe the symmetry properties of states [@OttoSzymanski2024]. One important subproblem is boson sampling [@Aaronson2011], where the transition amplitude reduces to a permanent whose evaluation is classically computationally hard. Whether noisy real-world quantum devices can perform this computation remains an open question.
 
-Some of these tasks require only a numerical estimate, whereas others require an exact symbolic group function. `GroupFunctions.jl` addresses the latter. Although related packages exist (see below), to our knowledge, none are designed to compute the representation matrix symbolically, one matrix element at a time -- the cheaper route when a calculation requires only a few of them.
+Some of these tasks require only a numerical estimate, whereas others require an exact symbolic group function. `GroupFunctions.jl` addresses the latter. Although related software exists (see below), to our knowledge none is designed to compute a single representation-matrix entry as an exact symbolic $D$-function. We therefore compare the cost of computing one such entry with the conventional route that constructs the Lie-algebra representation matrices and exponentiates the resulting full matrix.
+
+Let $\lambda \vdash N$, with $N>1$, and let the compatible basis states $A,B$ be supplied directly. For fixed $\lambda,A,B$ and $d\to\infty$, the hook--content formula gives
+
+$$D_\lambda(d)=\frac{f^{\lambda}}{N!}d^N+O(d^{N-1})=\Theta(d^N).$$
+
+The present implementation evaluates one symbolic $D$-function using $\Theta(d^3)$ structural operations and $\Theta(d^2)$ peak storage. By contrast, even if construction of the $D_\lambda(d)\times D_\lambda(d)$ Lie-algebra matrix is granted at no cost, conventional unstructured scaling-and-squaring/Padé exponentiation with classical dense arithmetic requires $\Theta(D_\lambda(d)^3)=\Theta(d^{3N})$ operations and $\Theta(D_\lambda(d)^2)=\Theta(d^{2N})$ storage. Consequently, the direct-to-exponentiation ratios are
+
+$$\Theta\!\left(d^{-3(N-1)}\right) \quad\text{and}\quad \Theta\!\left(d^{-2(N-1)}\right),$$
+
+respectively. Thus, computing one requested $D$-function has an asymptotic advantage over constructing the complete representation matrix in this fixed-$N$, growing-$d$ regime.
 
 # State of the field
 
