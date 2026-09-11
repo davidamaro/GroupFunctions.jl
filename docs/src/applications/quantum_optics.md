@@ -14,7 +14,7 @@ Consider $N$ photons distributed across $n$ modes. The Fock state $|m_1, m_2, \l
 $$|m_1, \ldots, m_n\rangle \xrightarrow{U} \sum_{m'} c_{m,m'}(U) |m'_1, \ldots, m'_n\rangle$$
 where $U \in \mathrm{SU}(n)$ mixes the mode creation operators: $a^\dagger_i \mapsto \sum_j U_{ij} a^\dagger_j$.
 
-The amplitudes $c_{m,m'}(U)$ are matrix elements of SU($n$) irreducible representations. Specifically, they are matrix elements of the **symmetric irrep** $\lambda = [N, 0, \ldots, 0]$, which corresponds to a single-row Young tableau. This irrep applies because bosonic states are symmetric under particle exchange. For symmetric irreps, `occupation_number(pattern)` converts a [Gelfand-Tsetlin pattern](../tutorial/states.md) to the corresponding Fock occupation list.
+The amplitudes $c_{m,m'}(U)$ are matrix entries of SU($n$) irreducible representations. Specifically, they are the entries of the **symmetric representation** $\lambda = [N, 0, \ldots, 0]$, which corresponds to a single-row Young tableau. This representation applies because bosonic states are symmetric under particle exchange. For symmetric representations, `occupation_number(pattern)` converts a [Gelfand-Tsetlin pattern](../tutorial/states.md) to the corresponding Fock occupation list.
 
 The translation between quantum optics and [GT pattern](../tutorial/states.md) language therefore has four steps:
 1. Define the photon-number subspace as `λ = [N, 0, ..., 0]`.

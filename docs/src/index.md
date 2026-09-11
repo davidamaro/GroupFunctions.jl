@@ -6,7 +6,7 @@ DocTestSetup = GroupFunctions.doctestsetup()
 
 ## Overview
 
-`GroupFunctions.jl` computes matrix elements of irreducible representations of the unitary group `U(n)`. The code accepts as input both numerical and symbolic matrices. Given a unitary matrix and an irrep label, the package returns the corresponding transformation matrix in a basis of [Gelfand-Tsetlin patterns](tutorial/states.md).
+`GroupFunctions.jl` computes matrix entries of irreducible representations of the unitary group `U(n)`. The code accepts as input both numerical and symbolic matrices. Given a unitary matrix and a representation label, the package returns the corresponding transformation matrix in a basis of [Gelfand-Tsetlin patterns](tutorial/states.md).
 
 For symbolic computations, the same API accepts symbolic block matrices such as `su2_block_symbolic`:
 
@@ -25,7 +25,7 @@ julia> group_function([2,0], U)[1]
              v_1_2^2        sqrt(2)*v_1_1*v_1_2              v_1_1^2
 ```
 
-The API also allows to compute `SU(3)` irreps from a symbolic `3×3` matrix:
+The API also allows to compute `SU(3)` irreducible representations from a symbolic `3×3` matrix:
 
 ```jldoctest
 julia> U = [GroupFunctions.SymEngine.symbols("u_$(i)_$(j)") for i in 1:3, j in 1:3];
