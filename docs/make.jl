@@ -12,13 +12,13 @@ makedocs(
     pages = [
         "Getting started" => "index.md",
         "Background" => [
-            "Basis states" => "background/states.md",
+            "Basis elements" => "background/states.md",
             "Computation of group functions" => "background/group_functions.md",
             "Characters" => "background/characters.md",
             "Immanants" => "background/immanants.md",
         ],
         "Tutorial" => [
-            "Basis states" => "tutorial/states.md",
+            "Basis elements" => "tutorial/states.md",
             "Computation of group functions" => "tutorial/group_functions.md",
             "Characters" => "tutorial/characters.md",
             "Immanants" => "tutorial/immanants.md",

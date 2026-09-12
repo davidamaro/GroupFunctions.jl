@@ -6,7 +6,7 @@ DocTestSetup = GroupFunctions.doctestsetup()
 
 # Characters
 
-The character of an irrep is the trace of its representation matrix,
+The character of an representation is the trace of its representation matrix,
 $\chi_\lambda(U) = \operatorname{tr}\rho_\lambda(U)$. Because the trace is
 unchanged by conjugation ($\chi(U)=\chi(V^\dagger U V)$ for unitary $V$), $\chi_\lambda$ depends on
 `U` only through its eigenvalues (it is a *class function*). `character(λ, U)` computes it by summing the
@@ -24,7 +24,7 @@ character(λ, U)
 
 ## Orthogonality
 
-Characters of distinct irreps are orthonormal under the Haar measure on U(d):
+Characters of distinct irreducible representations are orthonormal under the Haar measure on U(d):
 
 ```math
 \langle \chi_\lambda, \chi_\mu \rangle
@@ -32,7 +32,7 @@ Characters of distinct irreps are orthonormal under the Haar measure on U(d):
 = \delta_{\lambda\mu}.
 ```
 
-In particular, for a single irrep $\langle |\chi_\lambda|^2 \rangle = 1$. This
+In particular, for a single irreducible representation $\langle |\chi_\lambda|^2 \rangle = 1$. This
 is a statement about averages, and we can exemplified it by sampling.
 
 Here we draw Haar-random U(3) matrices with a QR-based sampler and average
@@ -99,8 +99,7 @@ Their ratio is the **Schur polynomial** $s_\lambda$:
 ```
 
 For $d=2$, $\lambda=(1,0)$, the top exponents are $(2,0)$ and the ratio is
-$\frac{x_1^2 - x_2^2}{x_1 - x_2} = x_1 + x_2$. The size of the irrep never
-enters — two $d\times d$ determinants regardless of $\dim V_\lambda$.
+$\frac{x_1^2 - x_2^2}{x_1 - x_2} = x_1 + x_2$. The size of the representation never appears, and the expression is build from two $d\times d$ determinants regardless of $\dim V_\lambda$.
 
 This is what `schur_polynomial` computes; `character(λ, U)` instead builds and
 traces the representation, so prefer `schur_polynomial` when only the character

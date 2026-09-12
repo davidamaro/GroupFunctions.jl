@@ -4,14 +4,14 @@ CollapsedDocStrings = true
 DocTestSetup = GroupFunctions.doctestsetup()
 ```
 
-# Basis states and GT patterns
+# Basis vectors and GT patterns
 
-GT patterns are the basis states used by `GroupFunctions.jl`. Each one labels a single
-basis vector of an irrep; `basis_states` enumerates them, and the weight functions read
+GT patterns are the basis vectors used by `GroupFunctions.jl`. Each one labels a single
+basis element of an irreducible representation; `basis_states` enumerates them, and the weight functions read
 off what a pattern encodes. For *why* GT patterns are the right basis, see the
 [background page](../background/states.md). Here we just build and use them.
 
-We carry one example throughout: the irrep `λ = [2, 0, 0]` of U(3) — two bosons in three
+We carry one example throughout: the irreducible representation `λ = [2, 0, 0]` of U(3) — two bosons in three
 modes.
 
 ## Build one directly
@@ -24,9 +24,9 @@ using GroupFunctions
 gt = GTPattern([[2, 0, 0], [1, 0], [1]])
 ```
 
-## Generate all patterns in an irrep
+## Generate all patterns in an irreducible representation
 
-More often you want the whole basis. `basis_states` returns every pattern of the irrep,
+More often you want the whole basis. `basis_states` returns every pattern of the irreducible representation,
 in a fixed order:
 
 ```@repl states
@@ -41,7 +41,7 @@ basis[2]
 ## Read the weights
 
 A pattern's **p-weight** is its sequence of row-sum differences; `occupation_number` is
-the same data in mode order (it is `reverse ∘ pweight`). For the symmetric irrep `[2,0,0]`
+the same data in mode order (it is `reverse ∘ pweight`). For the symmetric representation `[2,0,0]`
 the occupation numbers are literally the Fock occupations:
 
 ```@repl states
@@ -58,7 +58,7 @@ in three modes:
 occupation_number.(basis)
 ```
 
-## Pick the states you need
+## Pick the state vectors you need
 
 To compute a transition amplitude you select an initial and a final pattern. `findfirst`
 on the occupation numbers is the convenient way:
@@ -71,7 +71,7 @@ final   = basis[findfirst(gt -> occupation_number(gt) == [1, 1, 0], basis)];
 
 ## Hand them to a group function
 
-The states plug straight into `group_function`. Here `U` is a 50:50 beam splitter on
+The state vectors plug straight into `group_function`. Here `U` is a 50:50 beam splitter on
 modes 1–2 (built from an SU(2) block); the result is the amplitude
 $\langle 1,1,0 \mid U \mid 2,0,0\rangle$:
 
@@ -88,8 +88,8 @@ and the symbolic and multi-block cases, are covered next in
 
 ## Mixed symmetry
 
-Everything above used the symmetric irrep, where each pattern has a distinct p-weight. That
-stops being true for mixed-symmetry irreps. Take `λ = [2, 1, 0]`:
+Everything above used the symmetric representation, where each pattern has a distinct p-weight. That
+stops being true for mixed-symmetry representations. Take `λ = [2, 1, 0]`:
 
 ```@repl states
 basis21 = basis_states([2, 1, 0]);
@@ -98,7 +98,7 @@ occupation_number.(basis21)
 ```
 
 Two different patterns share the occupation vector `[1, 1, 1]`; it is an *inner multiplicity*.
-The weight alone no longer identifies the state, and you have to use the full pattern for unique determination. This is exactly
+The weight alone no longer identifies the basis element, and you have to use the full pattern for unique determination. This is exactly
 why the basis is GT patterns and not occupation numbers, and it is where permanents and
 determinants give way to the general
 [Grabmeier-Kerber formula](../background/group_functions.md#The-general-formula).
