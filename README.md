@@ -89,4 +89,22 @@ GroupFunctions.jl is distributed under the MIT License (see `LICENSE`).
 
 ## Citation
 
-Citation information is pending. In the meantime, please cite the repository URL and version tag (e.g., “GroupFunctions.jl v0.3.1, 2026, https://github.com/davidamaro/GroupFunctions.jl”).
+If you use GroupFunctions.jl in your research, please cite the published paper:
+
+Amaro-Alcalá, D., & Szymański, K. (2026). GroupFunctions.jl: computing individual entries of the irreducible representations of the unitary group U(d). *J. Open Source Software*, **11**(126), 11169. https://doi.org/10.21105/joss.11169
+
+```bibtex
+@article{AmaroAlcala2026GroupFunctions,
+  author  = {Amaro-Alcalá, David and Szymański, Konrad},
+  title   = {{GroupFunctions.jl}: computing individual entries of the irreducible representations of the unitary group {U(d)}},
+  journal = {J. Open Source Software},
+  year    = {2026},
+  volume  = {11},
+  number  = {126},
+  pages   = {11169},
+  doi     = {10.21105/joss.11169},
+  url     = {https://doi.org/10.21105/joss.11169}
+}
+```
+
+To identify the software version used, also cite the [v0.4.0 Zenodo archive](https://doi.org/10.5281/zenodo.23362950).
