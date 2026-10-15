@@ -80,7 +80,23 @@ The following example computes a symbolic matrix entry between two basis vectors
 group_function(λ, basis[1], basis[end]) # symbolic matrix entry
 ```
 
-The result is a polynomial in the entries of the $\mathrm{U}(4)$ matrix. For symmetric irreducible representations, matrix entries are proportional to permanents, which symbolic algebra packages also compute. For mixed-symmetry representations, no other software computes these entries symbolically. Further examples, applications, and mathematical background are available in [the documentation](https://davidamaro.github.io/GroupFunctions.jl/dev/).
+The result is a polynomial in the entries of the $\mathrm{U}(4)$ matrix: 
+
+```
+u_4_1^2*u_2_3*u_3_2^2 + u_4_2^2*u_2_3*u_3_1^2 - u_4_1^2*u_2_2*u_3_2*u_3_3 
+- u_4_2^2*u_2_1*u_3_1*u_3_3 - u_4_3*u_4_1*u_2_1*u_3_2^2 
+- u_4_3*u_4_2*u_2_2*u_3_1^2 + u_4_1*u_4_2*u_2_1*u_3_2*u_3_3 
++ u_4_1*u_4_2*u_2_2*u_3_1*u_3_3 - 2*u_4_1*u_4_2*u_2_3*u_3_1*u_3_2 
++ u_4_3*u_4_1*u_2_2*u_3_1*u_3_2 + u_4_3*u_4_2*u_2_1*u_3_1*u_3_2
+```
+
+The output printed by  Julia denotes the matrix entries by `u_i_j`; writing the same expression using $u_{i,j}$ makes it easier to read: 
+
+$$ \begin{aligned} &u_{4,1}^{2}u_{2,3}u_{3,2}^{2}  ~+\!u_{4,2}^{2}u_{2,3}u_{3,1}^{2} ~-\!u_{4,1}^{2}u_{2,2}u_{3,2}u_{3,3} ~-\!u_{4,2}^{2}u_{2,1}u_{3,1}u_{3,3} ~-\!u_{4,3}u_{4,1}u_{2,1}u_{3,2}^{2} \\
+- &u_{4,3}u_{4,2}u_{2,2}u_{3,1}^{2} ~+\!u_{4,1}u_{4,2}u_{2,1}u_{3,2}u_{3,3}~+\!u_{4,1}u_{4,2}u_{2,2}u_{3,1}u_{3,3}~-\!2u_{4,1}u_{4,2}u_{2,3}u_{3,1}u_{3,2} \\
++ &u_{4,3}u_{4,1}u_{2,2}u_{3,1}u_{3,2} ~+\!u_{4,3}u_{4,2}u_{2,1}u_{3,1}u_{3,2}. \end{aligned}$$
+
+For symmetric irreducible representations, matrix entries are proportional to permanents, which symbolic algebra packages also compute. For mixed-symmetry representations, no other software computes these entries symbolically. Further examples, applications, and mathematical background are available in [the documentation](https://davidamaro.github.io/GroupFunctions.jl/dev/).
 
 
 # AI usage disclosure
