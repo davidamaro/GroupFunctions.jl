@@ -5,7 +5,7 @@ function filled_tableau(shape, entries)
 end
 
 function assert_symbolic_match(irrep, first_tableau, second_tableau, expected_expression_string)
-    expected_expression = expected_expression_string |> mma_to_julia
+    expected_expression = expected_expression_string |> GroupFunctions.mma_to_julia
     actual_expression = group_function(irrep, first_tableau, second_tableau) |> expand
     @test symbolic_isapprox(expected_expression, actual_expression)
 end
@@ -13,7 +13,7 @@ end
 function assert_symbolic_matrix_matches(irrep, tableaux, expected_expression_strings)
     all_matches = Bool[]
     for (first_index, first_tableau) in enumerate(tableaux), (second_index, second_tableau) in enumerate(tableaux)
-        expected_expression = expected_expression_strings[first_index][second_index] |> mma_to_julia
+        expected_expression = expected_expression_strings[first_index][second_index] |> GroupFunctions.mma_to_julia
         actual_expression = group_function(irrep, first_tableau, second_tableau) |> expand
         difference_expression = expand(expected_expression - actual_expression)
         matches_reference = symbolic_isapprox(expected_expression, actual_expression)

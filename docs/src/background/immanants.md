@@ -6,7 +6,7 @@ DocTestSetup = GroupFunctions.doctestsetup()
 
 # Immanants
 
-Immanants generalize both permanents and determinants, and they appear naturally in multiphoton interference when exchange symmetry is not purely bosonic or purely fermionic. In `GroupFunctions.jl`, these quantities are recovered from sums of matrix elements computed by `group_function`.
+Immanants generalize both permanents and determinants, and they appear naturally in multiphoton interference when exchange symmetry is not purely bosonic or purely fermionic. In `GroupFunctions.jl`, these quantities are recovered from sums of matrix entries computed by `group_function`.
 
 Tichy and Mølmer call particles governed by generalized exchange symmetries beyond the fully symmetric bosonic and fully antisymmetric fermionic cases *immanons*.[^1]
 
@@ -18,7 +18,7 @@ For an integer partition $\lambda=(\lambda_1,\ldots,\lambda_k)$ with $\sum_i \la
 \mathrm{Imm}^{\lambda}(M)=\sum_{\pi \in S_n}\chi^\lambda(\pi)\prod_{i=1}^n M_{i,\pi(i)},
 ```
 
-where $\chi^\lambda$ is the character of the irrep $\lambda$ of the symmetric group $S_n$ -- a function on permutations, distinct from the U(d) character $\chi^\lambda(U)$ of the [characters page](characters.md).
+where $\chi^\lambda$ is the character of the irreducible representation $\lambda$ of the symmetric group $S_n$ -- a function on permutations, distinct from the U(d) character $\chi^\lambda(U)$ of the [characters page](characters.md).
 
 Two important limits are
 
@@ -37,16 +37,17 @@ For $3 \times 3$ matrices and mixed symmetry $(2,1)$:
 ## Connection with group functions
 
 A theorem of Kostant (see theorem 3 in de Guise et al.[^2]) gives the immanant directly as a sum of group functions.
-With $U \in U(d)$ the unitary matrix and $\Gamma^{(\lambda)}(U)$ its matrix in the irrep $\lambda$,
+With $U \in U(d)$ the unitary matrix and $\Gamma^{(\lambda)}(U)$ its matrix in the irreducible representation $\lambda$,
 
 ```math
 \mathrm{Imm}^{(\lambda)}(U) = \sum_t \langle t| \Gamma^{(\lambda)}(U) |t\rangle,
 ```
-where the sum runs over the *zero-weight* basis states $|t\rangle$ (states with zero `zweight`, see [basis states](states.md)) of the irrep
-$\lambda$, and $\langle t| \Gamma^{(\lambda)}(U) |t\rangle$ is a diagonal group function. The permanent
+
+where the sum runs over the *zero-weight* basis vectors $|t\rangle$ (those with zero `zweight`, see [basis vectors](states.md)) of the representation
+$\lambda$, and $\langle t| \Gamma^{(\lambda)}(U) |t\rangle$, equal to $(\Gamma^{(\lambda)}(U) t,t)$ in the mathematicians' notation,  is a diagonal group function. The permanent
 ($\lambda$ a single row) and determinant (single column) are the extreme cases.
-For the mixed $(2,1)$ immanant of a $3\times3$ matrix the $(11)$ irrep has two
-zero-weight states, so the sum has two terms -- the relation verified on the
+For the mixed $(2,1)$ immanant of a $3\times3$ matrix the $(11)$ representation has two
+zero-weight basis elements, so the sum has two terms -- the relation verified on the
 [tutorial page](../tutorial/immanants.md).
 
 [^1]: M. C. Tichy and K. Mølmer, “Extending exchange symmetry beyond bosons and fermions,” *Physical Review A* **96**, 022119 (2017).

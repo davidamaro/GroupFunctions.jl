@@ -1,6 +1,7 @@
 [![CI](https://github.com/davidamaro/GroupFunctions.jl/actions/workflows/CI.yml/badge.svg?branch=master)](https://github.com/davidamaro/GroupFunctions.jl/actions/workflows/CI.yml?query=branch%3Amaster)
 [![Docs – stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://davidamaro.github.io/GroupFunctions.jl/stable)
 [![Docs – dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://davidamaro.github.io/GroupFunctions.jl/dev)
+[![DOI](https://joss.theoj.org/papers/10.21105/joss.11169/status.svg)](https://doi.org/10.21105/joss.11169)
 
 <p align="center">
   <img src="docs/src/assets/banner.svg#gh-light-mode-only" alt="GroupFunctions.jl banner">
@@ -16,7 +17,6 @@ A Julia library to compute D-functions, which are entries of the irreducible rep
 - Character computation for SU(d) from traces of representation matrices
 - Gelfand–Tsetlin basis construction via `basis_states`
 - Works with Haar-random unitaries (e.g. using RandomMatrices.jl)
-- Export symbolic results to Mathematica with `julia_to_mma`
 
 ## Installation
 
@@ -61,8 +61,7 @@ U_su = U / det(U)^(1/size(U, 1))  # enforce det=1 for SU(d)
 character(irrep, U_su)
 
 # Symbolic D-function entry
-sym = group_function(irrep, basis[1], basis[3])
-julia_to_mma(sym)  # Mathematica-friendly expression
+group_function(irrep, basis[1], basis[3])
 ```
 
 For more examples and API details, see the documentation: https://davidamaro.github.io/GroupFunctions.jl/dev/
@@ -90,4 +89,22 @@ GroupFunctions.jl is distributed under the MIT License (see `LICENSE`).
 
 ## Citation
 
-Citation information is pending. In the meantime, please cite the repository URL and version tag (e.g., “GroupFunctions.jl v0.3.1, 2026, https://github.com/davidamaro/GroupFunctions.jl”).
+If you use GroupFunctions.jl in your research, please cite the published paper:
+
+Amaro-Alcalá, D., & Szymański, K. (2026). GroupFunctions.jl: computing individual entries of the irreducible representations of the unitary group U(d). *J. Open Source Software*, **11**(126), 11169. https://doi.org/10.21105/joss.11169
+
+```bibtex
+@article{AmaroAlcala2026GroupFunctions,
+  author  = {Amaro-Alcalá, David and Szymański, Konrad},
+  title   = {{GroupFunctions.jl}: computing individual entries of the irreducible representations of the unitary group {U(d)}},
+  journal = {J. Open Source Software},
+  year    = {2026},
+  volume  = {11},
+  number  = {126},
+  pages   = {11169},
+  doi     = {10.21105/joss.11169},
+  url     = {https://doi.org/10.21105/joss.11169}
+}
+```
+
+To identify the software version used, also cite the [v0.4.0 Zenodo archive](https://doi.org/10.5281/zenodo.23362950).

@@ -6,7 +6,7 @@ DocTestSetup = GroupFunctions.doctestsetup()
 
 # Characters
 
-`character(λ, U)` returns the trace of the irrep, see the
+`character(λ, U)` returns the trace of the representation, see the
 [background page](../background/characters.md) for the theory.
 
 ## Character as a trace
