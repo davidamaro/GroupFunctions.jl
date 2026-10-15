@@ -1,6 +1,7 @@
 [![CI](https://github.com/davidamaro/GroupFunctions.jl/actions/workflows/CI.yml/badge.svg?branch=master)](https://github.com/davidamaro/GroupFunctions.jl/actions/workflows/CI.yml?query=branch%3Amaster)
 [![Docs – stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://davidamaro.github.io/GroupFunctions.jl/stable)
 [![Docs – dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://davidamaro.github.io/GroupFunctions.jl/dev)
+[![DOI](https://joss.theoj.org/papers/10.21105/joss.11169/status.svg)](https://doi.org/10.21105/joss.11169)
 
 <p align="center">
   <img src="docs/src/assets/banner.svg#gh-light-mode-only" alt="GroupFunctions.jl banner">
